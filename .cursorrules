@@ -1,0 +1,90 @@
+um e-commerce completo chamado "Essencial", focado em produtos cosméticos e de beleza, inspirado no design e na experiência do site da Etsy. Nosso stack inicial de tecnologias inclui:
+
+Next.js (atualmente versão 15 ou superior, salvo atualização no momento do setup)
+React com Typescript
+TailwindCSS para estilização
+Supabase para banco de dados SQL (por ser mais adequado para e-commerce que Firestore)
+Firebase Auth para autenticação (com possibilidade de revisão futura caso o fluxo de autenticação ou segurança peça ajustes)
+Cloudinary para gerenciamento de imagens
+Vercel para deploy contínuo e hospedagem (com integração direta ao repositório do GitHub)
+Abordagem Metodológica
+Etapas curtas e rastreáveis: Dividimos o desenvolvimento em etapas claras, desde setup inicial, criação de estrutura e pastas, até cada funcionalidade específica.
+Zero suposições: Cada decisão técnica será validada com documentação oficial e boas práticas.
+Código conciso: Preferimos soluções simples e diretas, evitando over-engineering ou abstrações excessivas. Quanto menos código, melhor.
+Rastreamento contínuo: Todo progresso, erro encontrado e ajuste será documentado em parágrafos concisos de contexto.
+GitHub como fonte de verdade: O repositório deve ser criado imediatamente e qualquer mudança será comitada com mensagens claras e informativas. A Vercel será configurada para realizar deploy automático de cada push para a branch principal.
+
+Funcionalidades Planejadas
+Página Inicial (Home)
+
+Banner de destaque (promoções e novidades)
+Menu de categorias e barra de busca eficiente
+Produtos em destaque: mais vendidos, lançamentos e ofertas
+Catálogo de Produtos
+
+Categorias e subcategorias
+Filtros: preço, marca, avaliações, etc.
+Listagem com imagens, preços e descrições curtas
+Página de Produto
+
+Galeria de imagens
+Descrição completa, características e avaliações
+Preço (com e sem desconto)
+Botões de compra e wishlist
+Produtos relacionados
+Carrinho de Compras
+
+Resumo dos produtos
+Atualização de quantidades
+Cálculo de frete e cupom de desconto
+Checkout e Pagamento
+
+Cadastro ou login
+Endereço de entrega
+Escolha de frete
+Pagamento: cartão, Pix, boleto, etc.
+Resumo do pedido e confirmação
+Autenticação e Conta do Cliente
+
+Cadastro e login (Google, Email/Senha, etc.)
+Histórico de pedidos
+Gestão de endereços
+Produtos favoritos (wishlist)
+Painel Administrativo
+
+Cadastro, edição e exclusão de produtos
+Gestão de estoque
+Controle de pedidos e status
+Análise de vendas e relatórios
+Outros Requisitos
+
+SEO otimizado (URLs amigáveis, meta tags)
+Design responsivo
+Integração com plataformas de pagamento e envio
+Sistema de avaliações e comentários
+Políticas claras de troca, devolução e privacidade
+Integração com redes sociais
+Regras de Conduta Técnica
+Validação contínua: Cada funcionalidade ou ajuste será testado localmente (dev server), com build completo e checagem de lint antes de qualquer commit.
+Cuidado com Firestore: Mesmo optando por Supabase, caso algum recurso precise de Firestore (notificações push, por exemplo), garantimos que a utilização será mínima e otimizada.
+Não mexer no que funciona: Caso uma feature esteja estável, mudanças só serão feitas mediante justificativa forte (desempenho, segurança ou UX relevante).
+Documentação ativa: Cada etapa terá um despejo de contexto claro — o que foi feito, o que não funcionou, como corrigimos e quais insights ou riscos identificamos.
+Erros tratados com profundidade: Analisamos cada erro sem conclusões precipitadas, levantamos hipóteses, testamos cada uma e documentamos o raciocínio.
+
+Configurações Essenciais
+Criar tailwind.config.ts e postcss.config.js conforme documentação.
+Criar arquivo .env.local com placeholders para:
+Cloudinary API keys
+Supabase URL e chave
+Firebase API keys (Auth)
+URLs externas relevantes (Vercel, etc.)
+
+
+Checklist de Qualidade
+✅ Código enxuto e funcional.
+✅ Sem warnings ou erros no build.
+✅ Responsividade testada.
+✅ Integração com Vercel confirmada.
+✅ Documentação do setup inicial no README.md.
+Último Recado
+Você é o executor direto. Eu estou aqui para te orientar, revisar e explicar, mas quem executa, toma decisões de código e resolve problemas é você. Tome posse do projeto e tenha clareza sobre cada decisão e cada linha de código incluída. Nenhuma mudança deve ser feita no escuro.
