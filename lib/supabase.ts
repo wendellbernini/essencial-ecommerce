@@ -36,7 +36,62 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Variáveis de ambiente do Supabase não configuradas");
 }
 
-// Função para criar o cliente Supabase para Server Components
+// Cliente para uso no lado do cliente (browser)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Funções que NÃO precisam de cookies (podem usar o cliente browser)
+export async function getCategories() {
+  try {
+    console.log("Iniciando busca de todas as categorias...");
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .order("name");
+
+    if (error) {
+      console.error("Erro ao buscar categorias:", error);
+      return [];
+    }
+
+    if (!data || data.length === 0) {
+      console.log("Nenhuma categoria encontrada no banco de dados");
+      return [];
+    }
+
+    console.log(
+      `${data.length} categorias encontradas:`,
+      JSON.stringify(data, null, 2)
+    );
+    return data as Category[];
+  } catch (error) {
+    console.error("Erro ao buscar categorias:", error);
+    return [];
+  }
+}
+
+export async function getFeaturedProducts() {
+  try {
+    console.log("Iniciando busca de produtos em destaque...");
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("featured", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Erro ao buscar produtos em destaque:", error);
+      throw error;
+    }
+
+    console.log("Produtos em destaque encontrados:", data);
+    return data as Product[];
+  } catch (error) {
+    console.error("Erro ao buscar produtos em destaque:", error);
+    return [];
+  }
+}
+
+// Funções que precisam de cookies (usam o cliente server)
 export function createServerSupabaseClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error("Variáveis de ambiente do Supabase não configuradas");
@@ -67,117 +122,31 @@ export function createServerSupabaseClient() {
   });
 }
 
-// Cliente para uso no lado do cliente (browser)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Funções que NÃO precisam de cookies (podem usar o cliente browser)
-export async function getCategories() {
+// Busca um produto pelo slug
+export async function getProductBySlug(slug: string) {
   try {
-    console.log("Iniciando busca de todas as categorias...");
-    const supabase = createServerSupabaseClient();
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*")
-      .order("name");
-
-    if (error) {
-      console.error("Erro ao buscar categorias:", error);
-      return [];
-    }
-
-    if (!data || data.length === 0) {
-      console.log("Nenhuma categoria encontrada no banco de dados");
-      return [];
-    }
-
-    console.log(
-      `${data.length} categorias encontradas:`,
-      JSON.stringify(data, null, 2)
-    );
-    return data as Category[];
-  } catch (error) {
-    console.error("Erro ao buscar categorias:", error);
-    return [];
-  }
-}
-
-export async function getFeaturedProducts() {
-  try {
-    const supabase = createServerSupabaseClient();
     const { data, error } = await supabase
       .from("products")
-      .select("*")
-      .eq("featured", true)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Erro ao buscar produtos em destaque:", error);
-      throw error;
-    }
-
-    console.log("Produtos em destaque encontrados:", data);
-    return data as Product[];
-  } catch (error) {
-    console.error("Erro ao buscar produtos em destaque:", error);
-    return [];
-  }
-}
-
-// Funções que precisam de cookies (usam o cliente server)
-export async function getCategoryBySlug(slug: string) {
-  try {
-    console.log("Iniciando busca de categoria com slug:", slug);
-    const supabase = createServerSupabaseClient();
-    const { data, error } = await supabase
-      .from("categories")
       .select("*")
       .eq("slug", slug)
-      .limit(1);
+      .single();
 
     if (error) {
-      console.error(`Erro ao buscar categoria com slug ${slug}:`, error);
-      return null;
-    }
-
-    if (!data || data.length === 0) {
-      console.log(`Nenhuma categoria encontrada com o slug ${slug}`);
-      return null;
-    }
-
-    console.log("Categoria encontrada:", data[0]);
-    return data[0] as Category;
-  } catch (error) {
-    console.error(`Erro ao buscar categoria com slug ${slug}:`, error);
-    return null;
-  }
-}
-
-// Busca todos os produtos
-export async function getProducts() {
-  try {
-    const supabase = createServerSupabaseClient();
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Erro ao buscar produtos:", error);
+      console.error(`Erro ao buscar produto com slug ${slug}:`, error);
       throw error;
     }
 
-    console.log("Produtos encontrados:", data);
-    return data as Product[];
+    console.log("Produto encontrado:", data);
+    return data as Product;
   } catch (error) {
-    console.error("Erro ao buscar produtos:", error);
-    return [];
+    console.error(`Erro ao buscar produto com slug ${slug}:`, error);
+    return null;
   }
 }
 
 // Busca produtos por categoria
 export async function getProductsByCategory(categoryId: number) {
   try {
-    const supabase = createServerSupabaseClient();
     const { data, error } = await supabase
       .from("products")
       .select("*")
@@ -200,25 +169,25 @@ export async function getProductsByCategory(categoryId: number) {
   }
 }
 
-// Busca um produto pelo slug
-export async function getProductBySlug(slug: string) {
+// Busca uma categoria pelo slug
+export async function getCategoryBySlug(slug: string) {
   try {
-    const supabase = createServerSupabaseClient();
+    console.log("Iniciando busca de categoria com slug:", slug);
     const { data, error } = await supabase
-      .from("products")
+      .from("categories")
       .select("*")
       .eq("slug", slug)
       .single();
 
     if (error) {
-      console.error(`Erro ao buscar produto com slug ${slug}:`, error);
-      throw error;
+      console.error(`Erro ao buscar categoria com slug ${slug}:`, error);
+      return null;
     }
 
-    console.log("Produto encontrado:", data);
-    return data as Product;
+    console.log("Categoria encontrada:", data);
+    return data as Category;
   } catch (error) {
-    console.error(`Erro ao buscar produto com slug ${slug}:`, error);
+    console.error(`Erro ao buscar categoria com slug ${slug}:`, error);
     return null;
   }
 }

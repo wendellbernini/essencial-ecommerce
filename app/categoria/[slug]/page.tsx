@@ -8,6 +8,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCard } from "@/components/product-card";
 import { getCategoryBySlug, getProductsByCategory } from "@/lib/supabase";
 
+// Força a página a ser renderizada dinamicamente
+export const dynamic = "force-dynamic";
+
 interface CategoryPageProps {
   params: {
     slug: string;

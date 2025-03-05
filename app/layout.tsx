@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description:
     "Loja online de produtos cosméticos e de beleza. Encontre produtos exclusivos de vendedores independentes.",
   generator: "Next.js",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -18,6 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <head />
       <body className="min-h-screen bg-background font-sans antialiased">
         <ThemeProvider
           attribute="class"

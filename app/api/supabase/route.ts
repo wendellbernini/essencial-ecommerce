@@ -2,23 +2,46 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-  const cookieStore = cookies();
+// Força a rota a ser dinâmica
+export const dynamic = "force-dynamic";
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
-
+export async function GET() {
   try {
-    const { data: categories } = await supabase.from("categories").select("*");
+    const cookieStore = cookies();
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            try {
+              cookieStore.set({ name, value, ...options });
+            } catch (error) {
+              // Handle cookie errors in read-only contexts
+            }
+          },
+          remove(name: string, options: any) {
+            try {
+              cookieStore.delete({ name, ...options });
+            } catch (error) {
+              // Handle cookie errors in read-only contexts
+            }
+          },
+        },
+      }
+    );
+
+    const { data: categories, error } = await supabase
+      .from("categories")
+      .select("*")
+      .order("name");
+
+    if (error) throw error;
+
     return NextResponse.json({ categories });
   } catch (error) {
     console.error("Erro ao buscar categorias:", error);
@@ -30,25 +53,40 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const cookieStore = cookies();
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
-
-  const data = await request.json();
-
   try {
+    const cookieStore = cookies();
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            try {
+              cookieStore.set({ name, value, ...options });
+            } catch (error) {
+              // Handle cookie errors in read-only contexts
+            }
+          },
+          remove(name: string, options: any) {
+            try {
+              cookieStore.delete({ name, ...options });
+            } catch (error) {
+              // Handle cookie errors in read-only contexts
+            }
+          },
+        },
+      }
+    );
+
+    const data = await request.json();
     const { error } = await supabase.from("categories").insert(data);
+
     if (error) throw error;
+
     return NextResponse.json({ message: "Categoria criada com sucesso" });
   } catch (error) {
     console.error("Erro ao criar categoria:", error);

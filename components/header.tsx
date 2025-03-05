@@ -28,11 +28,12 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             <Image
-              src="/placeholder.svg?height=40&width=90"
+              src="/images/logo.png"
               alt="Essencial"
-              width={90}
-              height={40}
-              className="h-10 w-auto"
+              width={50}
+              height={50}
+              className="h-12 w-auto"
+              priority
             />
           </Link>
 

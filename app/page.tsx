@@ -16,10 +16,21 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCard } from "@/components/product-card";
 import { getFeaturedProducts, getCategories } from "@/lib/supabase";
 
+// Força a página a ser renderizada dinamicamente
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function Home() {
+  console.log("Renderizando página inicial...");
+
   // Buscar produtos em destaque e categorias do Supabase
   const featuredProducts = await getFeaturedProducts();
   const categories = await getCategories();
+
+  console.log("Dados obtidos:", {
+    featuredProductsCount: featuredProducts.length,
+    categoriesCount: categories.length,
+  });
 
   return (
     <div className="min-h-screen bg-white">
