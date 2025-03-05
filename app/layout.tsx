@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
+import { Montserrat } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import "./globals.css";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+});
 
 export const metadata: Metadata = {
   title: "Essencial - Cosméticos e Beleza",
@@ -23,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head />
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body
+        className={`min-h-screen bg-background font-sans antialiased ${montserrat.variable}`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

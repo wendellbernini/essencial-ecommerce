@@ -26,19 +26,19 @@ export function Header() {
           </Button>
 
           {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
+          <Link href="/" className="flex-shrink-0 flex items-center">
             <Image
-              src="/images/logo.png"
+              src="/images/logo_name.png"
               alt="Essencial"
-              width={50}
-              height={50}
-              className="h-12 w-auto"
+              width={400}
+              height={120}
+              className="h-20 w-auto"
               priority
             />
           </Link>
 
           {/* Barra de busca */}
-          <div className="hidden md:flex flex-1 mx-6 relative">
+          <div className="hidden md:flex flex-1 mx-12 relative">
             <Input
               type="search"
               placeholder="Buscar por produtos"
