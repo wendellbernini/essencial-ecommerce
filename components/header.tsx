@@ -81,7 +81,7 @@ export function Header() {
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
           {/* Botão de menu mobile */}
           <Button
             variant="ghost"
@@ -92,19 +92,19 @@ export function Header() {
           </Button>
 
           {/* Logo */}
-          <Link href="/" className="flex-shrink-0 flex items-center">
+          <Link href="/" className="flex-shrink-0 -ml-3">
             <Image
               src="/images/logo_name.png"
               alt="Essencial"
               width={200}
               height={50}
-              className="h-[50px] w-[200px] object-contain"
+              className="h-[50px] w-auto object-contain"
               priority
             />
           </Link>
 
           {/* Barra de busca */}
-          <div className="hidden md:flex flex-1 mx-12 relative">
+          <div className="hidden md:flex flex-1 mx-8 relative">
             <Input
               type="search"
               placeholder="Buscar por produtos"
