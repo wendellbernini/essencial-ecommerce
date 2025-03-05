@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -22,12 +24,14 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { useCart } from "@/contexts/cart-context";
 
 export function Header() {
   const [session, setSession] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const supabase = createClientComponentClient();
   const router = useRouter();
+  const { toggleCart, total_items } = useCart();
 
   useEffect(() => {
     // Verifica o estado da sessão ao montar o componente
@@ -202,10 +206,15 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-gray-700 hover:text-orange-500 hover:bg-orange-50"
-              onClick={() => router.push("/carrinho")}
+              className="text-gray-700 hover:text-orange-500 hover:bg-orange-50 relative"
+              onClick={toggleCart}
             >
               <ShoppingCart className="h-5 w-5" />
+              {total_items > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[10px] font-medium text-white">
+                  {total_items}
+                </span>
+              )}
             </Button>
           </div>
         </div>
