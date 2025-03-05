@@ -74,6 +74,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export async function getCategories() {
   try {
     console.log("Iniciando busca de todas as categorias...");
+    const supabase = createServerSupabaseClient();
     const { data, error } = await supabase
       .from("categories")
       .select("*")
@@ -102,6 +103,7 @@ export async function getCategories() {
 
 export async function getFeaturedProducts() {
   try {
+    const supabase = createServerSupabaseClient();
     const { data, error } = await supabase
       .from("products")
       .select("*")
