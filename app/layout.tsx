@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { RootLayout as MainLayout } from "@/components/layouts/root-layout";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -28,8 +27,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <head />
       <body
+        suppressHydrationWarning
         className={`min-h-screen bg-background font-sans antialiased ${montserrat.variable}`}
       >
         <ThemeProvider
@@ -38,17 +37,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex flex-col min-h-screen">
-            <div className="bg-[#FDEBD2] text-[#222222] py-2 px-4 text-center text-sm">
-              <p>
-                Aproveite até 30% de desconto! Confira nossas ofertas especiais
-                hoje.
-              </p>
-            </div>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-          </div>
+          <MainLayout>{children}</MainLayout>
         </ThemeProvider>
       </body>
     </html>

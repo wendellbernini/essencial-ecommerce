@@ -92,3 +92,22 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Supabase Auth UI overrides */
+.supabase-auth-ui_button {
+  @apply shadow-sm hover:shadow-md transition-all duration-200;
+}
+
+.supabase-auth-ui_container {
+  @apply space-y-4;
+}
+
+.supabase-auth-ui_label {
+  @apply text-gray-700 font-medium text-sm mb-1;
+}
+
+.supabase-auth-ui_input {
+  @apply bg-white border-gray-200 text-gray-900 shadow-sm;
+  @apply hover:border-gray-300 hover:shadow;
+  @apply focus:border-orange-500 focus:ring-orange-500 focus:shadow-md;
+}
