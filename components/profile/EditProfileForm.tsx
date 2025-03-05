@@ -4,32 +4,29 @@ import { useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface EditProfileFormProps {
-  initialData?: {
+  initialData: {
     full_name?: string;
     phone?: string;
   };
-  onSuccess?: () => void;
 }
 
-export function EditProfileForm({
-  initialData,
-  onSuccess,
-}: EditProfileFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
+export function EditProfileForm({ initialData }: EditProfileFormProps) {
   const [formData, setFormData] = useState({
-    full_name: initialData?.full_name || "",
-    phone: initialData?.phone || "",
+    full_name: initialData.full_name || "",
+    phone: initialData.phone || "",
   });
-
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState("");
   const supabase = createClientComponentClient();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSaving(true);
+    setMessage("");
 
     try {
       const {
@@ -37,66 +34,87 @@ export function EditProfileForm({
       } = await supabase.auth.getUser();
 
       if (!user) {
-        toast.error("Usuário não encontrado");
-        return;
+        throw new Error("Usuário não encontrado");
       }
 
-      const { error } = await supabase
-        .from("users")
-        .upsert({
-          id: user.id,
-          ...formData,
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
+      const { error } = await supabase.from("users").upsert({
+        id: user.id,
+        full_name: formData.full_name,
+        phone: formData.phone,
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) throw error;
 
-      toast.success("Perfil atualizado com sucesso!");
-      onSuccess?.();
+      setMessage("Dados atualizados com sucesso!");
+      router.refresh();
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);
-      toast.error("Erro ao atualizar perfil. Tente novamente.");
+      setMessage("Erro ao atualizar os dados. Tente novamente.");
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="full_name">Nome completo</Label>
+      <div>
+        <label
+          htmlFor="full_name"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Seu nome completo
+        </label>
         <Input
           id="full_name"
-          name="full_name"
+          type="text"
           value={formData.full_name}
-          onChange={handleChange}
-          placeholder="Seu nome completo"
-          disabled={isLoading}
+          onChange={(e) =>
+            setFormData({ ...formData, full_name: e.target.value })
+          }
+          className="mt-1 w-full rounded-md bg-gray-50 border-gray-200 focus:ring-orange-500 focus:border-orange-500"
+          placeholder="Digite seu nome completo"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="phone">Telefone</Label>
+      <div>
+        <label
+          htmlFor="phone"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Telefone
+        </label>
         <Input
           id="phone"
-          name="phone"
+          type="tel"
           value={formData.phone}
-          onChange={handleChange}
+          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          className="mt-1 w-full rounded-md bg-gray-50 border-gray-200 focus:ring-orange-500 focus:border-orange-500"
           placeholder="(00) 00000-0000"
-          disabled={isLoading}
         />
       </div>
 
-      <Button type="submit" disabled={isLoading} className="w-full">
-        {isLoading ? "Salvando..." : "Salvar alterações"}
-      </Button>
+      {message && (
+        <p
+          className={`text-sm ${
+            message.includes("sucesso")
+              ? "text-green-600 bg-green-50"
+              : "text-red-600 bg-red-50"
+          } p-3 rounded-md`}
+        >
+          {message}
+        </p>
+      )}
+
+      <div className="flex justify-end">
+        <Button
+          type="submit"
+          disabled={isSaving}
+          className="bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500"
+        >
+          {isSaving ? "Salvando..." : "Salvar alterações"}
+        </Button>
+      </div>
     </form>
   );
 }
