@@ -99,6 +99,7 @@ export function Header() {
               width={300}
               height={75}
               className="h-12 w-auto object-contain"
+              style={{ minWidth: "200px" }}
               priority
             />
           </Link>
