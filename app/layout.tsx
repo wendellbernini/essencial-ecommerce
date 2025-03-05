@@ -1,44 +1,34 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
-import { RootLayout as MainLayout } from "@/components/layouts/root-layout";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { CartProvider } from "@/contexts/cart-context";
+import { CartDrawer } from "@/components/cart/CartDrawer";
+import { PromoBanner } from "@/components/promo-banner";
 
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  variable: "--font-montserrat",
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Essencial - Cosméticos e Beleza",
-  description:
-    "Loja online de produtos cosméticos e de beleza. Encontre produtos exclusivos de vendedores independentes.",
-  generator: "Next.js",
-  manifest: "/manifest.json",
-  icons: {
-    icon: "/favicon.ico",
-  },
+  description: "Encontre os melhores produtos de beleza e cosméticos.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <body
-        suppressHydrationWarning
-        className={`min-h-screen bg-background font-sans antialiased ${montserrat.variable}`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <MainLayout>{children}</MainLayout>
-        </ThemeProvider>
+    <html lang="pt-BR">
+      <body className={inter.className}>
+        <CartProvider>
+          <PromoBanner />
+          <Header />
+          <main>{children}</main>
+          <Footer />
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );
