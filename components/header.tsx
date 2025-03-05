@@ -96,10 +96,9 @@ export function Header() {
             <Image
               src="/images/logo_name.png"
               alt="Essencial"
-              width={300}
-              height={75}
-              className="h-12 w-auto object-contain"
-              style={{ minWidth: "200px" }}
+              width={200}
+              height={50}
+              className="h-[50px] w-[200px] object-contain"
               priority
             />
           </Link>
