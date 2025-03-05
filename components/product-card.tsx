@@ -48,12 +48,12 @@ export function ProductCard({ product }: ProductCardProps) {
             <Heart className="h-4 w-4" />
           </Button>
           {product.featured && (
-            <Badge className="absolute bottom-2 left-2 bg-orange-500">
+            <Badge className="absolute bottom-2 left-2 bg-orange-500 text-white hover:bg-orange-600">
               Mais vendido
             </Badge>
           )}
           {product.stock_quantity <= 0 && (
-            <Badge className="absolute bottom-2 right-2 bg-gray-700">
+            <Badge className="absolute bottom-2 right-2 bg-gray-700 text-white">
               Esgotado
             </Badge>
           )}
@@ -80,7 +80,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex justify-between items-center">
             {hasDiscount ? (
               <div>
-                <p className="font-medium">
+                <p className="font-medium text-gray-900">
                   {formatPrice(product.sale_price!)}
                 </p>
                 <p className="text-xs text-gray-500 line-through">
@@ -88,7 +88,9 @@ export function ProductCard({ product }: ProductCardProps) {
                 </p>
               </div>
             ) : (
-              <p className="font-medium">{formatPrice(product.price)}</p>
+              <p className="font-medium text-gray-900">
+                {formatPrice(product.price)}
+              </p>
             )}
             {product.stock_quantity > 0 && product.stock_quantity <= 5 && (
               <Badge

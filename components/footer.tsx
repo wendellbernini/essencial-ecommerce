@@ -7,7 +7,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <div>
-            <h3 className="font-bold text-lg mb-4">Comprar</h3>
+            <h3 className="font-bold text-lg mb-4 text-gray-900">Comprar</h3>
             <ul className="space-y-2">
               {[
                 "Cartões de presente",
@@ -29,7 +29,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold text-lg mb-4">Vender</h3>
+            <h3 className="font-bold text-lg mb-4 text-gray-900">Vender</h3>
             <ul className="space-y-2">
               {[
                 "Venda na Essencial",
@@ -49,7 +49,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold text-lg mb-4">Sobre</h3>
+            <h3 className="font-bold text-lg mb-4 text-gray-900">Sobre</h3>
             <ul className="space-y-2">
               {[
                 "Essencial, Inc.",
@@ -71,7 +71,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold text-lg mb-4">Ajuda</h3>
+            <h3 className="font-bold text-lg mb-4 text-gray-900">Ajuda</h3>
             <ul className="space-y-2">
               {[
                 "Central de Ajuda",
@@ -89,7 +89,7 @@ export function Footer() {
               ))}
             </ul>
             <div className="mt-6">
-              <h4 className="font-bold text-sm mb-2">
+              <h4 className="font-bold text-sm mb-2 text-gray-900">
                 Baixe o aplicativo Essencial
               </h4>
               <div className="flex space-x-2">
