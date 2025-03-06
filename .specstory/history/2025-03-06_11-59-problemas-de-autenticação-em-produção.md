@@ -1951,6 +1951,86 @@ fiz o push aguardei 10min e ainda depois que coloco minha conta do google para e
 
 _**Assistant**_
 
+Ah! Agora identificamos o problema real: o redirecionamento está indo para localhost mesmo em produção. Isso acontece porque precisamos ajustar o `redirectUrl` no `AuthForm.tsx` para usar a URL correta em produção.
+
+Vou modificar o arquivo para corrigir isso:
+
+---
+
+_****_
+
+```diff
+  
+    useEffect(() => {
+-     setRedirectUrl(`${window.location.origin}/auth/callback`);
++     // Em produção, usa a URL da Vercel, em desenvolvimento usa localhost
++     const isProduction = process.env.NODE_ENV === "production";
++     const baseUrl = isProduction
++       ? "https://essencial-ecommerce.vercel.app"
++       : "http://localhost:3000";
++ 
++     setRedirectUrl(`${baseUrl}/auth/callback`);
+    }, []);
+  
+```
+
+---
+
+_****_
+
+Agora vou fazer o deploy dessas alterações:
+
+---
+
+_****_
+
+```bash
+git add . && git commit -m "fix: corrige URL de redirecionamento em produção" && git push
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git add . && git commit -m "fix
+: corrige URL de redirecionamento em produção" && git pusgit add . && git commit -m "fix
+: corrige URL de redirecionamento em produção" && git push
+[main fb64d19] fix: corrige URL de redirecionamento em produção
+ 2 files changed, 94 insertions(+), 1 deletion(-)
+Enumerating objects: 15, done.
+Counting objects: 100% (15/15), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (8/8), 1.70 KiB | 1.70 MiB/s, done.
+Total 8 (delta 5), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (5/5), completed with 5 local objects.
+To github.com:wendellbernini/essencial-ecommerce.git
+   694eab7..fb64d19  main -> main
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Agora:
+1. O deploy está sendo feito automaticamente na Vercel
+2. Aguarde cerca de 2-3 minutos para o deploy terminar
+3. Depois tente fazer login novamente no site em produção
+
+A alteração que fizemos agora garante que:
+- Em desenvolvimento (localhost), o redirecionamento será para `http://localhost:3000/auth/callback`
+- Em produção (Vercel), o redirecionamento será para `https://essencial-ecommerce.vercel.app/auth/callback`
+
+Me avise quando o deploy terminar para você testar novamente o login. Se ainda houver algum problema, me informe exatamente qual URL aparece no redirecionamento.
+
+---
+
+_**User**_
+
+continuo sendo redirecionado para links como http://localhost:3000/?code=3128eafb-bef5-40c1-ada0-9ac6ae47f992 (mesmo entando no site em producao)
+
+---
+
+_**Assistant**_
+
 
 
 ---

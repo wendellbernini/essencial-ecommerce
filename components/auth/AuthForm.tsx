@@ -11,11 +11,18 @@ export function AuthForm() {
   const [redirectUrl, setRedirectUrl] = useState<string>("");
 
   useEffect(() => {
-    // Em produção, usa a URL da Vercel, em desenvolvimento usa localhost
-    const isProduction = process.env.NODE_ENV === "production";
-    const baseUrl = isProduction
-      ? "https://essencial-ecommerce.vercel.app"
-      : "http://localhost:3000";
+    // Detecta se está em produção baseado no hostname atual
+    const isLocalhost = window.location.hostname === "localhost";
+    const baseUrl = isLocalhost
+      ? "http://localhost:3000"
+      : "https://essencial-ecommerce.vercel.app";
+
+    console.log("Ambiente atual:", {
+      hostname: window.location.hostname,
+      isLocalhost,
+      baseUrl,
+      redirectUrl: `${baseUrl}/auth/callback`,
+    });
 
     setRedirectUrl(`${baseUrl}/auth/callback`);
   }, []);
