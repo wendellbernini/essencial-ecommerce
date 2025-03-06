@@ -5,6 +5,7 @@ const nextConfig = {
       "images.unsplash.com",
       "plus.unsplash.com",
       "source.unsplash.com",
+      "api.dicebear.com",
     ],
   },
 };
