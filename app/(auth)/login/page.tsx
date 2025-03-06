@@ -9,7 +9,7 @@ export default function LoginPage() {
         <div className="mb-6 text-center">
           <Link href="/" className="inline-block mb-6">
             <Image
-              src="/images/logo_name.png"
+              src="/images/logo.png"
               alt="Essencial"
               width={140}
               height={43}

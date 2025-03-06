@@ -101,7 +101,7 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 -ml-3">
             <Image
-              src="/images/logo_name.png"
+              src="/images/logo.png"
               alt="Essencial"
               width={200}
               height={50}
