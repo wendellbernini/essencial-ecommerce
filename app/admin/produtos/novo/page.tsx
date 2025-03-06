@@ -18,6 +18,7 @@ import {
 import { useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function NewProductPage() {
     category_id: "",
     stock_quantity: "",
     featured: false,
-    image_url: "",
+    images: [] as string[],
   });
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export default function NewProductPage() {
         !formData.name ||
         !formData.price ||
         !formData.category_id ||
-        !formData.image_url
+        formData.images.length === 0
       ) {
         throw new Error("Preencha todos os campos obrigatórios");
       }
@@ -73,7 +74,7 @@ export default function NewProductPage() {
         stock_quantity: Number(formData.stock_quantity) || 0,
         category_id: Number(formData.category_id),
         featured: formData.featured,
-        images: [formData.image_url],
+        images: formData.images,
         updated_at: new Date().toISOString(),
       };
 
@@ -198,15 +199,19 @@ export default function NewProductPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="image_url">URL da Imagem</Label>
-            <Input
-              id="image_url"
-              type="url"
-              value={formData.image_url}
-              onChange={(e) =>
-                setFormData({ ...formData, image_url: e.target.value })
+            <Label>Imagens do Produto</Label>
+            <ImageUpload
+              value={formData.images}
+              disabled={isLoading}
+              onChange={(url) =>
+                setFormData({ ...formData, images: [...formData.images, url] })
               }
-              placeholder="https://exemplo.com/imagem.jpg"
+              onRemove={() =>
+                setFormData({
+                  ...formData,
+                  images: formData.images.slice(0, -1),
+                })
+              }
             />
           </div>
 
