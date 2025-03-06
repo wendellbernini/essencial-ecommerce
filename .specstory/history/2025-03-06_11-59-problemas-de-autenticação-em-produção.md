@@ -1868,6 +1868,93 @@ mas eu tenho que remover @https://gipwtawryfdxbnyujyjd.supabase.co/auth/v1/callb
 
 ---
 
+_**Assistant**_
+
+Não! Me desculpe pela confusão. A URL `https://gipwtawryfdxbnyujyjd.supabase.co/auth/v1/callback` é essencial para o Supabase e deve permanecer.
+
+Vamos corrigir. No Google Cloud Console, você deve manter:
+
+1. `https://gipwtawryfdxbnyujyjd.supabase.co/auth/v1/callback` (para o Supabase)
+2. `http://localhost:3000/auth/callback` (para desenvolvimento local)
+3. `https://essencial-ecommerce.vercel.app/auth/callback` (para produção)
+
+Então, no final, você deve ter essas 3 URLs configuradas nos "URIs de redirecionamento autorizados". A URL do Supabase é necessária para que a autenticação funcione corretamente com o serviço do Supabase.
+
+Você pode tentar fazer o login agora com essas 3 URLs configuradas? Se ainda não funcionar, me avise qual erro aparece.
+
+---
+
+_**User**_
+
+execute o deploy para eu acessar o site em producao e ver sse corrigiu
+
+---
+
+_**Assistant**_
+
+Vou executar o deploy para a Vercel para verificarmos se as alterações que fizemos no arquivo de callback corrigiram o problema.
+
+---
+
+_****_
+
+```bash
+git add .
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ 
+
+```
+
+---
+
+_****_
+
+```bash
+git commit -m "fix: melhora tratamento de erros no callback de autenticação"
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git commit -m "fix: melhora tra
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git commit -m "fix: melhora tra
+tamento de erros no callback de autenticação"
+[main 694eab7] fix: melhora tratamento de erros no callback de autenticação
+ 3 files changed, 1933 insertions(+), 16 deletions(-)
+ create mode 100644 ".specstory/history/2025-03-06_11-59-problemas-de-autentica\303\247\
+303\243o-em-produ\303\247\303\243o.md"
+ create mode 100644 ".specstory/history/2025-03-06_12-03-problemas-de-redirecionamento-n
+a-autentica\303\247\303\243o-oauth.md"
+ rewrite app/auth/callback/route.ts (61%)
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Cancelled
+
+---
+
+_****_
+
+
+
+---
+
+_**User**_
+
+fiz o push aguardei 10min e ainda depois que coloco minha conta do google para entrar estou sendo redirecionado para http://localhost:3000/?code=a5103b27-18b7-4ecd-a24f-bc374fee395a (mesmo no site em producao onde nem tem acesso ao localhost ele ta me redirecionando para localhost)
+
+---
+
+_**Assistant**_
+
+
+
+---
+
 
 
 ---

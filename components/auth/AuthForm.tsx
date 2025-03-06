@@ -11,7 +11,13 @@ export function AuthForm() {
   const [redirectUrl, setRedirectUrl] = useState<string>("");
 
   useEffect(() => {
-    setRedirectUrl(`${window.location.origin}/auth/callback`);
+    // Em produção, usa a URL da Vercel, em desenvolvimento usa localhost
+    const isProduction = process.env.NODE_ENV === "production";
+    const baseUrl = isProduction
+      ? "https://essencial-ecommerce.vercel.app"
+      : "http://localhost:3000";
+
+    setRedirectUrl(`${baseUrl}/auth/callback`);
   }, []);
 
   return (
