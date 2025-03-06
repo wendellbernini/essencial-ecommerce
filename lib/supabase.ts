@@ -23,6 +23,7 @@ export type Product = {
   stock_quantity: number;
   images: string[];
   featured: boolean;
+  is_new_release: boolean;
   created_at: string;
   updated_at: string;
 };

@@ -3,13 +3,12 @@
 import { CldUploadWidget } from "next-cloudinary";
 import { ImagePlus, Trash } from "lucide-react";
 import Image from "next/image";
-
 import { Button } from "@/components/ui/button";
 
 interface ImageUploadProps {
   disabled?: boolean;
   onChange: (value: string) => void;
-  onRemove: () => void;
+  onRemove: (url: string) => void;
   value: string[];
 }
 
@@ -19,26 +18,9 @@ export function ImageUpload({
   onRemove,
   value,
 }: ImageUploadProps) {
-  const onUpload = (result: any) => {
-    console.log("Upload result:", result);
-
-    if (!result?.info) {
-      console.error("Upload failed: No result info");
-      return;
-    }
-
-    if (!result.info.secure_url) {
-      console.error("Upload failed: No secure URL", result.info);
-      return;
-    }
-
-    console.log("Upload successful:", result.info.secure_url);
-    onChange(result.info.secure_url);
-  };
-
   return (
     <div>
-      <div className="mb-4 flex items-center gap-4">
+      <div className="mb-4 flex items-center gap-4 flex-wrap">
         {value.map((url) => (
           <div
             key={url}
@@ -47,7 +29,7 @@ export function ImageUpload({
             <div className="z-10 absolute top-2 right-2">
               <Button
                 type="button"
-                onClick={onRemove}
+                onClick={() => onRemove(url)}
                 variant="destructive"
                 size="icon"
               >
@@ -63,12 +45,21 @@ export function ImageUpload({
           </div>
         ))}
       </div>
-      <CldUploadWidget onUpload={onUpload} uploadPreset="essencial_products">
+      <CldUploadWidget
+        onUpload={(result) => {
+          console.log("Upload result:", result);
+          onChange(result.info.secure_url);
+        }}
+        uploadPreset="essencial_products"
+        options={{
+          maxFiles: 1,
+        }}
+      >
         {({ open }) => (
           <Button
             type="button"
             variant="secondary"
-            onClick={() => open()}
+            onClick={open}
             disabled={disabled}
           >
             <ImagePlus className="h-4 w-4 mr-2" />

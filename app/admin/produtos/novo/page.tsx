@@ -33,6 +33,7 @@ export default function NewProductPage() {
     category_id: "",
     stock_quantity: "",
     featured: false,
+    is_new_release: false,
     images: [] as string[],
   });
 
@@ -48,43 +49,52 @@ export default function NewProductPage() {
     if (data) setCategories(data);
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      if (
-        !formData.name ||
-        !formData.price ||
-        !formData.category_id ||
-        formData.images.length === 0
-      ) {
-        throw new Error("Preencha todos os campos obrigatórios");
+      // Validação dos campos obrigatórios
+      const requiredFields = {
+        name: "Nome do produto",
+        price: "Preço",
+        category_id: "Categoria",
+      };
+
+      for (const [field, label] of Object.entries(requiredFields)) {
+        if (!formData[field as keyof typeof formData]) {
+          throw new Error(`O campo "${label}" é obrigatório`);
+        }
+      }
+
+      if (formData.images.length === 0) {
+        throw new Error("Adicione pelo menos uma imagem do produto");
       }
 
       const productData = {
-        name: formData.name,
+        name: formData.name.trim(),
         slug: formData.name
           .toLowerCase()
+          .trim()
           .replace(/[^\w\s-]/g, "")
           .replace(/\s+/g, "-"),
-        description: formData.description || "",
+        description: formData.description?.trim() || "",
         price: Number(formData.price),
         sale_price: null,
         stock_quantity: Number(formData.stock_quantity) || 0,
         category_id: Number(formData.category_id),
         featured: formData.featured,
+        is_new_release: formData.is_new_release,
         images: formData.images,
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-
-      console.log("Dados a serem enviados:", productData);
 
       const { error } = await supabase.from("products").insert([productData]);
 
       if (error) {
-        console.error("Erro detalhado:", error);
-        throw error;
+        console.error("Erro ao criar produto:", error);
+        throw new Error(error.message);
       }
 
       toast({
@@ -94,7 +104,7 @@ export default function NewProductPage() {
 
       router.push("/admin/produtos");
     } catch (error) {
-      console.error("Erro completo:", error);
+      console.error("Erro ao criar produto:", error);
       toast({
         title: "Erro ao criar produto",
         description:
@@ -206,10 +216,10 @@ export default function NewProductPage() {
               onChange={(url) =>
                 setFormData({ ...formData, images: [...formData.images, url] })
               }
-              onRemove={() =>
+              onRemove={(url) =>
                 setFormData({
                   ...formData,
-                  images: formData.images.slice(0, -1),
+                  images: formData.images.filter((image) => image !== url),
                 })
               }
             />
@@ -224,6 +234,17 @@ export default function NewProductPage() {
               }
             />
             <Label htmlFor="featured">Produto em Destaque</Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="is_new_release"
+              checked={formData.is_new_release}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, is_new_release: checked as boolean })
+              }
+            />
+            <Label htmlFor="is_new_release">Lançamento</Label>
           </div>
         </div>
 
