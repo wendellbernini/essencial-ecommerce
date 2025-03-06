@@ -25,6 +25,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { useCart } from "@/contexts/cart-context";
+import { useSearch } from "@/hooks/useSearch";
+import { formatPrice } from "@/lib/utils";
 
 export function Header() {
   const [session, setSession] = useState<any>(null);
@@ -32,6 +34,7 @@ export function Header() {
   const supabase = createClientComponentClient();
   const router = useRouter();
   const { toggleCart, total_items } = useCart();
+  const { query, setQuery, results, isLoading } = useSearch();
 
   useEffect(() => {
     // Verifica o estado da sessão ao montar o componente
@@ -108,19 +111,99 @@ export function Header() {
           </Link>
 
           {/* Barra de busca */}
-          <div className="hidden md:flex flex-1 mx-8 relative">
-            <Input
-              type="search"
-              placeholder="Buscar por produtos"
-              className="w-full rounded-full bg-white border-gray-200 pl-4 pr-10 py-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-500"
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500"
+          <div className="hidden md:flex flex-1 mx-4 relative">
+            <form
+              action={`/busca`}
+              className="w-full"
+              onSubmit={(e) => {
+                if (!query.trim()) {
+                  e.preventDefault();
+                }
+              }}
             >
-              <Search className="h-5 w-5" />
-            </Button>
+              <Input
+                type="search"
+                name="q"
+                placeholder="Buscar por produtos"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full rounded-full bg-white border-gray-200 pl-4 pr-10 py-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-500"
+              />
+              <Button
+                type="submit"
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500"
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+            </form>
+
+            {/* Resultados rápidos da busca */}
+            {query.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[400px] overflow-y-auto z-50">
+                {isLoading ? (
+                  <div className="p-4 text-center text-gray-500">
+                    Buscando produtos...
+                  </div>
+                ) : results.length > 0 ? (
+                  <>
+                    <div className="py-2">
+                      {results.slice(0, 5).map((product) => (
+                        <Link
+                          key={product.id}
+                          href={`/produto/${product.slug}`}
+                          className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50"
+                        >
+                          <div className="w-12 h-12 relative flex-shrink-0">
+                            <Image
+                              src={product.images[0] || "/placeholder.png"}
+                              alt={product.name}
+                              fill
+                              className="object-cover rounded"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium text-gray-900 truncate">
+                              {product.name}
+                            </h4>
+                            <p className="text-sm text-gray-500">
+                              {product.categories.name}
+                            </p>
+                          </div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {product.sale_price ? (
+                              <>
+                                <span className="text-orange-500">
+                                  {formatPrice(product.sale_price)}
+                                </span>
+                                <span className="ml-2 line-through text-gray-400">
+                                  {formatPrice(product.price)}
+                                </span>
+                              </>
+                            ) : (
+                              formatPrice(product.price)
+                            )}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                    {results.length > 5 && (
+                      <Link
+                        href={`/busca?q=${encodeURIComponent(query)}`}
+                        className="block px-4 py-3 text-sm text-center text-orange-500 hover:bg-orange-50 border-t border-gray-100"
+                      >
+                        Ver todos os {results.length} resultados
+                      </Link>
+                    )}
+                  </>
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    Nenhum produto encontrado
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Navegação do usuário */}
@@ -221,18 +304,83 @@ export function Header() {
 
         {/* Busca mobile */}
         <div className="mt-3 relative md:hidden">
-          <Input
-            type="search"
-            placeholder="Buscar por produtos"
-            className="w-full rounded-full bg-white border-gray-200 pl-4 pr-10 py-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-500"
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500"
+          <form
+            action={`/busca`}
+            onSubmit={(e) => {
+              if (!query.trim()) {
+                e.preventDefault();
+              }
+            }}
           >
-            <Search className="h-5 w-5" />
-          </Button>
+            <Input
+              type="search"
+              name="q"
+              placeholder="Buscar por produtos"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full rounded-full bg-white border-gray-200 pl-4 pr-10 py-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-500"
+            />
+            <Button
+              type="submit"
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+          </form>
+
+          {/* Resultados rápidos da busca - Mobile */}
+          {query.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[400px] overflow-y-auto z-50">
+              {isLoading ? (
+                <div className="p-4 text-center text-gray-500">
+                  Buscando produtos...
+                </div>
+              ) : results.length > 0 ? (
+                <>
+                  <div className="py-2">
+                    {results.slice(0, 3).map((product) => (
+                      <Link
+                        key={product.id}
+                        href={`/produto/${product.slug}`}
+                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50"
+                      >
+                        <div className="w-12 h-12 relative flex-shrink-0">
+                          <Image
+                            src={product.images[0] || "/placeholder.png"}
+                            alt={product.name}
+                            fill
+                            className="object-cover rounded"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-gray-900 truncate">
+                            {product.name}
+                          </h4>
+                          <p className="text-sm text-gray-500">
+                            {product.categories.name}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  {results.length > 3 && (
+                    <Link
+                      href={`/busca?q=${encodeURIComponent(query)}`}
+                      className="block px-4 py-3 text-sm text-center text-orange-500 hover:bg-orange-50 border-t border-gray-100"
+                    >
+                      Ver todos os {results.length} resultados
+                    </Link>
+                  )}
+                </>
+              ) : (
+                <div className="p-4 text-center text-gray-500">
+                  Nenhum produto encontrado
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Navegação de categorias */}

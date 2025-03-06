@@ -1,115 +1,68 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { EditProfileForm } from "@/components/profile/EditProfileForm";
+"use client";
 
-// Força a página a ser dinâmica para sempre verificar a autenticação
-export const dynamic = "force-dynamic";
+import { useEffect } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAddresses } from "@/hooks/useAddresses";
+import { AddressesSection } from "@/components/profile/addresses-section";
+import { PersonalDataSection } from "@/components/profile/personal-data-section";
+import { OrdersSection } from "@/components/profile/orders-section";
+import { WishlistSection } from "@/components/profile/wishlist-section";
 
-export default async function PerfilPage() {
-  // Inicializa o cliente do Supabase no servidor
-  const supabase = createServerComponentClient({ cookies });
+export default function ProfilePage() {
+  const { fetchAddresses } = useAddresses();
 
-  // Verifica se o usuário está autenticado
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  // Se não estiver autenticado, redireciona para o login
-  if (!session) {
-    redirect("/login");
-  }
-
-  // Busca os dados do usuário
-  const { data: userData, error } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", session.user.id)
-    .single();
-
-  if (error) {
-    console.error("Erro ao buscar dados do usuário:", error);
-  }
+  useEffect(() => {
+    fetchAddresses();
+  }, [fetchAddresses]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 text-gray-900">Meu Perfil</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Menu lateral */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <nav className="space-y-2">
-              <a
-                href="/perfil"
-                className="block py-2 px-4 bg-orange-50 text-orange-500 rounded-md font-medium"
-              >
-                Dados Pessoais
-              </a>
-              <a
-                href="/perfil/enderecos"
-                className="block py-2 px-4 text-gray-600 hover:bg-orange-50 hover:text-orange-500 rounded-md transition-colors"
-              >
-                Endereços
-              </a>
-              <a
-                href="/perfil/pedidos"
-                className="block py-2 px-4 text-gray-600 hover:bg-orange-50 hover:text-orange-500 rounded-md transition-colors"
-              >
-                Meus Pedidos
-              </a>
-              <a
-                href="/perfil/wishlist"
-                className="block py-2 px-4 text-gray-600 hover:bg-orange-50 hover:text-orange-500 rounded-md transition-colors"
-              >
-                Lista de Desejos
-              </a>
-            </nav>
-          </div>
+      <Tabs defaultValue="personal-data" className="space-y-6">
+        <TabsList className="bg-muted w-full justify-start border-b">
+          <TabsTrigger
+            value="personal-data"
+            className="data-[state=active]:bg-background"
+          >
+            Dados Pessoais
+          </TabsTrigger>
+          <TabsTrigger
+            value="addresses"
+            className="data-[state=active]:bg-background"
+          >
+            Endereços
+          </TabsTrigger>
+          <TabsTrigger
+            value="orders"
+            className="data-[state=active]:bg-background"
+          >
+            Meus Pedidos
+          </TabsTrigger>
+          <TabsTrigger
+            value="wishlist"
+            className="data-[state=active]:bg-background"
+          >
+            Lista de Desejos
+          </TabsTrigger>
+        </TabsList>
 
-          {/* Conteúdo principal */}
-          <div className="md:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-                Dados da Conta
-              </h2>
-              <div className="space-y-4 text-sm">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Email
-                  </label>
-                  <p className="mt-1 text-gray-900">{session.user.email}</p>
-                </div>
+        <TabsContent value="personal-data" className="mt-6">
+          <PersonalDataSection />
+        </TabsContent>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Último acesso
-                  </label>
-                  <p className="mt-1 text-gray-900">
-                    {session.user.last_sign_in_at
-                      ? new Date(session.user.last_sign_in_at).toLocaleString(
-                          "pt-BR"
-                        )
-                      : "Primeiro acesso"}
-                  </p>
-                </div>
-              </div>
-            </div>
+        <TabsContent value="addresses" className="mt-6">
+          <AddressesSection />
+        </TabsContent>
 
-            <div>
-              <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-                Dados Pessoais
-              </h2>
-              <EditProfileForm
-                initialData={{
-                  full_name: userData?.full_name,
-                  phone: userData?.phone,
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+        <TabsContent value="orders" className="mt-6">
+          <OrdersSection />
+        </TabsContent>
+
+        <TabsContent value="wishlist" className="mt-6">
+          <WishlistSection />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

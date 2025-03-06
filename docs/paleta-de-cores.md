@@ -4,110 +4,169 @@ Este documento serve como referência para a paleta de cores utilizada no site E
 
 ## 🎨 Cores Principais
 
-### Laranja (Cor de Destaque)
+### Cores de Marca (Brand Colors)
 
-- `text-orange-500`: Cor principal para elementos interativos e destaques
-- `hover:text-orange-500`: Usado em hovers de links e botões
-- `hover:bg-orange-50`: Fundo suave laranja para hover de botões
+- `bg-[#FDEBD2]`: Cor pastel principal, usada no fundo do hero e seções destacadas
+- `text-orange-500`: Cor de destaque para elementos especiais (#F97316)
+- `bg-gray-800`: Cor principal para botões e ações (#1F2937)
+- `hover:bg-gray-700`: Estado hover dos botões principais (#374151)
+
+### Tons de Laranja (Destaques)
+
+- `bg-orange-500`: Badges de destaque e elementos especiais (#F97316)
+- `text-orange-500`: Links ativos, filtros selecionados e textos destacados
+- `bg-orange-50`: Fundo suave para elementos destacados (#FFF7ED)
+- `hover:text-orange-500`: Hover de links e elementos interativos secundários
 
 ### Tons de Cinza
 
-- `text-gray-900`: Títulos principais e textos de maior destaque
-- `text-gray-800`: Subtítulos e textos importantes
-- `text-gray-700`: Textos do corpo e links na navegação
-- `text-gray-600`: Textos secundários e links no footer
-- `text-gray-500`: Textos de placeholder e informações menos relevantes
-- `text-gray-400`: Ícones em estado normal
+- `text-gray-900`: Títulos principais (#111827)
+- `text-gray-800`: Subtítulos e botões principais (#1F2937)
+- `text-gray-700`: Textos do corpo (#374151)
+- `text-gray-600`: Textos secundários (#4B5563)
+- `text-gray-500`: Textos de placeholder (#6B7280)
+- `text-gray-400`: Ícones em estado normal (#9CA3AF)
+- `text-gray-300`: Bordas suaves (#D1D5DB)
+- `text-gray-200`: Separadores (#E5E7EB)
+- `text-gray-100`: Fundos alternativos (#F3F4F6)
+- `text-gray-50`: Fundo suave e hovers (#F9FAFB)
 
 ### Brancos e Fundos
 
 - `bg-white`: Fundo padrão de cards e seções principais
-- `bg-gray-50`: Fundo alternativo para seções e inputs
-
-### Bordas
-
-- `border-gray-200`: Bordas suaves para cards e separadores
-- `border-gray-300`: Bordas mais destacadas para botões e elementos interativos
+- `bg-gray-50`: Fundo alternativo para seções
+- `bg-[#FDEBD2]`: Fundo especial para seções de destaque
 
 ## 🎯 Aplicação das Cores
 
+### Elementos de Destaque
+
+1. **Badges e Tags de Destaque**
+
+```css
+bg-orange-500
+text-white
+```
+
+2. **Filtros e Links Ativos**
+
+```css
+text-orange-500
+font-medium
+```
+
+3. **Elementos "Mais Vendido"**
+
+```css
+bg-orange-500
+text-white
+text-sm
+font-medium
+```
+
 ### Botões
 
-1. **Botão Padrão**
+1. **Botão Principal**
+
+```css
+bg-gray-800
+text-white
+hover:bg-gray-700
+focus:ring-gray-800
+```
+
+2. **Botão Secundário**
 
 ```css
 bg-white
-text-gray-600
-hover:text-orange-500
-hover:bg-orange-50
+text-gray-700
 border
 border-gray-200
+hover:bg-gray-50
+hover:text-gray-800
 ```
 
-2. **Botão Ghost (Transparente)**
+3. **Botão Ghost**
 
 ```css
-text-gray-700
+text-gray-600
 hover:text-orange-500
-hover:bg-orange-50
+hover:bg-gray-50
 ```
 
-### Links
+### Links e Interações
+
+1. **Links de Navegação**
 
 ```css
 text-gray-600
 hover:text-orange-500
 ```
 
-### Textos
+2. **Links de Destaque**
 
-- Títulos principais: `text-gray-900`
-- Subtítulos: `text-gray-800`
-- Textos do corpo: `text-gray-700`
-- Textos secundários: `text-gray-600`
-- Placeholders: `text-gray-500`
+```css
+text-orange-500
+hover:text-orange-600
+```
 
-### Fundos de Seção
+### Seções
 
-- Seção principal (hero): `bg-[#FDEBD2]`
-- Seções alternadas:
-  - Principal: `bg-white`
-  - Secundária: `bg-gray-50`
+1. **Hero e Seções Destacadas**
+
+```css
+bg-[#FDEBD2]
+```
+
+2. **Seções Principais**
+
+```css
+bg-white
+```
+
+3. **Seções Alternadas**
+
+```css
+bg-gray-50
+```
 
 ### Elementos de Formulário
 
 ```css
-bg-gray-50
+bg-white
 border-gray-200
+focus:ring-gray-800
+focus:border-gray-800
 placeholder-gray-500
-focus:ring-orange-500
-focus:border-orange-500
 ```
 
 ## 💡 Boas Práticas
 
-1. **Consistência**
+1. **Uso do Laranja**
+
+   - Reserve para elementos que precisam de destaque visual
+   - Use em badges, tags e indicadores de status
+   - Aplique em links ativos e filtros selecionados
+   - Evite usar em áreas grandes ou botões principais
+
+2. **Uso dos Tons de Cinza**
+
+   - Use para botões principais e ações importantes
+   - Aplique em textos e elementos de interface básicos
+   - Mantenha a hierarquia visual com diferentes tons
+
+3. **Consistência**
 
    - Use `text-gray-900` para títulos principais
    - Use `text-gray-600` para textos secundários
-   - Mantenha o padrão de hover com `hover:text-orange-500`
+   - Use laranja estrategicamente para chamar atenção
+   - Mantenha o pastel `#FDEBD2` como identidade visual
 
-2. **Acessibilidade**
-
-   - Mantenha contraste adequado entre texto e fundo
-   - Use cores mais escuras para textos importantes
-   - Evite cores muito claras para textos, exceto em fundos escuros
-
-3. **Interatividade**
-
-   - Sempre forneça feedback visual no hover
-   - Use a cor laranja (`orange-500`) para indicar interatividade
-   - Mantenha consistência nos estados de hover
-
-4. **Hierarquia Visual**
-   - Use variações de cinza para criar hierarquia
-   - Quanto mais importante o elemento, mais escuro o tom de cinza
-   - Use a cor laranja com moderação, apenas para destaques importantes
+4. **Interatividade**
+   - Botões principais: tons de cinza
+   - Hovers secundários: laranja
+   - Links: transição de cinza para laranja no hover
+   - Mantenha feedback visual consistente
 
 ## 🔄 Atualizações
 
@@ -115,4 +174,4 @@ Este documento deve ser atualizado sempre que houver mudanças significativas na
 
 ---
 
-_Última atualização: [DATA_ATUAL]_
+_Última atualização: Março 2024_

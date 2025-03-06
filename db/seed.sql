@@ -1,10 +1,59 @@
 -- Primeiro: Limpar as tabelas existentes
 DELETE FROM public.products;
 DELETE FROM public.categories;
+DELETE FROM public.addresses;
 
 -- Resetar as sequências de ID
 ALTER SEQUENCE categories_id_seq RESTART WITH 1;
 ALTER SEQUENCE products_id_seq RESTART WITH 1;
+ALTER SEQUENCE addresses_id_seq RESTART WITH 1;
+
+-- Criar tabela de endereços se não existir
+CREATE TABLE IF NOT EXISTS public.addresses (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    recipient VARCHAR(255) NOT NULL,
+    zip_code VARCHAR(8) NOT NULL,
+    street VARCHAR(255) NOT NULL,
+    number VARCHAR(20) NOT NULL,
+    complement VARCHAR(255),
+    neighborhood VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    state VARCHAR(2) NOT NULL,
+    is_default BOOLEAN DEFAULT false,
+    phone VARCHAR(20),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Criar índices para melhor performance
+CREATE INDEX IF NOT EXISTS idx_addresses_user_id ON public.addresses(user_id);
+CREATE INDEX IF NOT EXISTS idx_addresses_zip_code ON public.addresses(zip_code);
+
+-- Criar políticas RLS para a tabela de endereços
+CREATE POLICY "Usuários podem ver seus próprios endereços"
+    ON public.addresses
+    FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Usuários podem inserir seus próprios endereços"
+    ON public.addresses
+    FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Usuários podem atualizar seus próprios endereços"
+    ON public.addresses
+    FOR UPDATE
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Usuários podem deletar seus próprios endereços"
+    ON public.addresses
+    FOR DELETE
+    USING (auth.uid() = user_id);
+
+-- Habilitar RLS na tabela
+ALTER TABLE public.addresses ENABLE ROW LEVEL SECURITY;
 
 -- Inserir categorias
 INSERT INTO public.categories (name, slug, description, image_url, created_at) 
