@@ -11,6 +11,7 @@ import {
   Menu,
   LogOut,
   Package,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ import { formatPrice } from "@/lib/utils";
 export function Header() {
   const [session, setSession] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const supabase = createClientComponentClient();
   const router = useRouter();
   const { toggleCart, total_items } = useCart();
@@ -69,6 +71,7 @@ export function Header() {
 
     if (!error && data) {
       setUserData(data);
+      setIsAdmin(data.role === "admin");
     }
   };
 
@@ -231,6 +234,20 @@ export function Header() {
                   align="end"
                   className="w-48 bg-white border border-gray-100 shadow-lg rounded-lg py-1"
                 >
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/admin"
+                          className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-500 bg-gray-50"
+                        >
+                          <LayoutDashboard className="mr-2.5 h-4 w-4" />
+                          <span>Painel</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <div className="h-px bg-gray-100 my-1" />
+                    </>
+                  )}
                   <DropdownMenuItem asChild>
                     <Link
                       href="/perfil"

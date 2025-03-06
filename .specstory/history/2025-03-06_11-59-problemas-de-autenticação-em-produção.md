@@ -11905,6 +11905,288 @@ vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
 
 _****_
 
+2. Agora vou adicionar todos os arquivos modificados:
+
+---
+
+_****_
+
+```bash
+git add .
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ 
+
+```
+
+---
+
+_****_
+
+3. Vou criar um commit com uma mensagem descritiva:
+
+---
+
+_****_
+
+```bash
+git commit -m "feat: integra upload de imagens com Cloudinary e corrige build"
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git commit -m "feat: integra up
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git commit -m "feat: integra up
+load de imagens com Cloudinary e corrige build"
+[main 7c0b069] feat: integra upload de imagens com Cloudinary e corrige build
+ 9 files changed, 2699 insertions(+), 11 deletions(-)
+ create mode 100644 app/api/sign-cloudinary-params/route.ts
+ create mode 100644 components/ui/image-upload.tsx
+ create mode 100644 lib/cloudinary.ts
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+4. Por fim, vou enviar as alterações para o GitHub:
+
+---
+
+_****_
+
+```bash
+git push origin main
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git push origin main
+Enumerating objects: 43, done.
+Counting objects: 100% (43/43), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (19/19), done.
+Writing objects: 100% (24/24), 22.07 KiB | 1.38 MiB/s, done.
+Total 24 (delta 11), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (11/11), completed with 11 local objects.
+To github.com:wendellbernini/essencial-ecommerce.git
+   0cd9b03..7c0b069  main -> main
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Pronto! O deploy foi realizado com sucesso. Aqui está um resumo das alterações enviadas:
+
+1. Integração com Cloudinary para upload de imagens:
+   - Novo componente `ImageUpload`
+   - Configuração do Cloudinary
+   - Endpoint para assinatura de parâmetros
+
+2. Correções no build:
+   - Configurações adicionadas no `next.config.js`
+   - Rota de callback de autenticação ajustada para modo dinâmico
+
+3. Arquivos modificados/adicionados:
+   - `app/admin/produtos/novo/page.tsx`
+   - `app/auth/callback/route.ts`
+   - `next.config.js`
+   - `package.json` e `package-lock.json`
+   - Novos arquivos:
+     - `app/api/sign-cloudinary-params/route.ts`
+     - `components/ui/image-upload.tsx`
+     - `lib/cloudinary.ts`
+
+O commit foi enviado com sucesso para a branch `main` no GitHub. Como o projeto está configurado com a Vercel, o deploy automático deve ser iniciado em breve.
+
+---
+
+_**User**_
+
+Adicionar uma opcao chamada "Painel" para quem for admin conseguir acessar o painel mais facil nesse menu suspenso, e melhor ne? o que acha?
+
+---
+
+_**Assistant**_
+
+Sim, excelente sugestão! Vou adicionar a opção "Painel" no menu suspenso, mas apenas para usuários que têm a role "admin". Primeiro, vou verificar o componente que renderiza esse menu:
+
+---
+
+_****_
+
+<details>
+            <summary>Searched codebase "menu suspenso com opções Meu Perfil, Meus Pedidos" • **25** results</summary>
+        
+| File | Lines |
+|------|-------|
+| `.specstory/history/2025-03-05_17-43-implementação-de-funcionalidades-de-perfil-do-usuário.md` | L1080-1119 |
+| `components/header.tsx` | L229-270 |
+| `.specstory/history/2025-03-05_17-43-implementação-de-funcionalidades-de-perfil-do-usuário.md` | L271-378 |
+| `.specstory/history/2025-03-05_17-43-implementação-de-funcionalidades-de-perfil-do-usuário.md` | L2812-2854 |
+| `.specstory/history/2025-03-06_06-41-deep-dive-investigation-for-project-analysis.md` | L2081-2130 |
+| `app/(main)/perfil/page.tsx` | L1-60 |
+| `components/header.tsx` | L73-113 |
+| `components/header.tsx` | L270-305 |
+| `components/profile/orders-section.tsx` | L1-7 |
+| `.specstory/history/2025-03-06_06-41-deep-dive-investigation-for-project-analysis.md` | L2130-2198 |
+| `components/header.tsx` | L1-73 |
+| `app/admin/layout.tsx` | L22-58 |
+| `.specstory/history/2025-03-05_17-43-implementação-de-funcionalidades-de-perfil-do-usuário.md` | L837-907 |
+| `app/admin/layout.tsx` | L98-145 |
+| `components/admin/products/products-table.tsx` | L144-184 |
+| `.specstory/history/2025-03-05_17-43-implementação-de-funcionalidades-de-perfil-do-usuário.md` | L79-271 |
+| `.specstory/history/2025-03-05_17-43-implementação-de-funcionalidades-de-perfil-do-usuário.md` | L1214-1262 |
+| `components/header.tsx` | L375-414 |
+| `.specstory/history/2025-03-06_11-59-problemas-de-autenticação-em-produção.md` | L3051-3103 |
+| `.specstory/history/2025-03-05_17-43-implementação-de-funcionalidades-de-perfil-do-usuário.md` | L1174-1214 |
+| `app/(main)/perfil/page.tsx` | L60-68 |
+| `.specstory/history/2025-03-04_17-56-revisão-de-tecnologias-do-e-commerce-essencial.md` | L313-365 |
+| `.specstory/history/2025-03-05_17-43-implementação-de-funcionalidades-de-perfil-do-usuário.md` | L1262-1399 |
+| `app/(main)/page.tsx` | L1-20 |
+| `.specstory/history/2025-03-06_11-59-problemas-de-autenticação-em-produção.md` | L4114-4232 |
+
+</details>
+
+---
+
+_****_
+
+Agora vou verificar o arquivo do header para adicionar a opção "Painel" para usuários admin:
+
+---
+
+_****_
+
+Read file: components/header.tsx
+
+---
+
+_****_
+
+Vou adicionar a opção "Painel" no menu dropdown para usuários admin. Primeiro, vou verificar se o usuário tem a role "admin":
+
+---
+
+_****_
+
+```diff
+    LogOut,
+    Package,
++   LayoutDashboard,
+  } from "lucide-react";
+  import { Button } from "@/components/ui/button";
+    const [session, setSession] = useState<any>(null);
+    const [userData, setUserData] = useState<any>(null);
++   const [isAdmin, setIsAdmin] = useState(false);
+    const supabase = createClientComponentClient();
+    const router = useRouter();
+      if (!error && data) {
+        setUserData(data);
++       setIsAdmin(data.role === "admin");
+      }
+    };
+                    className="w-48 bg-white border border-gray-100 shadow-lg rounded-lg py-1"
+                  >
++                   {isAdmin && (
++                     <>
++                       <DropdownMenuItem asChild>
++                         <Link
++                           href="/admin"
++                           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-500"
++                         >
++                           <LayoutDashboard className="mr-2 h-4 w-4" />
++                           <span>Painel</span>
++                         </Link>
++                       </DropdownMenuItem>
++                       <DropdownMenuItem>
++                         <div className="h-px bg-gray-100 -mx-1" />
++                       </DropdownMenuItem>
++                     </>
++                   )}
+                    <DropdownMenuItem asChild>
+                      <Link
+```
+
+---
+
+_****_
+
+Agora vou executar o build para verificar se há algum erro:
+
+---
+
+_****_
+
+Cancelled
+
+---
+
+_****_
+
+
+
+---
+
+_**User**_
+
+ficou bom, mas so ajusta o espacamento do painel e deixa uma cor de fundo cinza claro no painel 
+
+---
+
+_**Assistant**_
+
+Vou ajustar o espaçamento e adicionar um fundo cinza claro para destacar a opção do Painel:
+
+---
+
+_****_
+
+```diff
+                          <Link
+                            href="/admin"
+-                           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-500"
++                           className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-500 bg-gray-50"
+                          >
+-                           <LayoutDashboard className="mr-2 h-4 w-4" />
++                           <LayoutDashboard className="mr-2.5 h-4 w-4" />
+                            <span>Painel</span>
+                          </Link>
+                        </DropdownMenuItem>
+-                       <DropdownMenuItem>
+-                         <div className="h-px bg-gray-100 -mx-1" />
+-                       </DropdownMenuItem>
++                       <div className="h-px bg-gray-100 my-1" />
+                      </>
+                    )}
+```
+
+---
+
+_****_
+
+Fiz as seguintes alterações:
+1. Adicionei um fundo cinza claro (`bg-gray-50`) para destacar a opção Painel
+2. Aumentei o padding vertical (`py-2.5`) para dar mais espaço
+3. Aumentei o espaçamento entre o ícone e o texto (`mr-2.5`)
+4. Adicionei `font-medium` para deixar o texto um pouco mais destacado
+5. Ajustei o separador para ter uma margem vertical uniforme (`my-1`)
+6. Removi o DropdownMenuItem desnecessário que envolvia o separador
+
+Agora a opção Painel deve estar mais destacada e com melhor espaçamento. O fundo cinza claro ajuda a identificar que é uma área administrativa especial.
+
+---
+
+_**User**_
+
+otimo, agora: Execute npm run build e continue trabalhando até corrigir todos os possíveis erros que possam impedir a conclusão bem-sucedida do build. Se forem necessárias alterações, analise o contexto com cuidado, evitando conclusões precipitadas. Priorize soluções enxutas, mantendo o código o mais conciso possível. @Next.js 15 Caso ajude, navegue pela documentação oficial do Next.js para encontrar uma solução para os erros no build ou lint.
+
+---
+
+_**Assistant**_
+
 
 
 ---
