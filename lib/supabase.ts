@@ -215,3 +215,36 @@ export async function getNewReleases() {
     return [];
   }
 }
+
+export async function getActivePromoBanners() {
+  try {
+    console.log("Iniciando busca de banners promocionais ativos...");
+    const now = new Date().toISOString();
+
+    // Primeiro, vamos buscar todos os banners ativos para debug
+    const { data: allBanners, error: allError } = await supabase
+      .from("promo_banners")
+      .select("*")
+      .eq("is_active", true);
+
+    console.log("Todos os banners ativos:", allBanners);
+
+    // Agora fazemos a busca com os filtros
+    const { data, error } = await supabase
+      .from("promo_banners")
+      .select("*")
+      .eq("is_active", true)
+      .order("order_index", { ascending: true });
+
+    if (error) {
+      console.error("Erro ao buscar banners:", error);
+      return [];
+    }
+
+    console.log("Banners encontrados após filtros:", data);
+    return data || [];
+  } catch (error) {
+    console.error("Erro ao buscar banners:", error);
+    return [];
+  }
+}

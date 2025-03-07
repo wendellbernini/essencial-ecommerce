@@ -14,10 +14,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCard } from "@/components/product-card";
+import { PromoBanner } from "@/components/promo-banner";
 import {
   getFeaturedProducts,
   getCategories,
   getNewReleases,
+  getActivePromoBanners,
 } from "@/lib/supabase";
 
 // Força a página a ser renderizada dinamicamente
@@ -31,47 +33,20 @@ export default async function Home() {
   const featuredProducts = await getFeaturedProducts();
   const categories = await getCategories();
   const newReleases = await getNewReleases();
+  const promoBanners = await getActivePromoBanners();
 
   console.log("Dados obtidos:", {
     featuredProductsCount: featuredProducts.length,
     categoriesCount: categories.length,
     newReleasesCount: newReleases.length,
+    promoBannersCount: promoBanners.length,
   });
 
   return (
     <div className="min-h-screen bg-white">
       <main>
-        {/* Seção principal */}
-        <section className="relative bg-[#FDEBD2] py-10">
-          <div className="container mx-auto px-4">
-            <div className="max-w-2xl">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Encontre coisas que você vai amar. Apoie vendedores
-                independentes. Só na Essencial.
-              </h1>
-              <p className="text-lg text-gray-800 mb-6">
-                Descobertas diárias de pequenos negócios criativos.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button className="bg-white text-gray-800 hover:bg-gray-100 border border-gray-300">
-                  Decoração
-                </Button>
-                <Button className="bg-white text-gray-800 hover:bg-gray-100 border border-gray-300">
-                  Joias
-                </Button>
-                <Button className="bg-white text-gray-800 hover:bg-gray-100 border border-gray-300">
-                  Roupas
-                </Button>
-                <Button className="bg-white text-gray-800 hover:bg-gray-100 border border-gray-300">
-                  Presentes
-                </Button>
-                <Button className="bg-white text-gray-800 hover:bg-gray-100 border border-gray-300">
-                  Casamento
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Banner Promocional */}
+        <PromoBanner slides={promoBanners} />
 
         {/* Categorias populares */}
         <section className="py-12 bg-white">

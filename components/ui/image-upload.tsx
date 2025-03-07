@@ -50,6 +50,9 @@ export function ImageUpload({
         options={{
           maxFiles: 5,
           sources: ["local"],
+          clientAllowedFormats: ["jpg", "jpeg", "png", "webp"],
+          maxFileSize: 10000000, // 10MB
+          cropping: false,
           styles: {
             palette: {
               window: "#FFFFFF",
@@ -70,7 +73,11 @@ export function ImageUpload({
         }}
         onSuccess={(result: any) => {
           if (result?.info?.secure_url) {
-            onChange(result.info.secure_url);
+            const url = result.info.secure_url.replace(
+              "/upload/",
+              "/upload/q_auto,f_auto,c_limit,w_1920/"
+            );
+            onChange(url);
           }
         }}
         onError={(error) => {

@@ -9,6 +9,7 @@ import {
   Settings,
   Menu,
   ListTree,
+  Images,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -43,6 +44,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       href: "/admin/categorias",
       icon: ListTree,
       current: pathname.startsWith("/admin/categorias"),
+    },
+    {
+      name: "Banners",
+      href: "/admin/banners",
+      icon: Images,
+      current: pathname.startsWith("/admin/banners"),
     },
     {
       name: "Configurações",
