@@ -192,3 +192,26 @@ export async function getCategoryBySlug(slug: string) {
     return null;
   }
 }
+
+export async function getNewReleases() {
+  try {
+    console.log("Iniciando busca de lançamentos...");
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("is_new_release", true)
+      .limit(6)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Erro ao buscar lançamentos:", error);
+      throw error;
+    }
+
+    console.log("Lançamentos encontrados:", data);
+    return data as Product[];
+  } catch (error) {
+    console.error("Erro ao buscar lançamentos:", error);
+    return [];
+  }
+}

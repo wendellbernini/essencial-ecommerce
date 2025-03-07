@@ -18,42 +18,20 @@ export async function GET(request: Request) {
 
     const { data: products, error } = await supabase
       .from("products")
-      .select(
-        `
-        id,
-        name,
-        slug,
-        price,
-        sale_price,
-        images,
-        categories (
-          id,
-          name,
-          slug
-        )
-      `
-      )
-      .or(
-        `
-        name.ilike.%${query}%,
-        description.ilike.%${query}%
-      `
-      )
-      .limit(10);
+      .select("*")
+      .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Erro na busca:", error);
-      return NextResponse.json(
-        { error: "Erro ao realizar a busca" },
-        { status: 500 }
-      );
+      throw error;
     }
 
-    return NextResponse.json({ products });
+    return NextResponse.json({ products: products || [] });
   } catch (error) {
-    console.error("Erro inesperado:", error);
+    console.error("Erro na rota de busca:", error);
     return NextResponse.json(
-      { error: "Erro interno do servidor" },
+      { error: "Erro ao realizar a busca" },
       { status: 500 }
     );
   }

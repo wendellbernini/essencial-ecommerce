@@ -14,7 +14,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCard } from "@/components/product-card";
-import { getFeaturedProducts, getCategories } from "@/lib/supabase";
+import {
+  getFeaturedProducts,
+  getCategories,
+  getNewReleases,
+} from "@/lib/supabase";
 
 // Força a página a ser renderizada dinamicamente
 export const dynamic = "force-dynamic";
@@ -23,13 +27,15 @@ export const revalidate = 0;
 export default async function Home() {
   console.log("Renderizando página inicial...");
 
-  // Buscar produtos em destaque e categorias do Supabase
+  // Buscar produtos em destaque, lançamentos e categorias do Supabase
   const featuredProducts = await getFeaturedProducts();
   const categories = await getCategories();
+  const newReleases = await getNewReleases();
 
   console.log("Dados obtidos:", {
     featuredProductsCount: featuredProducts.length,
     categoriesCount: categories.length,
+    newReleasesCount: newReleases.length,
   });
 
   return (
@@ -143,6 +149,27 @@ export default async function Home() {
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
               {featuredProducts.slice(0, 10).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Lançamentos */}
+        <section className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">Lançamentos</h2>
+              <Button
+                variant="link"
+                className="text-orange-500 hover:text-orange-600"
+              >
+                Ver todos
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
+              {newReleases.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
