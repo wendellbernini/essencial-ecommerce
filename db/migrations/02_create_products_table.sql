@@ -4,6 +4,9 @@ ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 -- Adiciona coluna is_new_release
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_new_release BOOLEAN DEFAULT false;
 
+-- Adiciona coluna is_best_seller
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_best_seller BOOLEAN DEFAULT false;
+
 -- Remove políticas existentes
 DROP POLICY IF EXISTS "Admins têm acesso total" ON public.products;
 DROP POLICY IF EXISTS "Usuários podem ver produtos" ON public.products;

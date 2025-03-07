@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Category } from "@/lib/supabase";
+import { Category, Product } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,12 +15,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ImageUpload } from "@/components/ui/image-upload";
 
-export default function NewProductPage() {
+interface EditProductPageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function EditProductPage({ params }: EditProductPageProps) {
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createClientComponentClient();
@@ -41,6 +46,7 @@ export default function NewProductPage() {
 
   useEffect(() => {
     loadCategories();
+    loadProduct();
   }, []);
 
   async function loadCategories() {
@@ -49,6 +55,41 @@ export default function NewProductPage() {
       .select("*")
       .order("name");
     if (data) setCategories(data);
+  }
+
+  async function loadProduct() {
+    try {
+      const { data: product, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", params.id)
+        .single();
+
+      if (error) throw error;
+
+      if (product) {
+        setFormData({
+          name: product.name,
+          description: product.description || "",
+          price: product.sale_price?.toString() || "",
+          original_price: product.price.toString(),
+          category_id: product.category_id.toString(),
+          stock_quantity: product.stock_quantity.toString(),
+          featured: product.featured,
+          is_new_release: product.is_new_release,
+          is_best_seller: product.is_best_seller,
+          images: product.images,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao carregar produto:", error);
+      toast({
+        title: "Erro ao carregar produto",
+        description: "Não foi possível carregar os dados do produto.",
+        variant: "destructive",
+      });
+      router.push("/admin/produtos");
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -96,27 +137,29 @@ export default function NewProductPage() {
         is_new_release: formData.is_new_release,
         is_best_seller: formData.is_best_seller,
         images: formData.images,
-        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase.from("products").insert([productData]);
+      const { error } = await supabase
+        .from("products")
+        .update(productData)
+        .eq("id", params.id);
 
       if (error) {
-        console.error("Erro ao criar produto:", error);
+        console.error("Erro ao atualizar produto:", error);
         throw new Error(error.message);
       }
 
       toast({
-        title: "Produto criado com sucesso!",
-        description: "O produto foi adicionado ao catálogo.",
+        title: "Produto atualizado com sucesso!",
+        description: "As alterações foram salvas.",
       });
 
       router.push("/admin/produtos");
     } catch (error) {
-      console.error("Erro ao criar produto:", error);
+      console.error("Erro ao atualizar produto:", error);
       toast({
-        title: "Erro ao criar produto",
+        title: "Erro ao atualizar produto",
         description:
           error instanceof Error ? error.message : "Erro desconhecido",
         variant: "destructive",
@@ -129,9 +172,9 @@ export default function NewProductPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Novo Produto</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Editar Produto</h2>
         <p className="text-muted-foreground">
-          Adicione um novo produto ao catálogo.
+          Atualize as informações do produto.
         </p>
       </div>
 
@@ -293,7 +336,7 @@ export default function NewProductPage() {
 
         <div className="flex gap-4">
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Criando..." : "Criar Produto"}
+            {isLoading ? "Salvando..." : "Salvar Alterações"}
           </Button>
           <Button type="button" variant="outline" onClick={() => router.back()}>
             Cancelar

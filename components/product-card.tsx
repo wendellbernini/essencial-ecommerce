@@ -47,7 +47,7 @@ export function ProductCard({ product }: ProductCardProps) {
           >
             <Heart className="h-4 w-4" />
           </Button>
-          {product.featured && (
+          {product.is_best_seller && (
             <Badge className="absolute bottom-2 left-2 bg-orange-500 text-white hover:bg-orange-600 text-[10px] py-0.5 px-1.5 font-medium rounded">
               Mais vendido
             </Badge>
