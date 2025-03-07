@@ -46,26 +46,50 @@ export function ImageUpload({
         ))}
       </div>
       <CldUploadWidget
-        onUpload={(result) => {
-          console.log("Upload result:", result);
-          onChange(result.info.secure_url);
-        }}
         uploadPreset="essencial_products"
         options={{
-          maxFiles: 1,
+          maxFiles: 5,
+          sources: ["local"],
+          styles: {
+            palette: {
+              window: "#FFFFFF",
+              windowBorder: "#90A0B3",
+              tabIcon: "#111827",
+              menuIcons: "#111827",
+              textDark: "#111827",
+              textLight: "#FFFFFF",
+              link: "#111827",
+              action: "#111827",
+              inactiveTabIcon: "#6B7280",
+              error: "#F44235",
+              inProgress: "#0078FF",
+              complete: "#20B832",
+              sourceBg: "#F8F9FA",
+            },
+          },
+        }}
+        onSuccess={(result: any) => {
+          if (result?.info?.secure_url) {
+            onChange(result.info.secure_url);
+          }
+        }}
+        onError={(error) => {
+          console.error("Erro no upload:", error);
         }}
       >
-        {({ open }) => (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={open}
-            disabled={disabled}
-          >
-            <ImagePlus className="h-4 w-4 mr-2" />
-            Fazer upload de imagem
-          </Button>
-        )}
+        {({ open }) => {
+          return (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => open()}
+              disabled={disabled}
+            >
+              <ImagePlus className="h-4 w-4 mr-2" />
+              Fazer upload de imagem
+            </Button>
+          );
+        }}
       </CldUploadWidget>
     </div>
   );

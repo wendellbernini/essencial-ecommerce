@@ -10,8 +10,6 @@ import { ProductsFilter } from "@/components/admin/products/products-filter";
 import { Product } from "@/lib/supabase";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
-export const dynamic = "force-dynamic";
-
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -41,7 +39,27 @@ export default function ProductsPage() {
 
   useEffect(() => {
     loadProducts();
-  }, [loadProducts]);
+
+    // Inscreve-se para atualizações em tempo real
+    const channel = supabase
+      .channel("products_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "products",
+        },
+        () => {
+          loadProducts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadProducts, supabase]);
 
   const handleFilterChange = useCallback(
     ({
@@ -94,6 +112,10 @@ export default function ProductsPage() {
     [products]
   );
 
+  const handleProductDeleted = useCallback(() => {
+    loadProducts();
+  }, [loadProducts]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -116,7 +138,10 @@ export default function ProductsPage() {
         {isLoading ? (
           <div className="text-center py-4">Carregando produtos...</div>
         ) : (
-          <ProductsTable data={filteredProducts} />
+          <ProductsTable
+            data={filteredProducts}
+            onDelete={handleProductDeleted}
+          />
         )}
       </div>
     </div>

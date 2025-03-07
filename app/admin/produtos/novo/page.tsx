@@ -30,6 +30,7 @@ export default function NewProductPage() {
     name: "",
     description: "",
     price: "",
+    original_price: "",
     category_id: "",
     stock_quantity: "",
     featured: false,
@@ -51,13 +52,13 @@ export default function NewProductPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsLoading(true);
 
     try {
       // Validação dos campos obrigatórios
       const requiredFields = {
         name: "Nome do produto",
-        price: "Preço",
         category_id: "Categoria",
       };
 
@@ -65,6 +66,13 @@ export default function NewProductPage() {
         if (!formData[field as keyof typeof formData]) {
           throw new Error(`O campo "${label}" é obrigatório`);
         }
+      }
+
+      // Validação específica para preços
+      if (!formData.original_price && !formData.price) {
+        throw new Error(
+          "É necessário informar pelo menos um preço (original ou com desconto)"
+        );
       }
 
       if (formData.images.length === 0) {
@@ -79,8 +87,8 @@ export default function NewProductPage() {
           .replace(/[^\w\s-]/g, "")
           .replace(/\s+/g, "-"),
         description: formData.description?.trim() || "",
-        price: Number(formData.price),
-        sale_price: null,
+        price: Number(formData.original_price || formData.price),
+        sale_price: formData.price ? Number(formData.price) : null,
         stock_quantity: Number(formData.stock_quantity) || 0,
         category_id: Number(formData.category_id),
         featured: formData.featured,
@@ -179,7 +187,22 @@ export default function NewProductPage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="price">Preço</Label>
+              <Label htmlFor="original_price">Preço Original</Label>
+              <Input
+                id="original_price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.original_price}
+                onChange={(e) =>
+                  setFormData({ ...formData, original_price: e.target.value })
+                }
+                placeholder="0,00"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price">Preço com Desconto</Label>
               <Input
                 id="price"
                 type="number"
@@ -192,7 +215,9 @@ export default function NewProductPage() {
                 placeholder="0,00"
               />
             </div>
+          </div>
 
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="stock">Quantidade em Estoque</Label>
               <Input
@@ -210,19 +235,24 @@ export default function NewProductPage() {
 
           <div className="space-y-2">
             <Label>Imagens do Produto</Label>
-            <ImageUpload
-              value={formData.images}
-              disabled={isLoading}
-              onChange={(url) =>
-                setFormData({ ...formData, images: [...formData.images, url] })
-              }
-              onRemove={(url) =>
-                setFormData({
-                  ...formData,
-                  images: formData.images.filter((image) => image !== url),
-                })
-              }
-            />
+            <div>
+              <ImageUpload
+                value={formData.images}
+                disabled={isLoading}
+                onChange={(url) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    images: [...prev.images, url],
+                  }));
+                }}
+                onRemove={(url) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    images: prev.images.filter((image) => image !== url),
+                  }));
+                }}
+              />
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
