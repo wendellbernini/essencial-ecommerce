@@ -43,14 +43,21 @@ export default function NewBannerPage() {
         }
       }
 
+      // Converte as datas do horário local para UTC antes de salvar
+      const convertToUTC = (localDate: string) => {
+        if (!localDate) return null;
+        const date = new Date(localDate);
+        return date.toISOString();
+      };
+
       const bannerData = {
         link: formData.link || null,
         image_url: formData.image_url,
         start_date: formData.has_countdown
-          ? new Date(formData.start_date).toISOString()
+          ? convertToUTC(formData.start_date)
           : null,
         end_date: formData.has_countdown
-          ? new Date(formData.end_date).toISOString()
+          ? convertToUTC(formData.end_date)
           : null,
         is_active: formData.is_active,
         has_countdown: formData.has_countdown,

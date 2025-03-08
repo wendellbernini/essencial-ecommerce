@@ -44,11 +44,24 @@ export default function EditBannerPage({ params }: PageProps) {
         if (error) throw error;
 
         if (data) {
+          const formatLocalDateTime = (utcDate: string) => {
+            if (!utcDate) return "";
+            const date = new Date(utcDate);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            const hours = String(date.getHours()).padStart(2, "0");
+            const minutes = String(date.getMinutes()).padStart(2, "0");
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+          };
+
           setFormData({
             link: data.link || "",
             image_url: data.image_url,
-            start_date: data.start_date?.slice(0, 16) || "",
-            end_date: data.end_date?.slice(0, 16) || "",
+            start_date: data.start_date
+              ? formatLocalDateTime(data.start_date)
+              : "",
+            end_date: data.end_date ? formatLocalDateTime(data.end_date) : "",
             is_active: data.is_active,
             has_countdown: data.has_countdown,
             order_index: data.order_index.toString(),
@@ -84,14 +97,21 @@ export default function EditBannerPage({ params }: PageProps) {
         }
       }
 
+      // Converte as datas do horário local para UTC antes de salvar
+      const convertToUTC = (localDate: string) => {
+        if (!localDate) return null;
+        const date = new Date(localDate);
+        return date.toISOString();
+      };
+
       const bannerData = {
         link: formData.link,
         image_url: formData.image_url,
         start_date: formData.has_countdown
-          ? new Date(formData.start_date).toISOString()
+          ? convertToUTC(formData.start_date)
           : null,
         end_date: formData.has_countdown
-          ? new Date(formData.end_date).toISOString()
+          ? convertToUTC(formData.end_date)
           : null,
         is_active: formData.is_active,
         has_countdown: formData.has_countdown,

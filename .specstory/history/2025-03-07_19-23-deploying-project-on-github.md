@@ -2694,6 +2694,151 @@ Apenas execute o deploy no GitHub. Os arquivos essenciais, como .gitignore, já 
 
 ---
 
+_**Assistant**_
+
+Vou executar o processo de deploy no GitHub. Primeiro, vou verificar o status do repositório Git.
+
+---
+
+_****_
+
+```bash
+git status
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   .specstory/history/2025-03-07_19-23-deploying-project-on-github.md
+        modified:   app/admin/banners/[id]/editar/page.tsx
+        modified:   app/admin/banners/novo/page.tsx
+        modified:   app/admin/banners/page.tsx
+        modified:   components/promo-banner.tsx
+
+no changes added to commit (use "git add" and/or "git commit -a")
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Ótimo, vejo que temos algumas modificações para commitar. Vou adicionar todas as alterações e criar um commit com uma mensagem descritiva.
+
+---
+
+_****_
+
+```bash
+git add .
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ 
+
+```
+
+---
+
+_****_
+
+```bash
+git commit -m "fix: ajusta exibição do contador nos banners promocionais para mostrar horas totais sem converter para dias"
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git commit -m "fix: ajusta exib
+ição do contador nos banners promocionais para mostrar horas totais sem converter para d
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git commit -m "fix: ajusta exib
+ição do contador nos banners promocionais para mostrar horas totais sem converter para d
+ias"
+[main d0a1472] fix: ajusta exibição do contador nos banners promocionais para mostrar ho
+ras totais sem converter para dias
+ 5 files changed, 1149 insertions(+), 30 deletions(-)
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Agora vou enviar as alterações para o GitHub:
+
+---
+
+_****_
+
+```bash
+git push
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git push
+Enumerating objects: 31, done.
+Counting objects: 100% (31/31), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (13/13), done.
+Writing objects: 100% (16/16), 9.88 KiB | 1.98 MiB/s, done.
+Total 16 (delta 9), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (9/9), completed with 9 local objects.
+To github.com:wendellbernini/essencial-ecommerce.git
+   066550e..d0a1472  main -> main
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Pronto! O deploy foi realizado com sucesso. Aqui está um resumo do que foi feito:
+
+1. Verificamos o status do Git e identificamos as alterações pendentes
+2. Adicionamos todas as alterações ao staging com `git add .`
+3. Criamos um commit com uma mensagem descritiva explicando as mudanças
+4. Enviamos as alterações para o GitHub com `git push`
+
+O push foi bem-sucedido e todas as alterações foram enviadas para o repositório remoto. Se você tiver a integração com a Vercel configurada, um novo deploy deve começar automaticamente.
+
+As alterações incluíram:
+- Ajustes no componente de banner promocional
+- Correções nas páginas de administração de banners
+- Atualização da documentação
+
+Há mais alguma coisa que você gostaria que eu fizesse?
+
+---
+
+_**User**_
+
+Otimo, tem um comportamento chato tb que eu quero corrigir que quando eu vou editar o banner a hora que ele mostra nao e a mesma que tava ex: inicio 5:18 termino 5:30 ai eu abro para editar ele aparece no calendario com a hora inicio 8:18 e final 8:30, entende?
+
+---
+
+_**Assistant**_
+
+Sim, entendo perfeitamente! O problema está acontecendo porque o input `datetime-local` está mostrando a hora em UTC (que está 3 horas à frente do horário de Brasília), enquanto na listagem estamos convertendo para o horário local.
+
+Vou ajustar o código para que, ao carregar os dados no formulário de edição, as datas sejam convertidas de UTC para o horário local:
+
+---
+
+_****_
+
+
+
+---
+
+_****_
+
+
+
+---
+
 
 
 ---
