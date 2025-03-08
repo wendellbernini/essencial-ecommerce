@@ -20,7 +20,9 @@ import {
   getCategories,
   getNewReleases,
   getActivePromoBanners,
+  getPromotionalProducts,
 } from "@/lib/supabase";
+import { PromotionalProducts } from "@/components/promotional-products";
 
 // Força a página a ser renderizada dinamicamente
 export const dynamic = "force-dynamic";
@@ -34,12 +36,14 @@ export default async function Home() {
   const categories = await getCategories();
   const newReleases = await getNewReleases();
   const promoBanners = await getActivePromoBanners();
+  const promotionalProducts = await getPromotionalProducts();
 
   console.log("Dados obtidos:", {
     featuredProductsCount: featuredProducts.length,
     categoriesCount: categories.length,
     newReleasesCount: newReleases.length,
     promoBannersCount: promoBanners.length,
+    promotionalProductsCount: promotionalProducts.length,
   });
 
   return (
@@ -82,8 +86,26 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Produtos em destaque */}
+        {/* Seção de Promoções */}
         <section className="py-12 bg-gray-50">
+          <div className="container relative mx-auto">
+            <div className="flex items-center justify-between mb-8 px-4">
+              <h2 className="text-2xl font-bold text-gray-900">Promoções</h2>
+              <Button
+                variant="link"
+                className="text-orange-500 hover:text-orange-600"
+              >
+                Ver todas
+              </Button>
+            </div>
+            <div className="px-8">
+              <PromotionalProducts products={promotionalProducts} />
+            </div>
+          </div>
+        </section>
+
+        {/* Produtos em destaque */}
+        <section className="py-12 bg-white">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900">
@@ -131,7 +153,7 @@ export default async function Home() {
         </section>
 
         {/* Lançamentos */}
-        <section className="py-12 bg-white">
+        <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900">Lançamentos</h2>

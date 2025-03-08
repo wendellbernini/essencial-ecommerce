@@ -248,3 +248,42 @@ export async function getActivePromoBanners() {
     return [];
   }
 }
+
+export async function getPromotionalProducts() {
+  try {
+    console.log("=== BUSCANDO PRODUTOS PROMOCIONAIS ===");
+
+    // Buscar todos os produtos e filtrar no código
+    const { data: allProducts, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Erro ao buscar produtos:", error);
+      throw error;
+    }
+
+    // Filtrar produtos em promoção
+    const promotionalProducts = allProducts?.filter((product) => {
+      const hasDiscount =
+        product.sale_price !== null && product.sale_price < product.price;
+      if (hasDiscount) {
+        console.log(
+          `Produto em promoção encontrado: ${product.name} (${product.price} -> ${product.sale_price})`
+        );
+      }
+      return hasDiscount;
+    });
+
+    console.log(
+      `Total de produtos em promoção: ${promotionalProducts?.length || 0}`
+    );
+    console.log("=====================================");
+
+    return promotionalProducts || [];
+  } catch (error) {
+    console.error("Erro ao buscar produtos em promoção:", error);
+    return [];
+  }
+}
