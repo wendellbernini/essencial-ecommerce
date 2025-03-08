@@ -48,7 +48,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      <main>
+      <main className="pt-2">
         {/* Banner Promocional */}
         <PromoBanner slides={promoBanners} />
 

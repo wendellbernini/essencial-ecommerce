@@ -1,0 +1,6 @@
+---
+description: Deploy
+globs: 
+alwaysApply: false
+---
+Apenas execute o deploy no GitHub. Os arquivos essenciais, como .gitignore, já estão configurados, e o repositório Git já foi inicializado.
