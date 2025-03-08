@@ -106,9 +106,9 @@ export function Header() {
             <Image
               src="/images/logo.png"
               alt="Essencial"
-              width={200}
-              height={50}
-              className="h-[50px] w-auto object-contain"
+              width={220}
+              height={55}
+              className="h-[55px] w-auto object-contain"
               priority
             />
           </Link>
