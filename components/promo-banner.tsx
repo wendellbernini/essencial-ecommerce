@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PromoBanner as PromoBannerType } from "@/lib/types";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 interface TimeLeft {
   hours: number;
@@ -37,6 +38,8 @@ interface PromoBannerProps {
 export function PromoBanner({ slides = [] }: PromoBannerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [timeLeft, setTimeLeft] = useState<{ [key: number]: TimeLeft }>({});
+  const [activeSlides, setActiveSlides] = useState<PromoBanner[]>(slides);
+  const supabase = createClientComponentClient();
 
   // Função para calcular o tempo restante
   const calculateTimeLeft = useCallback((endDate: string) => {
@@ -55,22 +58,64 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
     return null;
   }, []);
 
+  // Função para desativar um banner no Supabase
+  const deactivateBanner = useCallback(async (bannerId: number) => {
+    try {
+      console.log(`Desativando banner ${bannerId} no Supabase...`);
+      const { error } = await supabase
+        .from("promo_banners")
+        .update({ is_active: false })
+        .eq("id", bannerId);
+
+      if (error) {
+        console.error(`Erro ao desativar banner ${bannerId}:`, error);
+      } else {
+        console.log(`Banner ${bannerId} desativado com sucesso.`);
+      }
+    } catch (error) {
+      console.error(`Erro ao desativar banner ${bannerId}:`, error);
+    }
+  }, [supabase]);
+
+  // Inicializa os slides ativos
+  useEffect(() => {
+    setActiveSlides(slides);
+  }, [slides]);
+
   // Atualiza todos os contadores a cada segundo
   useEffect(() => {
     // Função para atualizar todos os contadores
     const updateAllCountdowns = () => {
       const newTimeLeft: { [key: number]: TimeLeft } = {};
+      const newActiveSlides = [...activeSlides];
+      let slidesChanged = false;
 
-      slides.forEach((banner, index) => {
+      activeSlides.forEach((banner, index) => {
         if (banner.has_countdown && banner.end_date) {
           const timeRemaining = calculateTimeLeft(banner.end_date);
           if (timeRemaining) {
             newTimeLeft[index] = timeRemaining;
+          } else {
+            // O contador expirou, remover o banner da exibição
+            console.log(`Contador do banner ${banner.id} expirou, removendo da exibição...`);
+            newActiveSlides.splice(index, 1);
+            slidesChanged = true;
+            
+            // Desativar o banner no Supabase
+            deactivateBanner(banner.id);
           }
         }
       });
 
       setTimeLeft(newTimeLeft);
+      
+      if (slidesChanged) {
+        setActiveSlides(newActiveSlides);
+        // Ajustar o slide atual se necessário
+        if (currentSlide >= newActiveSlides.length) {
+          setCurrentSlide(0);
+        }
+      }
     };
 
     // Atualiza imediatamente e depois a cada segundo
@@ -78,35 +123,35 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
     const interval = setInterval(updateAllCountdowns, 1000);
 
     return () => clearInterval(interval);
-  }, [slides, calculateTimeLeft]);
+  }, [activeSlides, calculateTimeLeft, currentSlide, deactivateBanner]);
 
   // Avança para o próximo slide automaticamente
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (activeSlides.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [slides.length]);
+  }, [activeSlides.length]);
 
   // Se não houver slides, não renderiza nada
-  if (!slides || slides.length === 0) {
+  if (!activeSlides || activeSlides.length === 0) {
     return null;
   }
 
-  const currentBanner = slides[currentSlide];
-  console.log("Slides totais:", slides.length);
+  const currentBanner = activeSlides[currentSlide];
+  console.log("Slides ativos totais:", activeSlides.length);
   console.log("Slide atual:", currentSlide);
   console.log("Banner atual:", currentBanner);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    setCurrentSlide((prev) => (prev - 1 + activeSlides.length) % activeSlides.length);
   };
 
   const formatPrice = (price: number) => {
@@ -117,7 +162,12 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
   };
 
   // Função para formatar número com zero à esquerda
-  const padNumber = (num: number): string => {
+  const padNumber = (num: number, isHour: boolean = false): string => {
+    // Para horas com 3 dígitos ou mais, não precisamos adicionar zeros à esquerda
+    if (isHour && num >= 100) {
+      return num.toString();
+    }
+    // Para horas com 1 ou 2 dígitos, ou para minutos e segundos, adicionamos zeros à esquerda para garantir 2 dígitos
     return num.toString().padStart(2, "0");
   };
 
@@ -126,7 +176,7 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
       <div className="container mx-auto px-0">
         <div className="relative bg-white rounded-lg overflow-hidden">
           {/* Navegação */}
-          {slides.length > 1 && (
+          {activeSlides.length > 1 && (
             <>
               <Button
                 variant="ghost"
@@ -162,44 +212,70 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
 
               {/* Contador regressivo */}
               {currentBanner.has_countdown && timeLeft[currentSlide] && (
-                <div className="absolute right-[5%] top-1/2 -translate-y-1/2 flex items-center gap-4">
-                  <div className="relative bg-white rounded-lg w-[120px] h-[120px] shadow-lg">
-                    <div className="absolute inset-x-0 top-0 h-1/2 bg-gray-200 rounded-t-lg" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-[72px] font-bold text-gray-900 leading-none">
-                        {padNumber(timeLeft[currentSlide].hours)}
-                      </span>
-                      <span className="text-[20px] text-gray-900 mt-1">
-                        {timeLeft[currentSlide].hours === 1 ? "Hora" : "Horas"}
-                      </span>
+                <div className="absolute right-[5%] top-1/2 -translate-y-1/2 flex items-center gap-1 md:gap-3">
+                  {/* Container principal com fundo branco semi-transparente */}
+                  <div className="bg-white/80 backdrop-blur-sm rounded-xl p-2 md:p-3 flex items-center gap-1 md:gap-3 shadow-lg">
+                    {/* Horas */}
+                    <div className={`relative bg-white rounded-lg shadow-md ${
+                      timeLeft[currentSlide].hours > 99 
+                        ? 'w-[85px] md:w-[130px]' 
+                        : 'w-[70px] md:w-[120px]'
+                    } h-[70px] md:h-[110px]`}>
+                      <div className="absolute inset-x-0 top-0 h-1/2 bg-gray-100 rounded-t-lg" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className={`font-bold text-gray-900 leading-none ${
+                          timeLeft[currentSlide].hours > 99 
+                            ? 'text-[30px] md:text-[52px]' 
+                            : 'text-[36px] md:text-[64px]'
+                        }`}>
+                          {padNumber(timeLeft[currentSlide].hours, true)}
+                        </span>
+                        <span className="text-[12px] md:text-[16px] text-gray-700 mt-0 md:mt-1">
+                          {timeLeft[currentSlide].hours === 1 ? "Hora" : "Horas"}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-4xl font-bold text-white">:</span>
-                  <div className="relative bg-white rounded-lg w-[120px] h-[120px] shadow-lg">
-                    <div className="absolute inset-x-0 top-0 h-1/2 bg-gray-200 rounded-t-lg" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-[72px] font-bold text-gray-900 leading-none">
-                        {padNumber(timeLeft[currentSlide].minutes)}
-                      </span>
-                      <span className="text-[20px] text-gray-900 mt-1">
-                        {timeLeft[currentSlide].minutes === 1
-                          ? "Minuto"
-                          : "Minutos"}
-                      </span>
+                    
+                    <span className="text-2xl md:text-4xl font-bold text-gray-800">:</span>
+                    
+                    {/* Minutos */}
+                    <div className="relative bg-white rounded-lg w-[70px] md:w-[120px] h-[70px] md:h-[110px] shadow-md">
+                      <div className="absolute inset-x-0 top-0 h-1/2 bg-gray-100 rounded-t-lg" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className={`font-bold text-gray-900 leading-none ${
+                          timeLeft[currentSlide].hours > 99 
+                            ? 'text-[30px] md:text-[52px]' 
+                            : 'text-[36px] md:text-[64px]'
+                        }`}>
+                          {padNumber(timeLeft[currentSlide].minutes)}
+                        </span>
+                        <span className="text-[12px] md:text-[16px] text-gray-700 mt-0 md:mt-1">
+                          {timeLeft[currentSlide].minutes === 1
+                            ? "Minuto"
+                            : "Minutos"}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-4xl font-bold text-white">:</span>
-                  <div className="relative bg-white rounded-lg w-[120px] h-[120px] shadow-lg">
-                    <div className="absolute inset-x-0 top-0 h-1/2 bg-gray-200 rounded-t-lg" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-[72px] font-bold text-gray-900 leading-none">
-                        {padNumber(timeLeft[currentSlide].seconds)}
-                      </span>
-                      <span className="text-[20px] text-gray-900 mt-1">
-                        {timeLeft[currentSlide].seconds === 1
-                          ? "Segundo"
-                          : "Segundos"}
-                      </span>
+                    
+                    <span className="text-2xl md:text-4xl font-bold text-gray-800">:</span>
+                    
+                    {/* Segundos */}
+                    <div className="relative bg-white rounded-lg w-[70px] md:w-[120px] h-[70px] md:h-[110px] shadow-md">
+                      <div className="absolute inset-x-0 top-0 h-1/2 bg-gray-100 rounded-t-lg" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className={`font-bold text-gray-900 leading-none ${
+                          timeLeft[currentSlide].hours > 99 
+                            ? 'text-[30px] md:text-[52px]' 
+                            : 'text-[36px] md:text-[64px]'
+                        }`}>
+                          {padNumber(timeLeft[currentSlide].seconds)}
+                        </span>
+                        <span className="text-[12px] md:text-[16px] text-gray-700 mt-0 md:mt-1">
+                          {timeLeft[currentSlide].seconds === 1
+                            ? "Segundo"
+                            : "Segundos"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -208,9 +284,9 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
           </Link>
 
           {/* Indicadores */}
-          {slides.length > 1 && (
+          {activeSlides.length > 1 && (
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-              {slides.map((_, index) => (
+              {activeSlides.map((_, index) => (
                 <button
                   key={index}
                   className={`w-1 h-1 rounded-full transition-all ${

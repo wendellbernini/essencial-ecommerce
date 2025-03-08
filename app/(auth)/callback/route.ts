@@ -31,4 +31,4 @@ export async function GET(request: Request) {
       new URL("/login?error=auth_callback_failed", request.url)
     );
   }
-}
+} 

@@ -21,10 +21,10 @@ export function AuthForm() {
       hostname: window.location.hostname,
       isLocalhost,
       baseUrl,
-      redirectUrl: `${baseUrl}/auth/callback`,
+      redirectUrl: `${baseUrl}/callback`,
     });
 
-    setRedirectUrl(`${baseUrl}/auth/callback`);
+    setRedirectUrl(`${baseUrl}/callback`);
   }, []);
 
   return (

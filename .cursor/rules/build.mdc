@@ -1,0 +1,6 @@
+---
+description: Maneira  para se executar o npm run build de maneira segura
+globs: 
+alwaysApply: false
+---
+Execute npm run build e continue trabalhando até corrigir todos os possíveis erros que possam impedir a conclusão bem-sucedida do build. Se forem necessárias alterações, analise o contexto com cuidado, evitando conclusões precipitadas. Priorize soluções enxutas, mantendo o código o mais conciso possível. @Next.js 15 Caso ajude, navegue pela documentação oficial do Next.js para encontrar uma solução para os erros no build ou lint.

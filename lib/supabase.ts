@@ -221,19 +221,38 @@ export async function getActivePromoBanners() {
     console.log("Iniciando busca de banners promocionais ativos...");
     const now = new Date().toISOString();
 
-    // Primeiro, vamos buscar todos os banners ativos para debug
-    const { data: allBanners, error: allError } = await supabase
+    // Primeiro, vamos verificar se há banners com contador expirado e atualizá-los
+    const { data: expiredBanners, error: expiredError } = await supabase
       .from("promo_banners")
       .select("*")
-      .eq("is_active", true);
+      .eq("is_active", true)
+      .lt("end_date", now)
+      .eq("has_countdown", true);
 
-    console.log("Todos os banners ativos:", allBanners);
+    if (expiredBanners && expiredBanners.length > 0) {
+      console.log(`Encontrados ${expiredBanners.length} banners expirados para desativar:`, expiredBanners);
+      
+      // Desativar banners expirados
+      for (const banner of expiredBanners) {
+        const { error: updateError } = await supabase
+          .from("promo_banners")
+          .update({ is_active: false })
+          .eq("id", banner.id);
+          
+        if (updateError) {
+          console.error(`Erro ao desativar banner ${banner.id}:`, updateError);
+        } else {
+          console.log(`Banner ${banner.id} desativado com sucesso.`);
+        }
+      }
+    }
 
-    // Agora fazemos a busca com os filtros
+    // Agora buscamos apenas os banners ativos e não expirados
     const { data, error } = await supabase
       .from("promo_banners")
       .select("*")
       .eq("is_active", true)
+      .or(`end_date.gt.${now},end_date.is.null`) // Banners sem data de término ou com data futura
       .order("order_index", { ascending: true });
 
     if (error) {
@@ -241,7 +260,7 @@ export async function getActivePromoBanners() {
       return [];
     }
 
-    console.log("Banners encontrados após filtros:", data);
+    console.log("Banners ativos encontrados:", data);
     return data || [];
   } catch (error) {
     console.error("Erro ao buscar banners:", error);
