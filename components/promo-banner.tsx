@@ -45,10 +45,9 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
     const distance = end - now;
 
     if (distance > 0) {
+      const totalHours = Math.floor(distance / (1000 * 60 * 60));
       return {
-        hours: Math.floor(
-          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        ),
+        hours: totalHours,
         minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
         seconds: Math.floor((distance % (1000 * 60)) / 1000),
       };
@@ -171,7 +170,7 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
                         {padNumber(timeLeft[currentSlide].hours)}
                       </span>
                       <span className="text-[20px] text-gray-900 mt-1">
-                        Horas
+                        {timeLeft[currentSlide].hours === 1 ? "Hora" : "Horas"}
                       </span>
                     </div>
                   </div>
@@ -183,7 +182,9 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
                         {padNumber(timeLeft[currentSlide].minutes)}
                       </span>
                       <span className="text-[20px] text-gray-900 mt-1">
-                        Minutos
+                        {timeLeft[currentSlide].minutes === 1
+                          ? "Minuto"
+                          : "Minutos"}
                       </span>
                     </div>
                   </div>
@@ -195,7 +196,9 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
                         {padNumber(timeLeft[currentSlide].seconds)}
                       </span>
                       <span className="text-[20px] text-gray-900 mt-1">
-                        Segundos
+                        {timeLeft[currentSlide].seconds === 1
+                          ? "Segundo"
+                          : "Segundos"}
                       </span>
                     </div>
                   </div>

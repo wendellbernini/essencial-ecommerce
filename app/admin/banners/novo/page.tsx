@@ -31,12 +31,10 @@ export default function NewBannerPage() {
     setIsLoading(true);
 
     try {
-      // Validação dos campos obrigatórios
       if (!formData.image_url) {
         throw new Error("A imagem do banner é obrigatória");
       }
 
-      // Se tiver contador ativo, valida as datas
       if (formData.has_countdown) {
         if (!formData.start_date || !formData.end_date) {
           throw new Error(
@@ -48,14 +46,12 @@ export default function NewBannerPage() {
       const bannerData = {
         link: formData.link || null,
         image_url: formData.image_url,
-        start_date:
-          formData.has_countdown && formData.start_date
-            ? formData.start_date
-            : null,
-        end_date:
-          formData.has_countdown && formData.end_date
-            ? formData.end_date
-            : null,
+        start_date: formData.has_countdown
+          ? new Date(formData.start_date).toISOString()
+          : null,
+        end_date: formData.has_countdown
+          ? new Date(formData.end_date).toISOString()
+          : null,
         is_active: formData.is_active,
         has_countdown: formData.has_countdown,
         order_index: Number(formData.order_index),

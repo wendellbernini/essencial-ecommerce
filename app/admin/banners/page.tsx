@@ -75,8 +75,11 @@ export default function BannersPage() {
     }
   }
 
-  const formatDate = (date: string) => {
-    return format(new Date(date), "dd/MM/yyyy HH:mm", { locale: ptBR });
+  const formatDate = (date: string | null | undefined) => {
+    if (!date) return "";
+    // Converte a data UTC para o horário local do Brasil
+    const localDate = new Date(date);
+    return format(localDate, "dd/MM/yyyy HH:mm", { locale: ptBR });
   };
 
   const handleDelete = (banner: PromoBanner) => {
@@ -149,16 +152,13 @@ export default function BannersPage() {
                 <div className="relative w-48 h-32 rounded-lg overflow-hidden">
                   <Image
                     src={banner.image_url}
-                    alt={banner.title}
+                    alt="Banner"
                     fill
                     className="object-cover"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-semibold truncate">
-                      {banner.title}
-                    </h3>
                     {banner.is_active ? (
                       <Badge className="bg-green-500">Ativo</Badge>
                     ) : (
@@ -170,9 +170,6 @@ export default function BannersPage() {
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                    {banner.description}
-                  </p>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     {banner.has_countdown && (
                       <>

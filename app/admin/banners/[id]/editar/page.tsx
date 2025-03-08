@@ -47,7 +47,7 @@ export default function EditBannerPage({ params }: PageProps) {
           setFormData({
             link: data.link || "",
             image_url: data.image_url,
-            start_date: data.start_date?.slice(0, 16) || "", // Formato YYYY-MM-DDTHH:mm
+            start_date: data.start_date?.slice(0, 16) || "",
             end_date: data.end_date?.slice(0, 16) || "",
             is_active: data.is_active,
             has_countdown: data.has_countdown,
@@ -72,12 +72,10 @@ export default function EditBannerPage({ params }: PageProps) {
     setIsLoading(true);
 
     try {
-      // Validação dos campos obrigatórios
       if (!formData.image_url) {
         throw new Error("A imagem do banner é obrigatória");
       }
 
-      // Se tiver contador ativo, valida as datas
       if (formData.has_countdown) {
         if (!formData.start_date || !formData.end_date) {
           throw new Error(
@@ -89,8 +87,12 @@ export default function EditBannerPage({ params }: PageProps) {
       const bannerData = {
         link: formData.link,
         image_url: formData.image_url,
-        start_date: formData.has_countdown ? formData.start_date : null,
-        end_date: formData.has_countdown ? formData.end_date : null,
+        start_date: formData.has_countdown
+          ? new Date(formData.start_date).toISOString()
+          : null,
+        end_date: formData.has_countdown
+          ? new Date(formData.end_date).toISOString()
+          : null,
         is_active: formData.is_active,
         has_countdown: formData.has_countdown,
         order_index: Number(formData.order_index),
