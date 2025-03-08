@@ -95,6 +95,59 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Banners Promocionais Estilo Sephora */}
+        <section className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Banner Promocional 1 */}
+              <div className="relative overflow-hidden rounded-lg group">
+                <Link href="/categoria/skincare">
+                  <div className="aspect-[16/9] relative">
+                    <Image
+                      src="https://res.cloudinary.com/dsvcredfs/image/upload/v1741426079/lpv2ftmpzoiqiqmwcjr4.jpg"
+                      alt="Cuidados com a pele"
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
+                      <div className="absolute bottom-6 left-6 right-6 text-white">
+                        <h3 className="text-xl md:text-2xl font-bold mb-2">Cuide da sua pele</h3>
+                        <p className="text-sm md:text-base mb-4">Produtos premium para uma rotina completa</p>
+                        <span className="inline-block bg-white text-black px-4 py-2 rounded-full text-sm font-medium">
+                          Comprar agora
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+              
+              {/* Banner Promocional 2 */}
+              <div className="relative overflow-hidden rounded-lg group">
+                <Link href="/categoria/perfumes">
+                  <div className="aspect-[16/9] relative">
+                    <Image
+                      src="https://res.cloudinary.com/dsvcredfs/image/upload/v1741364650/tum3lfvueih3ucxtr9ji.avif"
+                      alt="Fragrâncias exclusivas"
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
+                      <div className="absolute bottom-6 left-6 right-6 text-white">
+                        <h3 className="text-xl md:text-2xl font-bold mb-2">Fragrâncias exclusivas</h3>
+                        <p className="text-sm md:text-base mb-4">Descubra seu perfume ideal</p>
+                        <span className="inline-block bg-white text-black px-4 py-2 rounded-full text-sm font-medium">
+                          Explorar coleção
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Produtos em destaque */}
         <section className="py-12 bg-white">
           <div className="container mx-auto px-4">
