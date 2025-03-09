@@ -33,3 +33,15 @@ export interface Product {
     slug: string;
   };
 }
+
+export interface SecondaryBanner {
+  id: number;
+  image_url: string;
+  link: string | null;
+  title: string | null;
+  type: "double" | "carousel";
+  order_index: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}

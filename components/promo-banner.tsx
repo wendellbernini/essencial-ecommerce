@@ -122,7 +122,7 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
   };
 
   return (
-    <div className="relative w-full mt-2">
+    <div className="relative w-full mt-6">
       <div className="container mx-auto px-0">
         <div className="relative bg-white rounded-lg overflow-hidden">
           {/* Navegação */}

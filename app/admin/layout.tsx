@@ -49,7 +49,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       name: "Banners",
       href: "/admin/banners",
       icon: Images,
-      current: pathname.startsWith("/admin/banners"),
+      current:
+        pathname.startsWith("/admin/banners") &&
+        !pathname.startsWith("/admin/banners-secundarios"),
+    },
+    {
+      name: "Banners Secundários",
+      href: "/admin/banners-secundarios",
+      icon: Images,
+      current: pathname.startsWith("/admin/banners-secundarios"),
     },
     {
       name: "Configurações",

@@ -21,8 +21,11 @@ import {
   getNewReleases,
   getActivePromoBanners,
   getPromotionalProducts,
+  supabase,
 } from "@/lib/supabase";
 import { PromotionalProducts } from "@/components/promotional-products";
+import { SecondaryBanners } from "@/components/secondary-banners";
+import { SecondaryBanner } from "@/lib/types";
 
 // Força a página a ser renderizada dinamicamente
 export const dynamic = "force-dynamic";
@@ -38,12 +41,31 @@ export default async function Home() {
   const promoBanners = await getActivePromoBanners();
   const promotionalProducts = await getPromotionalProducts();
 
+  // Buscar banners secundários
+  const { data: secondaryBanners } = await supabase
+    .from("secondary_banners")
+    .select("*")
+    .eq("is_active", true)
+    .order("type", { ascending: true })
+    .order("order_index", { ascending: true });
+
+  // Separar os banners por tipo
+  const doubleBanners =
+    secondaryBanners?.filter(
+      (banner: SecondaryBanner) => banner.type === "double"
+    ) || [];
+  const carouselBanners =
+    secondaryBanners?.filter(
+      (banner: SecondaryBanner) => banner.type === "carousel"
+    ) || [];
+
   console.log("Dados obtidos:", {
     featuredProductsCount: featuredProducts.length,
     categoriesCount: categories.length,
     newReleasesCount: newReleases.length,
     promoBannersCount: promoBanners.length,
     promotionalProductsCount: promotionalProducts.length,
+    secondaryBannersCount: secondaryBanners?.length || 0,
   });
 
   return (
@@ -92,6 +114,16 @@ export default async function Home() {
             <div className="px-8">
               <PromotionalProducts products={promotionalProducts} />
             </div>
+          </div>
+        </section>
+
+        {/* Banners Secundários */}
+        <section className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <SecondaryBanners
+              doubleBanners={doubleBanners}
+              carouselBanners={carouselBanners}
+            />
           </div>
         </section>
 
