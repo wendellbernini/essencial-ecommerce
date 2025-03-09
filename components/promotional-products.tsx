@@ -51,8 +51,8 @@ export function PromotionalProducts({ products }: { products: Product[] }) {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6 px-4">
-        <h2 className="text-2xl font-bold text-gray-900">Promoções</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Só Hoje! Só Agora!</h2>
         <Tabs
           value={discountFilter}
           className="bg-white rounded-lg border border-gray-200"
@@ -87,7 +87,7 @@ export function PromotionalProducts({ products }: { products: Product[] }) {
         </Tabs>
       </div>
 
-      <div className="relative px-12">
+      <div className="relative px-8">
         <div className="overflow-hidden">
           {filteredProducts.length > 0 ? (
             <div
@@ -97,7 +97,7 @@ export function PromotionalProducts({ products }: { products: Product[] }) {
               {Array.from({ length: totalPages }).map((_, pageIndex) => (
                 <div
                   key={pageIndex}
-                  className="w-full flex-shrink-0 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
+                  className="w-full flex-shrink-0 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4"
                 >
                   {filteredProducts
                     .slice(
@@ -120,18 +120,18 @@ export function PromotionalProducts({ products }: { products: Product[] }) {
         {totalPages > 1 && filteredProducts.length > 0 && (
           <>
             <button
-              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-16 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center shadow-sm"
+              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-14 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center shadow-sm"
               onClick={() =>
                 setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages)
               }
             >
-              <ChevronLeft className="h-6 w-6 text-gray-600" />
+              <ChevronLeft className="h-5 w-5 text-gray-600" />
             </button>
             <button
-              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-16 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center shadow-sm"
+              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-14 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center shadow-sm"
               onClick={() => setCurrentPage((prev) => (prev + 1) % totalPages)}
             >
-              <ChevronRight className="h-6 w-6 text-gray-600" />
+              <ChevronRight className="h-5 w-5 text-gray-600" />
             </button>
           </>
         )}

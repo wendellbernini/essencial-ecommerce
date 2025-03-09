@@ -3,11 +3,11 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 pt-12 pb-6">
+    <footer className="bg-black border-t border-gray-800 pt-12 pb-6">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <div>
-            <h3 className="font-bold text-lg mb-4 text-gray-900">Comprar</h3>
+            <h3 className="font-bold text-lg mb-4 text-white">Comprar</h3>
             <ul className="space-y-2">
               {[
                 "Cartões de presente",
@@ -20,7 +20,7 @@ export function Footer() {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-gray-600 hover:text-orange-500 text-sm"
+                    className="text-gray-400 hover:text-orange-500 text-sm"
                   >
                     {item}
                   </Link>
@@ -29,7 +29,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold text-lg mb-4 text-gray-900">Vender</h3>
+            <h3 className="font-bold text-lg mb-4 text-white">Vender</h3>
             <ul className="space-y-2">
               {[
                 "Venda na Essencial",
@@ -40,7 +40,7 @@ export function Footer() {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-gray-600 hover:text-orange-500 text-sm"
+                    className="text-gray-400 hover:text-orange-500 text-sm"
                   >
                     {item}
                   </Link>
@@ -49,7 +49,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold text-lg mb-4 text-gray-900">Sobre</h3>
+            <h3 className="font-bold text-lg mb-4 text-white">Sobre</h3>
             <ul className="space-y-2">
               {[
                 "Essencial, Inc.",
@@ -62,7 +62,7 @@ export function Footer() {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-gray-600 hover:text-orange-500 text-sm"
+                    className="text-gray-400 hover:text-orange-500 text-sm"
                   >
                     {item}
                   </Link>
@@ -71,7 +71,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold text-lg mb-4 text-gray-900">Ajuda</h3>
+            <h3 className="font-bold text-lg mb-4 text-white">Ajuda</h3>
             <ul className="space-y-2">
               {[
                 "Central de Ajuda",
@@ -81,7 +81,7 @@ export function Footer() {
                 <li key={item}>
                   <Link
                     href="#"
-                    className="text-gray-600 hover:text-orange-500 text-sm"
+                    className="text-gray-400 hover:text-orange-500 text-sm"
                   >
                     {item}
                   </Link>
@@ -89,7 +89,7 @@ export function Footer() {
               ))}
             </ul>
             <div className="mt-6">
-              <h4 className="font-bold text-sm mb-2 text-gray-900">
+              <h4 className="font-bold text-sm mb-2 text-white">
                 Baixe o aplicativo Essencial
               </h4>
               <div className="flex space-x-2">
@@ -116,7 +116,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-200 pt-6 flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-gray-800 pt-6 flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-4 md:mb-0">
             <Image
               src="/placeholder.svg?height=30&width=80&text=Essencial"
@@ -125,10 +125,10 @@ export function Footer() {
               height={30}
               className="h-8 w-auto mr-4"
             />
-            <p className="text-sm text-gray-500">© 2024 Essencial, Inc.</p>
+            <p className="text-sm text-gray-400">© 2024 Essencial, Inc.</p>
           </div>
           <div className="flex space-x-6">
-            <Link href="#" className="text-gray-600 hover:text-orange-500">
+            <Link href="#" className="text-gray-400 hover:text-orange-500">
               <svg
                 className="h-6 w-6"
                 fill="currentColor"
@@ -142,7 +142,7 @@ export function Footer() {
                 />
               </svg>
             </Link>
-            <Link href="#" className="text-gray-600 hover:text-orange-500">
+            <Link href="#" className="text-gray-400 hover:text-orange-500">
               <svg
                 className="h-6 w-6"
                 fill="currentColor"
@@ -156,7 +156,7 @@ export function Footer() {
                 />
               </svg>
             </Link>
-            <Link href="#" className="text-gray-600 hover:text-orange-500">
+            <Link href="#" className="text-gray-400 hover:text-orange-500">
               <svg
                 className="h-6 w-6"
                 fill="currentColor"
@@ -166,7 +166,7 @@ export function Footer() {
                 <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
               </svg>
             </Link>
-            <Link href="#" className="text-gray-600 hover:text-orange-500">
+            <Link href="#" className="text-gray-400 hover:text-orange-500">
               <svg
                 className="h-6 w-6"
                 fill="currentColor"

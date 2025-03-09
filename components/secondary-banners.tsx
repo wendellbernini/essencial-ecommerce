@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface SecondaryBanner {
   id: number;
@@ -87,7 +85,7 @@ export function SecondaryBanners({
       </div>
 
       {/* Banners carrossel */}
-      <div className="relative">
+      <div className="space-y-4">
         <div className="overflow-hidden">
           <div className="grid grid-cols-3 gap-4 transition-transform duration-300 ease-in-out">
             {getVisibleCarouselBanners()
@@ -109,24 +107,22 @@ export function SecondaryBanners({
         </div>
 
         {carouselBanners.length > 3 && (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50"
-              onClick={prevSlide}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50"
-              onClick={nextSlide}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </>
+          <div className="flex items-center justify-center gap-3">
+            {Array.from({ length: Math.ceil(carouselBanners.length / 3) }).map(
+              (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index * 3)}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    Math.floor(currentSlide / 3) === index
+                      ? "bg-gray-900 w-6"
+                      : "bg-gray-300 hover:bg-gray-400"
+                  }`}
+                  aria-label={`Ir para grupo de banners ${index + 1}`}
+                />
+              )
+            )}
+          </div>
         )}
       </div>
     </div>

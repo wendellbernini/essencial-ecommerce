@@ -109,11 +109,9 @@ export default async function Home() {
         </section>
 
         {/* Seção de Promoções */}
-        <section className="py-12 bg-gray-50">
-          <div className="container relative mx-auto">
-            <div className="px-8">
-              <PromotionalProducts products={promotionalProducts} />
-            </div>
+        <section className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <PromotionalProducts products={promotionalProducts} />
           </div>
         </section>
 
