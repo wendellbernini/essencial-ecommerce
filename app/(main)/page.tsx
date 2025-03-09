@@ -89,15 +89,6 @@ export default async function Home() {
         {/* Seção de Promoções */}
         <section className="py-12 bg-gray-50">
           <div className="container relative mx-auto">
-            <div className="flex items-center justify-between mb-8 px-4">
-              <h2 className="text-2xl font-bold text-gray-900">Promoções</h2>
-              <Button
-                variant="link"
-                className="text-orange-500 hover:text-orange-600"
-              >
-                Ver todas
-              </Button>
-            </div>
             <div className="px-8">
               <PromotionalProducts products={promotionalProducts} />
             </div>
