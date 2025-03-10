@@ -74,6 +74,12 @@ export default async function Home() {
     .order("type", { ascending: true })
     .order("order_index", { ascending: true });
 
+  // Buscar marcas
+  const { data: brands } = await supabase
+    .from("brands")
+    .select("*")
+    .order("name", { ascending: true });
+
   // Separar os banners por tipo
   const doubleBanners =
     secondaryBanners?.filter((banner) => banner.type === "double") || [];
@@ -89,6 +95,7 @@ export default async function Home() {
       promotionalProducts={promotionalProducts}
       doubleBanners={doubleBanners}
       carouselBanners={carouselBanners}
+      brands={brands || []}
     />
   );
 }

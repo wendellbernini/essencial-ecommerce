@@ -4,11 +4,12 @@ import { ProductGrid } from "@/components/product-grid";
 import { PromoBanner } from "@/components/promo-banner";
 import { PromotionalProducts } from "@/components/promotional-products";
 import { SecondaryBanners } from "@/components/secondary-banners";
-import { Product, SecondaryBanner } from "@/lib/types";
+import { Product, SecondaryBanner, Brand } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { BrandCarousel } from "@/components/brand-carousel";
 
 interface HomeContentProps {
   featuredProducts: Product[];
@@ -22,6 +23,7 @@ interface HomeContentProps {
   promotionalProducts: Product[];
   doubleBanners: SecondaryBanner[];
   carouselBanners: SecondaryBanner[];
+  brands: Brand[];
 }
 
 export function HomeContent({
@@ -32,6 +34,7 @@ export function HomeContent({
   promotionalProducts,
   doubleBanners,
   carouselBanners,
+  brands,
 }: HomeContentProps) {
   return (
     <div className="min-h-screen bg-white">
@@ -120,11 +123,16 @@ export function HomeContent({
           </div>
         </section>
 
+        {/* Carrossel de Marcas */}
+        <BrandCarousel brands={brands} />
+
         {/* Lançamentos */}
-        <section className="py-12 bg-gray-50">
+        <section className="py-12 mt-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Lançamentos</h2>
+              <h2 className="text-2xl font-bold text-gray-900 uppercase">
+                Lançamentos
+              </h2>
               <Button
                 variant="link"
                 className="text-orange-500 hover:text-orange-600"
@@ -133,7 +141,7 @@ export function HomeContent({
               </Button>
             </div>
 
-            <ProductGrid products={newReleases} />
+            <ProductGrid products={newReleases.slice(0, 5)} />
           </div>
         </section>
       </main>
