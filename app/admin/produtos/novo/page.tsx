@@ -27,6 +27,11 @@ export default function NewProductPage() {
   const supabase = createClientComponentClient();
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [subcategories, setSubcategories] = useState<any[]>([]);
+  const [classifications, setClassifications] = useState<any[]>([]);
+  const [selectedClassifications, setSelectedClassifications] = useState<
+    number[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -34,6 +39,7 @@ export default function NewProductPage() {
     price: "",
     original_price: "",
     category_id: "",
+    subcategory_id: "",
     brand_id: "",
     stock_quantity: "",
     featured: false,
@@ -46,6 +52,13 @@ export default function NewProductPage() {
     loadCategories();
     loadBrands();
   }, []);
+
+  useEffect(() => {
+    if (formData.category_id) {
+      loadSubcategories(formData.category_id);
+      loadClassifications(formData.category_id);
+    }
+  }, [formData.category_id]);
 
   async function loadCategories() {
     const { data } = await supabase
@@ -60,6 +73,24 @@ export default function NewProductPage() {
     if (data) setBrands(data);
   }
 
+  async function loadSubcategories(categoryId: string) {
+    const { data } = await supabase
+      .from("subcategories")
+      .select("*")
+      .eq("category_id", categoryId)
+      .order("name");
+    if (data) setSubcategories(data);
+  }
+
+  async function loadClassifications(categoryId: string) {
+    const { data } = await supabase
+      .from("classifications")
+      .select("*")
+      .eq("category_id", categoryId)
+      .order("type, name");
+    if (data) setClassifications(data);
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -70,6 +101,7 @@ export default function NewProductPage() {
       const requiredFields = {
         name: "Nome do produto",
         category_id: "Categoria",
+        subcategory_id: "Subcategoria",
         brand_id: "Marca",
       };
 
@@ -102,6 +134,7 @@ export default function NewProductPage() {
         sale_price: formData.price ? Number(formData.price) : null,
         stock_quantity: Number(formData.stock_quantity) || 0,
         category_id: Number(formData.category_id),
+        subcategory_id: Number(formData.subcategory_id),
         brand_id: Number(formData.brand_id),
         featured: formData.featured,
         is_new_release: formData.is_new_release,
@@ -111,11 +144,27 @@ export default function NewProductPage() {
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase.from("products").insert([productData]);
+      const { data: product, error: productError } = await supabase
+        .from("products")
+        .insert([productData])
+        .select()
+        .single();
 
-      if (error) {
-        console.error("Erro ao criar produto:", error);
-        throw new Error(error.message);
+      if (productError) throw productError;
+
+      if (selectedClassifications.length > 0 && product) {
+        const classificationData = selectedClassifications.map(
+          (classificationId) => ({
+            product_id: product.id,
+            classification_id: classificationId,
+          })
+        );
+
+        const { error: classificationError } = await supabase
+          .from("product_classifications")
+          .insert(classificationData);
+
+        if (classificationError) throw classificationError;
       }
 
       toast({
@@ -136,6 +185,17 @@ export default function NewProductPage() {
       setIsLoading(false);
     }
   };
+
+  const groupedClassifications = classifications.reduce(
+    (acc, classification) => {
+      if (!acc[classification.type]) {
+        acc[classification.type] = [];
+      }
+      acc[classification.type].push(classification);
+      return acc;
+    },
+    {} as Record<string, typeof classifications>
+  );
 
   return (
     <div className="space-y-6">
@@ -166,7 +226,11 @@ export default function NewProductPage() {
               <Select
                 value={formData.category_id}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, category_id: value })
+                  setFormData({
+                    ...formData,
+                    category_id: value,
+                    subcategory_id: "",
+                  })
                 }
               >
                 <SelectTrigger>
@@ -184,6 +248,31 @@ export default function NewProductPage() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="subcategory">Subcategoria</Label>
+            <Select
+              value={formData.subcategory_id}
+              onValueChange={(value) =>
+                setFormData({ ...formData, subcategory_id: value })
+              }
+              disabled={!formData.category_id}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma subcategoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {subcategories.map((subcategory) => (
+                  <SelectItem
+                    key={subcategory.id}
+                    value={subcategory.id.toString()}
+                  >
+                    {subcategory.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -319,6 +408,43 @@ export default function NewProductPage() {
             />
             <Label htmlFor="is_new_release">Lançamento</Label>
           </div>
+
+          {/* Classificações */}
+          {Object.entries(groupedClassifications).map(([type, items]) => (
+            <div key={type} className="space-y-2">
+              <Label>{type.replace(/_/g, " ").toUpperCase()}</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {items.map((classification) => (
+                  <div
+                    key={classification.id}
+                    className="flex items-center space-x-2"
+                  >
+                    <Checkbox
+                      id={`classification-${classification.id}`}
+                      checked={selectedClassifications.includes(
+                        classification.id
+                      )}
+                      onCheckedChange={(checked) => {
+                        setSelectedClassifications(
+                          checked
+                            ? [...selectedClassifications, classification.id]
+                            : selectedClassifications.filter(
+                                (id) => id !== classification.id
+                              )
+                        );
+                      }}
+                    />
+                    <Label
+                      htmlFor={`classification-${classification.id}`}
+                      className="text-sm font-normal"
+                    >
+                      {classification.name}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="flex gap-4">

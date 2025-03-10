@@ -32,6 +32,11 @@ export default function EditProductPage({ params }: EditProductPageProps) {
   const supabase = createClientComponentClient();
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [subcategories, setSubcategories] = useState<any[]>([]);
+  const [classifications, setClassifications] = useState<any[]>([]);
+  const [selectedClassifications, setSelectedClassifications] = useState<
+    number[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -39,6 +44,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     price: "",
     original_price: "",
     category_id: "",
+    subcategory_id: "",
     brand_id: "",
     stock_quantity: "",
     featured: false,
@@ -48,59 +54,122 @@ export default function EditProductPage({ params }: EditProductPageProps) {
   });
 
   useEffect(() => {
-    loadCategories();
-    loadBrands();
-    loadProduct();
-  }, []);
+    const initializeData = async () => {
+      try {
+        // Carrega dados básicos primeiro
+        const [categoriesResult, brandsResult] = await Promise.all([
+          supabase.from("categories").select("*").order("name"),
+          supabase.from("brands").select("*").order("name"),
+        ]);
 
-  async function loadCategories() {
-    const { data } = await supabase
-      .from("categories")
-      .select("*")
-      .order("name");
-    if (data) setCategories(data);
-  }
+        if (categoriesResult.data) setCategories(categoriesResult.data);
+        if (brandsResult.data) setBrands(brandsResult.data);
 
-  async function loadBrands() {
-    const { data } = await supabase.from("brands").select("*").order("name");
-    if (data) setBrands(data);
-  }
+        // Carrega o produto com todas as relações necessárias
+        const { data: product, error } = await supabase
+          .from("products")
+          .select(
+            `
+            *,
+            product_classifications (classification_id)
+          `
+          )
+          .eq("id", params.id)
+          .single();
 
-  async function loadProduct() {
-    try {
-      const { data: product, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", params.id)
-        .single();
+        if (error) throw error;
 
-      if (error) throw error;
+        if (product) {
+          // Carrega subcategorias e classificações da categoria do produto
+          if (product.category_id) {
+            const [subcatsResult, classificationsResult] = await Promise.all([
+              supabase
+                .from("subcategories")
+                .select("*")
+                .eq("category_id", product.category_id)
+                .order("name"),
+              supabase
+                .from("classifications")
+                .select("*")
+                .eq("category_id", product.category_id)
+                .order("type, name"),
+            ]);
 
-      if (product) {
-        setFormData({
-          name: product.name,
-          description: product.description || "",
-          price: product.sale_price?.toString() || "",
-          original_price: product.price.toString(),
-          category_id: product.category_id.toString(),
-          brand_id: product.brand_id?.toString() || "",
-          stock_quantity: product.stock_quantity.toString(),
-          featured: product.featured,
-          is_new_release: product.is_new_release,
-          is_best_seller: product.is_best_seller,
-          images: product.images,
+            if (subcatsResult.data) setSubcategories(subcatsResult.data);
+            if (classificationsResult.data)
+              setClassifications(classificationsResult.data);
+          }
+
+          // Atualiza o formulário com todos os dados
+          setFormData({
+            name: product.name || "",
+            description: product.description || "",
+            price: (product.sale_price || "").toString(),
+            original_price: (product.price || "").toString(),
+            category_id: (product.category_id || "").toString(),
+            subcategory_id: (product.subcategory_id || "").toString(),
+            brand_id: (product.brand_id || "").toString(),
+            stock_quantity: (product.stock_quantity || "").toString(),
+            featured: Boolean(product.featured),
+            is_new_release: Boolean(product.is_new_release),
+            is_best_seller: Boolean(product.is_best_seller),
+            images: product.images || [],
+          });
+
+          if (product.product_classifications) {
+            setSelectedClassifications(
+              product.product_classifications.map(
+                (pc: any) => pc.classification_id
+              )
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+        toast({
+          title: "Erro ao carregar produto",
+          description: "Não foi possível carregar os dados do produto.",
+          variant: "destructive",
         });
+        router.push("/admin/produtos");
       }
-    } catch (error) {
-      console.error("Erro ao carregar produto:", error);
-      toast({
-        title: "Erro ao carregar produto",
-        description: "Não foi possível carregar os dados do produto.",
-        variant: "destructive",
-      });
-      router.push("/admin/produtos");
+    };
+
+    initializeData();
+  }, []); // Executa apenas uma vez na montagem
+
+  // Atualiza subcategorias e classificações quando a categoria muda
+  useEffect(() => {
+    if (
+      formData.category_id &&
+      formData.category_id !==
+        categories
+          .find((c) => c.id.toString() === formData.category_id)
+          ?.id.toString()
+    ) {
+      const loadCategoryData = async () => {
+        const [subcatsResult, classificationsResult] = await Promise.all([
+          supabase
+            .from("subcategories")
+            .select("*")
+            .eq("category_id", formData.category_id)
+            .order("name"),
+          supabase
+            .from("classifications")
+            .select("*")
+            .eq("category_id", formData.category_id)
+            .order("type, name"),
+        ]);
+
+        if (subcatsResult.data) setSubcategories(subcatsResult.data);
+        if (classificationsResult.data)
+          setClassifications(classificationsResult.data);
+        setSelectedClassifications([]); // Limpa classificações ao mudar de categoria
+      };
+
+      loadCategoryData();
     }
-  }
+  }, [formData.category_id]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -112,6 +181,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
       const requiredFields = {
         name: "Nome do produto",
         category_id: "Categoria",
+        subcategory_id: "Subcategoria",
         brand_id: "Marca",
       };
 
@@ -144,6 +214,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         sale_price: formData.price ? Number(formData.price) : null,
         stock_quantity: Number(formData.stock_quantity) || 0,
         category_id: Number(formData.category_id),
+        subcategory_id: Number(formData.subcategory_id),
         brand_id: Number(formData.brand_id),
         featured: formData.featured,
         is_new_release: formData.is_new_release,
@@ -152,14 +223,34 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase
+      const { error: productError } = await supabase
         .from("products")
         .update(productData)
         .eq("id", params.id);
 
-      if (error) {
-        console.error("Erro ao atualizar produto:", error);
-        throw new Error(error.message);
+      if (productError) throw productError;
+
+      // Atualiza as classificações
+      const { error: deleteError } = await supabase
+        .from("product_classifications")
+        .delete()
+        .eq("product_id", params.id);
+
+      if (deleteError) throw deleteError;
+
+      if (selectedClassifications.length > 0) {
+        const classificationData = selectedClassifications.map(
+          (classificationId) => ({
+            product_id: Number(params.id),
+            classification_id: classificationId,
+          })
+        );
+
+        const { error: classificationError } = await supabase
+          .from("product_classifications")
+          .insert(classificationData);
+
+        if (classificationError) throw classificationError;
       }
 
       toast({
@@ -180,6 +271,17 @@ export default function EditProductPage({ params }: EditProductPageProps) {
       setIsLoading(false);
     }
   };
+
+  const groupedClassifications = classifications.reduce(
+    (acc, classification) => {
+      if (!acc[classification.type]) {
+        acc[classification.type] = [];
+      }
+      acc[classification.type].push(classification);
+      return acc;
+    },
+    {} as Record<string, typeof classifications>
+  );
 
   return (
     <div className="space-y-6">
@@ -210,7 +312,11 @@ export default function EditProductPage({ params }: EditProductPageProps) {
               <Select
                 value={formData.category_id}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, category_id: value })
+                  setFormData({
+                    ...formData,
+                    category_id: value,
+                    subcategory_id: "",
+                  })
                 }
               >
                 <SelectTrigger>
@@ -228,6 +334,31 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="subcategory">Subcategoria</Label>
+            <Select
+              value={formData.subcategory_id}
+              onValueChange={(value) =>
+                setFormData({ ...formData, subcategory_id: value })
+              }
+              disabled={!formData.category_id}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma subcategoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {subcategories.map((subcategory) => (
+                  <SelectItem
+                    key={subcategory.id}
+                    value={subcategory.id.toString()}
+                  >
+                    {subcategory.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -365,6 +496,43 @@ export default function EditProductPage({ params }: EditProductPageProps) {
             />
             <Label htmlFor="is_new_release">Lançamento</Label>
           </div>
+
+          {/* Classificações */}
+          {Object.entries(groupedClassifications).map(([type, items]) => (
+            <div key={type} className="space-y-2">
+              <Label>{type.replace(/_/g, " ").toUpperCase()}</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {items.map((classification) => (
+                  <div
+                    key={classification.id}
+                    className="flex items-center space-x-2"
+                  >
+                    <Checkbox
+                      id={`classification-${classification.id}`}
+                      checked={selectedClassifications.includes(
+                        classification.id
+                      )}
+                      onCheckedChange={(checked) => {
+                        setSelectedClassifications(
+                          checked
+                            ? [...selectedClassifications, classification.id]
+                            : selectedClassifications.filter(
+                                (id) => id !== classification.id
+                              )
+                        );
+                      }}
+                    />
+                    <Label
+                      htmlFor={`classification-${classification.id}`}
+                      className="text-sm font-normal"
+                    >
+                      {classification.name}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="flex gap-4">
