@@ -8136,6 +8136,674 @@ Vou adicionar e commitar essas alterações:
 
 _****_
 
+```bash
+git add . && git commit -m "fix: corrige problemas no formulário de edição de produtos e adiciona documentação" | cat
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git add . && git commit -m "fix
+: corrige problemas no formulário de edição de produtos egit add . && git commit -m "fix
+: corrige problemas no formulário de edição de produtos e adiciona documentação" | cat
+[main ecd3ffd] fix: corrige problemas no formulário de edição de produtos e adiciona doc
+umentação
+ 3 files changed, 982 insertions(+), 27 deletions(-)
+ create mode 100644 docs/aprendizado5.md
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Agora vou fazer o push das alterações para o GitHub:
+
+---
+
+_****_
+
+```bash
+git push origin main | cat
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git push origin main | cat
+Enumerating objects: 24, done.
+Counting objects: 100% (24/24), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (10/10), done.
+Writing objects: 100% (13/13), 10.11 KiB | 2.02 MiB/s, done.
+Total 13 (delta 7), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (7/7), completed with 7 local objects.
+To github.com:wendellbernini/essencial-ecommerce.git
+   4a4879c..ecd3ffd  main -> main
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+
+
+---
+
+_**User**_
+
+Otimo, agora note que no menu suspenso da categoria corpo e banho nao esta sendo exibido corretamente as subcategorias mesmo elas existindo ja que na criacao do produto eu vejo que existem subcategorias para ela
+
+---
+
+_**Assistant**_
+
+Vou analisar o componente do menu suspenso e verificar por que as subcategorias de "Corpo & Banho" não estão sendo exibidas corretamente.
+
+---
+
+_****_
+
+Read file: undefined
+
+---
+
+_****_
+
+Agora vou verificar como o slug da categoria "Corpo & Banho" está sendo passado no header:
+
+---
+
+_****_
+
+Read file: undefined
+
+---
+
+_****_
+
+Me desculpe, vou tentar ler a parte específica do header onde estão os menus de categoria:
+
+---
+
+_****_
+
+Read file: undefined
+
+---
+
+_****_
+
+Encontrei o problema! O slug da categoria "Corpo & Banho" está sendo passado como "corpo-banho", mas provavelmente no banco de dados está diferente. Vou adicionar logs no componente CategoryMenu para verificar o que está acontecendo e depois fazer a correção necessária.
+
+---
+
+_****_
+
+Cancelled
+
+---
+
+_****_
+
+Agora vou verificar o slug correto da categoria no banco de dados.
+
+---
+
+_****_
+
+Cancelled
+
+---
+
+_****_
+
+
+
+---
+
+_**User**_
+
+rejeitei a alteracao e te enviei um print das categorias no banco de dados para ver se ajuda
+
+---
+
+_**Assistant**_
+
+Agora consigo ver claramente o problema! Na tabela de categorias do banco de dados, o slug da categoria "Corpo & Banho" está cadastrado como "corpo-e-banho", mas no componente `header.tsx` estamos passando como "corpo-banho". Vou corrigir isso.
+
+---
+
+_****_
+
+```diff
+                  <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                  <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
+-                   <CategoryMenu categorySlug="corpo-banho" />
++                   <CategoryMenu categorySlug="corpo-e-banho" />
+                  </div>
+                </div>
+```
+
+---
+
+_****_
+
+Agora o slug corresponde exatamente ao que está no banco de dados. O menu suspenso da categoria "Corpo & Banho" deve funcionar corretamente, exibindo todas as subcategorias e classificações associadas.
+
+Você pode testar novamente passando o mouse sobre a categoria "Corpo & Banho" no menu. As subcategorias e classificações devem aparecer corretamente agora.
+
+---
+
+_**User**_
+
+Otimo, esta otimo, no entanto, eu quero acrescentar ainda mais nesse menu suspenso, no estilo que ele ja ta exibindo as subcategorias esta perfeito, so que no lado direito das subcategorias (dentro do menu suspenso) eu quero exibir a imagem com o titulo e um botao escrito algo como "eu quero" exibindo sempre o ultimo produto que foi adicionado referente aquela categoria, entao por exemplo: skincare, ele vai exibir o ultimo produto adicionado com a categoria skincare com o titulo e o botao, entende?
+
+---
+
+_**Assistant**_
+
+Entendi perfeitamente! Vamos modificar o componente `CategoryMenu` para incluir essa seção de "Último Lançamento" no lado direito do menu suspenso. Primeiro, vou atualizar o componente para buscar o último produto da categoria.
+
+---
+
+_****_
+
+```diff
+  import { useState, useEffect } from "react";
+  import Link from "next/link";
++ import Image from "next/image";
+  import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
++ import { Button } from "@/components/ui/button";
+  
+  interface CategoryMenuProps {
+    slug: string;
+  }
++ 
++ interface LatestProduct {
++   id: number;
++   name: string;
++   slug: string;
++   images: string[];
++   price: number;
++   sale_price: number | null;
++ }
+  
+  export function CategoryMenu({ categorySlug }: CategoryMenuProps) {
+    const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+    const [classifications, setClassifications] = useState<Classification[]>([]);
++   const [latestProduct, setLatestProduct] = useState<LatestProduct | null>(
++     null
++   );
+    const supabase = createClientComponentClient();
+  
+    useEffect(() => {
+      async function loadCategoryData() {
++       console.log("Carregando dados da categoria:", categorySlug);
+        // Primeiro, busca o ID da categoria pelo slug
+-       const { data: categoryData } = await supabase
++       const { data: categoryData, error: categoryError } = await supabase
+          .from("categories")
+-         .select("id")
++         .select("id, name")
+          .eq("slug", categorySlug)
+          .single();
+  
++       console.log("Dados da categoria:", categoryData, "Erro:", categoryError);
++ 
+        if (categoryData) {
+-         // Carrega subcategorias e classificações
+-         const [subcatsResult, classResult] = await Promise.all([
++         // Carrega subcategorias, classificações e último produto
++         const [subcatsResult, classResult, latestProductResult] =
++           await Promise.all([
+              supabase
+                .from("subcategories")
+                .eq("category_id", categoryData.id)
+                .order("type, name"),
+-         ]);
++             supabase
++               .from("products")
++               .select("id, name, slug, images, price, sale_price")
++               .eq("category_id", categoryData.id)
++               .order("created_at", { ascending: false })
++               .limit(1)
++               .single(),
++           ]);
++ 
++         console.log("Último produto encontrado:", latestProductResult.data);
+  
+          if (subcatsResult.data) setSubcategories(subcatsResult.data);
+          if (classResult.data) setClassifications(classResult.data);
++         if (latestProductResult.data)
++           setLatestProduct(latestProductResult.data);
+        }
+      }
+  
+      loadCategoryData();
+-   }, [categorySlug]);
++   }, [categorySlug, supabase]);
+  
+    // Agrupa classificações por tipo
+      return acc;
+    }, {} as Record<string, Classification[]>);
++ 
++   // Formatar preço para o formato brasileiro
++   const formatPrice = (price: number) => {
++     return new Intl.NumberFormat("pt-BR", {
++       style: "currency",
++       currency: "BRL",
++     }).format(price);
++   };
+  
+    return (
+-     <div className="absolute left-0 right-0 bg-white shadow-lg z-50 min-w-[600px] rounded-b-lg border-t border-gray-100">
+-       <div className="p-6 grid grid-cols-3 gap-8">
++     <div className="absolute left-0 right-0 bg-white shadow-lg z-50 min-w-[800px] rounded-b-lg border-t border-gray-100">
++       <div className="p-6 grid grid-cols-4 gap-8">
+          {/* Subcategorias */}
+          <div>
+            </div>
+          ))}
++ 
++         {/* Último lançamento */}
++         {latestProduct && (
++           <div className="col-span-1 bg-gray-50 rounded-lg p-4">
++             <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wide">
++               Último Lançamento
++             </h3>
++             <div className="space-y-4">
++               <div className="relative aspect-square rounded-lg overflow-hidden">
++                 <Image
++                   src={latestProduct.images[0]}
++                   alt={latestProduct.name}
++                   fill
++                   className="object-cover"
++                 />
++               </div>
++               <div>
++                 <h4 className="text-sm font-medium text-gray-900 line-clamp-2">
++                   {latestProduct.name}
++                 </h4>
++                 <div className="mt-2 space-y-1">
++                   {latestProduct.sale_price &&
++                   latestProduct.sale_price < latestProduct.price ? (
++                     <>
++                       <p className="text-sm text-gray-500 line-through">
++                         {formatPrice(latestProduct.price)}
++                       </p>
++                       <p className="text-lg font-bold text-gray-900">
++                         {formatPrice(latestProduct.sale_price)}
++                       </p>
++                     </>
++                   ) : (
++                     <p className="text-lg font-bold text-gray-900">
++                       {formatPrice(latestProduct.price)}
++                     </p>
++                   )}
++                 </div>
++                 <Link href={`/produto/${latestProduct.slug}`}>
++                   <Button className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white">
++                     Eu quero!
++                   </Button>
++                 </Link>
++               </div>
++             </div>
++           </div>
++         )}
+        </div>
+      </div>
+```
+
+---
+
+_****_
+
+Fiz as seguintes alterações:
+
+1. Adicionei uma nova interface `LatestProduct` para tipar o último produto
+2. Modifiquei a consulta ao banco para buscar também o último produto da categoria
+3. Aumentei a largura mínima do menu para `800px` e ajustei o grid para 4 colunas
+4. Adicionei uma nova seção no lado direito que exibe:
+   - Imagem do produto
+   - Nome do produto
+   - Preço (com desconto se houver)
+   - Botão "Eu quero!" que leva à página do produto
+5. Adicionei formatação de preço em reais
+6. Estilizei a seção do último produto com fundo cinza claro e cantos arredondados
+
+O menu agora deve mostrar:
+- À esquerda: as subcategorias principais
+- No meio: as classificações agrupadas por tipo
+- À direita: o último produto adicionado naquela categoria
+
+Você pode testar passando o mouse sobre qualquer categoria. O menu deve exibir as subcategorias e o último produto adicionado naquela categoria específica.
+
+---
+
+_**User**_
+
+ficou otimo, no entanto, nao precisa exibir o preco e a cor do botao deve ser preta
+
+---
+
+_**Assistant**_
+
+Vou ajustar o componente para remover o preço e mudar a cor do botão para preto.
+
+---
+
+_****_
+
+```diff
+                    {latestProduct.name}
+                  </h4>
+-                 <div className="mt-2 space-y-1">
+-                   {latestProduct.sale_price &&
+-                   latestProduct.sale_price < latestProduct.price ? (
+-                     <>
+-                       <p className="text-sm text-gray-500 line-through">
+-                         {formatPrice(latestProduct.price)}
+-                       </p>
+-                       <p className="text-lg font-bold text-gray-900">
+-                         {formatPrice(latestProduct.sale_price)}
+-                       </p>
+-                     </>
+-                   ) : (
+-                     <p className="text-lg font-bold text-gray-900">
+-                       {formatPrice(latestProduct.price)}
+-                     </p>
+-                   )}
+-                 </div>
+                  <Link href={`/produto/${latestProduct.slug}`}>
+-                   <Button className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white">
++                   <Button className="w-full mt-4 bg-black hover:bg-gray-900 text-white">
+                      Eu quero!
+                    </Button>
+```
+
+---
+
+_****_
+
+Fiz as seguintes alterações:
+1. Removi todo o bloco de código que exibia os preços
+2. Mudei a cor do botão de laranja para preto (`bg-black`) com hover em um tom mais claro de preto (`hover:bg-gray-900`)
+
+O menu agora deve mostrar apenas o nome do produto e o botão "Eu quero!" em preto. Você pode testar passando o mouse sobre qualquer categoria para ver como ficou.
+
+---
+
+_**User**_
+
+Otimo, mas acho que precisamos aumentar agora o espacamentro entre as opcoes do submenu para nao ter aquele espaco em branco grande embaixo, concorda?
+
+---
+
+_**Assistant**_
+
+Sim, concordo! Vou ajustar o espaçamento entre os itens do submenu para melhor distribuir o espaço vertical.
+
+---
+
+_****_
+
+```diff
+          {/* Subcategorias */}
+          <div>
+-           <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wide">
++           <h3 className="text-sm font-medium text-gray-900 mb-6 uppercase tracking-wide">
+              Principais
+            </h3>
+-           <ul className="space-y-2.5">
++           <ul className="space-y-4">
+              {subcategories.map((subcategory) => (
+                <li key={subcategory.id}>
+          {Object.entries(groupedClassifications).map(([type, items]) => (
+            <div key={type}>
+-             <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wide">
++             <h3 className="text-sm font-medium text-gray-900 mb-6 uppercase tracking-wide">
+                {type.replace(/_/g, " ")}
+              </h3>
+-             <ul className="space-y-2.5">
++             <ul className="space-y-4">
+                {items.map((classification) => (
+                  <li key={classification.id}>
+          {/* Último lançamento */}
+          {latestProduct && (
+-           <div className="col-span-1 bg-gray-50 rounded-lg p-4">
+-             <h3 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wide">
++           <div className="col-span-1 bg-gray-50 rounded-lg p-6">
++             <h3 className="text-sm font-medium text-gray-900 mb-6 uppercase tracking-wide">
+                Último Lançamento
+              </h3>
+                  </h4>
+                  <Link href={`/produto/${latestProduct.slug}`}>
+-                   <Button className="w-full mt-4 bg-black hover:bg-gray-900 text-white">
++                   <Button className="w-full mt-6 bg-black hover:bg-gray-900 text-white">
+                      Eu quero!
+                    </Button>
+```
+
+---
+
+_****_
+
+Fiz os seguintes ajustes:
+
+1. Aumentei o espaçamento entre os itens do menu de `space-y-2.5` para `space-y-4`
+2. Aumentei o espaçamento após os títulos de `mb-4` para `mb-6`
+3. Aumentei o padding da seção do último lançamento de `p-4` para `p-6`
+4. Aumentei o espaçamento antes do botão "Eu quero!" de `mt-4` para `mt-6`
+
+Essas alterações devem:
+- Distribuir melhor o espaço vertical
+- Reduzir o espaço em branco no final do menu
+- Melhorar a legibilidade e o equilíbrio visual do menu
+
+O menu agora deve parecer mais equilibrado e proporcional. Você pode testar passando o mouse sobre qualquer categoria para ver como ficou o novo espaçamento.
+
+---
+
+_**User**_
+
+Otimo, agora note como os submenus das categorias PERFUMES
+CORPO & BANHO
+UNHAS --- estao com uma largura muito maior do que precisam, e acabam deixando um enorme espaco em branco a direita
+
+---
+
+_**Assistant**_
+
+Sim, você tem razão! O problema é que definimos uma largura mínima fixa (`min-w-[800px]`) para todos os menus, independentemente do conteúdo. Vamos ajustar isso para que o menu se adapte ao conteúdo de cada categoria, mantendo apenas a largura necessária.
+
+---
+
+_****_
+
+```diff
+  
+    return (
+-     <div className="absolute left-0 right-0 bg-white shadow-lg z-50 min-w-[800px] rounded-b-lg border-t border-gray-100">
+-       <div className="p-6 grid grid-cols-4 gap-8">
++     <div className="absolute left-0 bg-white shadow-lg z-50 rounded-b-lg border-t border-gray-100">
++       <div
++         className="p-6 grid gap-8"
++         style={{
++           gridTemplateColumns:
++             Object.keys(groupedClassifications).length > 0
++               ? `repeat(${Math.min(
++                   2 + Object.keys(groupedClassifications).length,
++                   4
++                 )}, minmax(200px, 1fr))`
++               : "repeat(2, minmax(200px, 1fr))",
++         }}
++       >
+          {/* Subcategorias */}
+          <div>
+          {/* Último lançamento */}
+          {latestProduct && (
+-           <div className="col-span-1 bg-gray-50 rounded-lg p-6">
++           <div className="bg-gray-50 rounded-lg p-6">
+              <h3 className="text-sm font-medium text-gray-900 mb-6 uppercase tracking-wide">
+                Último Lançamento
+```
+
+---
+
+_****_
+
+Fiz as seguintes alterações:
+
+1. Removi a largura mínima fixa (`min-w-[800px]`)
+2. Removi o `right-0` para permitir que o menu se ajuste ao conteúdo
+3. Substituí o `grid-cols-4` fixo por um sistema dinâmico que:
+   - Calcula o número de colunas baseado no número de seções (subcategorias + classificações + último lançamento)
+   - Define uma largura mínima de 200px para cada coluna
+   - Limita o máximo a 4 colunas
+4. Removi o `col-span-1` desnecessário do último lançamento
+
+Agora o menu deve:
+- Se ajustar automaticamente ao conteúdo de cada categoria
+- Manter uma largura mínima confortável para cada coluna
+- Não ter espaços em branco desnecessários
+- Continuar com o mesmo visual e organização, mas mais compacto
+
+Você pode testar passando o mouse sobre as diferentes categorias. Cada menu deve ter uma largura apropriada ao seu conteúdo, especialmente nas categorias PERFUMES, CORPO & BANHO e UNHAS que têm menos itens.
+
+---
+
+_**User**_
+
+Otimo, agora note que passando o mouse por cima  da categoria no submenu funciona corretamente, mas eu quero tb que ao clicar na categoria ex: cliquei em skincare no header somente sem escolher subcategoria, eu quero ser redirecionado para a pagina /categoria/skincare por exemplo, e assim sucessivamente, entende?
+
+---
+
+_**Assistant**_
+
+Sim, entendi! Vamos adicionar o link na própria categoria do header para que ao clicar diretamente nela (sem escolher subcategoria) o usuário seja redirecionado para a página da categoria. Para isso, precisamos modificar o componente `header.tsx`.
+
+---
+
+_****_
+
+```diff
+              <li className="relative group">
+                <div className="relative">
+-                 <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
++                 <Link
++                   href="/categoria/skincare"
++                   className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
++                 >
+                    SKINCARE
+                    <ChevronDown className="ml-1 h-3.5 w-3.5" />
+-                 </button>
++                 </Link>
+                  <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                  <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
+              <li className="relative group">
+                <div className="relative">
+-                 <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
++                 <Link
++                   href="/categoria/maquiagem"
++                   className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
++                 >
+                    MAQUIAGEM
+                    <ChevronDown className="ml-1 h-3.5 w-3.5" />
+-                 </button>
++                 </Link>
+                  <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                  <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
+              <li className="relative group">
+                <div className="relative">
+-                 <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
++                 <Link
++                   href="/categoria/cabelos"
++                   className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
++                 >
+                    CABELOS
+                    <ChevronDown className="ml-1 h-3.5 w-3.5" />
+-                 </button>
++                 </Link>
+                  <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                  <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
+              <li className="relative group">
+                <div className="relative">
+-                 <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
++                 <Link
++                   href="/categoria/perfumes"
++                   className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
++                 >
+                    PERFUMES
+                    <ChevronDown className="ml-1 h-3.5 w-3.5" />
+-                 </button>
++                 </Link>
+                  <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                  <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
+              <li className="relative group">
+                <div className="relative">
+-                 <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
++                 <Link
++                   href="/categoria/corpo-e-banho"
++                   className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
++                 >
+                    CORPO & BANHO
+                    <ChevronDown className="ml-1 h-3.5 w-3.5" />
+-                 </button>
++                 </Link>
+                  <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                  <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
+              <li className="relative group">
+                <div className="relative">
+-                 <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
++                 <Link
++                   href="/categoria/unhas"
++                   className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
++                 >
+                    UNHAS
+                    <ChevronDown className="ml-1 h-3.5 w-3.5" />
+-                 </button>
++                 </Link>
+                  <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                  <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
+```
+
+---
+
+_****_
+
+Fiz as seguintes alterações:
+
+1. Substituí todos os `<button>` por `<Link>` nas categorias principais
+2. Adicionei os links correspondentes para cada categoria:
+   - `/categoria/skincare`
+   - `/categoria/maquiagem`
+   - `/categoria/cabelos`
+   - `/categoria/perfumes`
+   - `/categoria/corpo-e-banho`
+   - `/categoria/unhas`
+3. Mantive o mesmo estilo visual e comportamento do hover
+4. Mantive o ícone de seta (ChevronDown) para indicar que há um submenu
+
+Agora você pode:
+1. Clicar diretamente na categoria para ir para a página principal daquela categoria
+2. OU passar o mouse por cima para ver o submenu e escolher uma subcategoria específica
+
+O comportamento do submenu continua o mesmo, só adicionamos a funcionalidade de clique direto na categoria principal.
+
+---
+
+_**User**_
+
+Otimo, agora Execute npm run build e continue trabalhando até corrigir todos os possíveis erros que possam impedir a conclusão bem-sucedida do build. Se forem necessárias alterações, analise o contexto com cuidado, evitando conclusões precipitadas. Priorize soluções enxutas, mantendo o código o mais conciso possível. @Next.js 15 Caso ajude, navegue pela documentação oficial do Next.js para encontrar uma solução para os erros no build ou lint.
+
+---
+
+_**Assistant**_
+
+Vou executar o comando `npm run build` e analisar quaisquer erros que possam surgir.
+
+---
+
+_****_
+
 
 
 ---

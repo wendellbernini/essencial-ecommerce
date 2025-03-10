@@ -421,10 +421,13 @@ export function Header() {
           <ul className="flex space-x-8">
             <li className="relative group">
               <div className="relative">
-                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                <Link
+                  href="/categoria/skincare"
+                  className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
+                >
                   SKINCARE
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
-                </button>
+                </Link>
                 <div className="absolute top-full left-0 right-0 h-2 bg-white" />
                 <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="skincare" />
@@ -433,10 +436,13 @@ export function Header() {
             </li>
             <li className="relative group">
               <div className="relative">
-                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                <Link
+                  href="/categoria/maquiagem"
+                  className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
+                >
                   MAQUIAGEM
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
-                </button>
+                </Link>
                 <div className="absolute top-full left-0 right-0 h-2 bg-white" />
                 <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="maquiagem" />
@@ -445,10 +451,13 @@ export function Header() {
             </li>
             <li className="relative group">
               <div className="relative">
-                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                <Link
+                  href="/categoria/cabelos"
+                  className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
+                >
                   CABELOS
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
-                </button>
+                </Link>
                 <div className="absolute top-full left-0 right-0 h-2 bg-white" />
                 <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="cabelos" />
@@ -457,10 +466,13 @@ export function Header() {
             </li>
             <li className="relative group">
               <div className="relative">
-                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                <Link
+                  href="/categoria/perfumes"
+                  className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
+                >
                   PERFUMES
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
-                </button>
+                </Link>
                 <div className="absolute top-full left-0 right-0 h-2 bg-white" />
                 <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="perfumes" />
@@ -469,22 +481,28 @@ export function Header() {
             </li>
             <li className="relative group">
               <div className="relative">
-                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                <Link
+                  href="/categoria/corpo-e-banho"
+                  className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
+                >
                   CORPO & BANHO
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
-                </button>
+                </Link>
                 <div className="absolute top-full left-0 right-0 h-2 bg-white" />
                 <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
-                  <CategoryMenu categorySlug="corpo-banho" />
+                  <CategoryMenu categorySlug="corpo-e-banho" />
                 </div>
               </div>
             </li>
             <li className="relative group">
               <div className="relative">
-                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                <Link
+                  href="/categoria/unhas"
+                  className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
+                >
                   UNHAS
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
-                </button>
+                </Link>
                 <div className="absolute top-full left-0 right-0 h-2 bg-white" />
                 <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="unhas" />
