@@ -56,6 +56,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
   useEffect(() => {
     const initializeData = async () => {
       try {
+        console.log("Iniciando carregamento dos dados...");
         // Carrega dados básicos primeiro
         const [categoriesResult, brandsResult] = await Promise.all([
           supabase.from("categories").select("*").order("name"),
@@ -71,11 +72,15 @@ export default function EditProductPage({ params }: EditProductPageProps) {
           .select(
             `
             *,
-            product_classifications (classification_id)
+            product_classifications (classification_id),
+            category:categories(id, name),
+            subcategory:subcategories(id, name)
           `
           )
           .eq("id", params.id)
           .single();
+
+        console.log("Dados do produto carregados:", product);
 
         if (error) throw error;
 
@@ -95,33 +100,53 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                 .order("type, name"),
             ]);
 
-            if (subcatsResult.data) setSubcategories(subcatsResult.data);
-            if (classificationsResult.data)
+            console.log("Subcategorias carregadas:", subcatsResult.data);
+            console.log(
+              "Classificações carregadas:",
+              classificationsResult.data
+            );
+
+            if (subcatsResult.data) {
+              console.log("Atualizando subcategorias...");
+              setSubcategories(subcatsResult.data);
+            }
+            if (classificationsResult.data) {
+              console.log("Atualizando classificações...");
               setClassifications(classificationsResult.data);
+            }
           }
 
           // Atualiza o formulário com todos os dados
-          setFormData({
+          const formDataUpdate = {
             name: product.name || "",
             description: product.description || "",
-            price: (product.sale_price || "").toString(),
-            original_price: (product.price || "").toString(),
-            category_id: (product.category_id || "").toString(),
-            subcategory_id: (product.subcategory_id || "").toString(),
-            brand_id: (product.brand_id || "").toString(),
-            stock_quantity: (product.stock_quantity || "").toString(),
+            price: product.sale_price ? product.sale_price.toString() : "",
+            original_price: product.price ? product.price.toString() : "",
+            category_id: product.category_id
+              ? product.category_id.toString()
+              : "",
+            subcategory_id: product.subcategory_id
+              ? product.subcategory_id.toString()
+              : "",
+            brand_id: product.brand_id ? product.brand_id.toString() : "",
+            stock_quantity: product.stock_quantity
+              ? product.stock_quantity.toString()
+              : "",
             featured: Boolean(product.featured),
             is_new_release: Boolean(product.is_new_release),
             is_best_seller: Boolean(product.is_best_seller),
             images: product.images || [],
-          });
+          };
+
+          console.log("Atualizando formData com:", formDataUpdate);
+          setFormData(formDataUpdate);
 
           if (product.product_classifications) {
-            setSelectedClassifications(
-              product.product_classifications.map(
-                (pc: any) => pc.classification_id
-              )
+            const classifications = product.product_classifications.map(
+              (pc: { classification_id: number }) => pc.classification_id
             );
+            console.log("Classificações selecionadas:", classifications);
+            setSelectedClassifications(classifications);
           }
         }
       } catch (error) {
@@ -136,18 +161,16 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     };
 
     initializeData();
-  }, []); // Executa apenas uma vez na montagem
+  }, [params.id, supabase, router, toast]); // Adicionando todas as dependências necessárias
 
   // Atualiza subcategorias e classificações quando a categoria muda
   useEffect(() => {
-    if (
-      formData.category_id &&
-      formData.category_id !==
-        categories
-          .find((c) => c.id.toString() === formData.category_id)
-          ?.id.toString()
-    ) {
+    if (formData.category_id) {
       const loadCategoryData = async () => {
+        console.log(
+          "Carregando dados da nova categoria:",
+          formData.category_id
+        );
         const [subcatsResult, classificationsResult] = await Promise.all([
           supabase
             .from("subcategories")
@@ -161,15 +184,22 @@ export default function EditProductPage({ params }: EditProductPageProps) {
             .order("type, name"),
         ]);
 
-        if (subcatsResult.data) setSubcategories(subcatsResult.data);
-        if (classificationsResult.data)
+        if (subcatsResult.data) {
+          console.log("Novas subcategorias carregadas:", subcatsResult.data);
+          setSubcategories(subcatsResult.data);
+        }
+        if (classificationsResult.data) {
+          console.log(
+            "Novas classificações carregadas:",
+            classificationsResult.data
+          );
           setClassifications(classificationsResult.data);
-        setSelectedClassifications([]); // Limpa classificações ao mudar de categoria
+        }
       };
 
       loadCategoryData();
     }
-  }, [formData.category_id]);
+  }, [formData.category_id, supabase]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
