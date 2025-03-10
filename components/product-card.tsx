@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Product } from "@/lib/supabase";
+import { Product } from "@/lib/types";
 
 interface WishlistButtonProps {
   productId: number;
@@ -72,18 +72,24 @@ export function ProductCard({
       : `/placeholder.svg?height=200&width=200&text=Produto${product.id}`;
 
   return (
-    <div className="group">
+    <div className="group border border-transparent hover:border-gray-200 transition-colors duration-200 rounded-lg p-3">
       <div className="relative">
         <Link href={`/produto/${product.slug}`}>
-          <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
+          <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 group">
             <Image
               src={product.images[0]}
               alt={product.name}
-              className="object-cover object-center hover:scale-105 transition-transform duration-300"
+              className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority={priority}
             />
+            {/* Overlay "Ver mais" */}
+            <div className="absolute bottom-0 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="bg-black text-white text-xs font-medium py-2 text-center uppercase tracking-wide">
+                Ver mais
+              </div>
+            </div>
             <div className="absolute top-2 left-2 flex flex-col items-start gap-0.5">
               {hasDiscount && (
                 <Badge className="bg-black text-white rounded-none px-1.5 py-0.5 text-[10px] font-medium inline-flex leading-none">

@@ -33,10 +33,20 @@ export function Header() {
   const [session, setSession] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const supabase = createClientComponentClient();
   const router = useRouter();
   const { toggleCart, total_items } = useCart();
   const { query, setQuery, results, isLoading } = useSearch();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     // Verifica o estado da sessão ao montar o componente
@@ -89,7 +99,11 @@ export function Header() {
     userData?.avatar_url || session?.user?.user_metadata?.avatar_url;
 
   return (
-    <header className="bg-white border-b border-gray-200">
+    <header
+      className={`bg-white border-b border-gray-200 transition-shadow duration-200 ${
+        isScrolled ? "shadow-md" : ""
+      }`}
+    >
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center gap-4">
           {/* Botão de menu mobile */}
@@ -404,19 +418,19 @@ export function Header() {
         <nav className="hidden md:flex items-center justify-between mt-4 text-sm bg-white">
           <ul className="flex space-x-6">
             {[
-              "Skincare",
-              "Maquiagem",
-              "Cabelos",
-              "Perfumes",
-              "Corpo & Banho",
-              "Unhas",
+              "SKINCARE",
+              "MAQUIAGEM",
+              "CABELOS",
+              "PERFUMES",
+              "CORPO & BANHO",
+              "UNHAS",
             ].map((category) => (
               <li key={category}>
                 <Link
                   href={`/categoria/${category
                     .toLowerCase()
                     .replace(/ & /g, "-e-")}`}
-                  className="text-gray-700 hover:text-orange-500 flex items-center"
+                  className="text-gray-700 hover:text-orange-500 flex items-center font-medium tracking-wide"
                 >
                   {category}
                   <ChevronDown className="ml-1 h-4 w-4" />
