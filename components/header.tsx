@@ -144,13 +144,13 @@ export function Header() {
                 placeholder="Buscar por produtos"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full rounded-full bg-white border-gray-200 pl-4 pr-10 py-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-500"
+                className="w-full rounded-full bg-gray-100 border-gray-300 pl-4 pr-10 py-2 focus:ring-black focus:border-black placeholder-gray-900 text-gray-900"
               />
               <Button
                 type="submit"
                 variant="ghost"
                 size="icon"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-900 hover:text-black"
               >
                 <Search className="h-5 w-5" />
               </Button>
@@ -349,13 +349,13 @@ export function Header() {
               placeholder="Buscar por produtos"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full rounded-full bg-white border-gray-200 pl-4 pr-10 py-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-500"
+              className="w-full rounded-full bg-gray-100 border-gray-300 pl-4 pr-10 py-2 focus:ring-black focus:border-black placeholder-gray-900 text-gray-900"
             />
             <Button
               type="submit"
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-900 hover:text-black"
             >
               <Search className="h-5 w-5" />
             </Button>
