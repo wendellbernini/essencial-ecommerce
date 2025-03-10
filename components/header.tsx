@@ -28,12 +28,14 @@ import { UserAvatar } from "@/components/ui/user-avatar";
 import { useCart } from "@/contexts/cart-context";
 import { useSearch } from "@/hooks/useSearch";
 import { formatPrice } from "@/lib/utils";
+import { CategoryMenu } from "@/components/category-menu";
 
 export function Header() {
   const [session, setSession] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
   const supabase = createClientComponentClient();
   const router = useRouter();
   const { toggleCart, total_items } = useCart();
@@ -415,28 +417,80 @@ export function Header() {
         </div>
 
         {/* Navegação de categorias */}
-        <nav className="hidden md:flex items-center justify-between mt-4 text-sm bg-white">
-          <ul className="flex space-x-6">
-            {[
-              "SKINCARE",
-              "MAQUIAGEM",
-              "CABELOS",
-              "PERFUMES",
-              "CORPO & BANHO",
-              "UNHAS",
-            ].map((category) => (
-              <li key={category}>
-                <Link
-                  href={`/categoria/${category
-                    .toLowerCase()
-                    .replace(/ & /g, "-e-")}`}
-                  className="text-gray-700 hover:text-orange-500 flex items-center font-medium tracking-wide"
-                >
-                  {category}
-                  <ChevronDown className="ml-1 h-4 w-4" />
-                </Link>
-              </li>
-            ))}
+        <nav className="hidden md:flex items-center justify-between mt-4">
+          <ul className="flex space-x-8">
+            <li className="relative group">
+              <div className="relative">
+                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                  SKINCARE
+                  <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                </button>
+                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
+                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                  <CategoryMenu categorySlug="skincare" />
+                </div>
+              </div>
+            </li>
+            <li className="relative group">
+              <div className="relative">
+                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                  MAQUIAGEM
+                  <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                </button>
+                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
+                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                  <CategoryMenu categorySlug="maquiagem" />
+                </div>
+              </div>
+            </li>
+            <li className="relative group">
+              <div className="relative">
+                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                  CABELOS
+                  <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                </button>
+                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
+                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                  <CategoryMenu categorySlug="cabelos" />
+                </div>
+              </div>
+            </li>
+            <li className="relative group">
+              <div className="relative">
+                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                  PERFUMES
+                  <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                </button>
+                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
+                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                  <CategoryMenu categorySlug="perfumes" />
+                </div>
+              </div>
+            </li>
+            <li className="relative group">
+              <div className="relative">
+                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                  CORPO & BANHO
+                  <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                </button>
+                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
+                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                  <CategoryMenu categorySlug="corpo-banho" />
+                </div>
+              </div>
+            </li>
+            <li className="relative group">
+              <div className="relative">
+                <button className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]">
+                  UNHAS
+                  <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                </button>
+                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
+                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                  <CategoryMenu categorySlug="unhas" />
+                </div>
+              </div>
+            </li>
           </ul>
         </nav>
       </div>
