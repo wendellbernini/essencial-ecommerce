@@ -24,8 +24,8 @@ export function RootLayout({ children }: { children: React.ReactNode }) {
         </div>
         <Header />
       </div>
-      <div className="h-[120px]" />{" "}
-      {/* Espaçador para compensar o header fixo */}
+      <div className="h-[140px]" />{" "}
+      {/* Aumentando o espaçador para compensar o header fixo */}
       <main className="flex-grow">{children}</main>
       <Footer />
     </div>
