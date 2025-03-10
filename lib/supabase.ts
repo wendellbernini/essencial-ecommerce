@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { Category, Product, Brand } from "@/lib/types";
 
 // Tipos para as tabelas do Supabase
 export type Category = {
@@ -19,13 +18,34 @@ export type Product = {
   description: string | null;
   price: number;
   sale_price: number | null;
-  category_id: number;
-  stock_quantity: number;
   images: string[];
+  category_id: number;
+  brand_id: number;
+  stock_quantity: number;
   featured: boolean;
   is_new_release: boolean;
   created_at: string;
   updated_at: string;
+  rating?: number;
+  reviews_count?: number;
+  categories?: {
+    name: string;
+    slug: string;
+  };
+  brand?: {
+    name: string;
+    slug: string;
+    logo_url: string | null;
+  };
+};
+
+export type Brand = {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  created_at: string;
 };
 
 // Cria o cliente Supabase usando as variáveis de ambiente
@@ -75,7 +95,13 @@ export async function getFeaturedProducts() {
     console.log("Iniciando busca de produtos em destaque...");
     const { data, error } = await supabase
       .from("products")
-      .select("*")
+      .select(
+        `
+        *,
+        categories:category_id(name, slug),
+        brand:brand_id(name, slug, logo_url)
+      `
+      )
       .eq("featured", true)
       .order("created_at", { ascending: false });
 
@@ -92,113 +118,18 @@ export async function getFeaturedProducts() {
   }
 }
 
-// Funções que precisam de cookies (usam o cliente server)
-export function createServerSupabaseClient() {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Variáveis de ambiente do Supabase não configuradas");
-  }
-
-  const cookieStore = cookies();
-
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value;
-      },
-      set(name: string, value: string, options: any) {
-        try {
-          cookieStore.set({ name, value, ...options });
-        } catch (error) {
-          // Erro ao definir cookie em ambiente read-only
-        }
-      },
-      remove(name: string, options: any) {
-        try {
-          cookieStore.delete({ name, ...options });
-        } catch (error) {
-          // Erro ao remover cookie em ambiente read-only
-        }
-      },
-    },
-  });
-}
-
-// Busca um produto pelo slug
-export async function getProductBySlug(slug: string) {
-  try {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("slug", slug)
-      .single();
-
-    if (error) {
-      console.error(`Erro ao buscar produto com slug ${slug}:`, error);
-      throw error;
-    }
-
-    console.log("Produto encontrado:", data);
-    return data as Product;
-  } catch (error) {
-    console.error(`Erro ao buscar produto com slug ${slug}:`, error);
-    return null;
-  }
-}
-
-// Busca produtos por categoria
-export async function getProductsByCategory(categoryId: number) {
-  try {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("category_id", categoryId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error(
-        `Erro ao buscar produtos da categoria ${categoryId}:`,
-        error
-      );
-      throw error;
-    }
-
-    console.log(`Produtos da categoria ${categoryId} encontrados:`, data);
-    return data as Product[];
-  } catch (error) {
-    console.error(`Erro ao buscar produtos da categoria ${categoryId}:`, error);
-    return [];
-  }
-}
-
-// Busca uma categoria pelo slug
-export async function getCategoryBySlug(slug: string) {
-  try {
-    console.log("Iniciando busca de categoria com slug:", slug);
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*")
-      .eq("slug", slug)
-      .single();
-
-    if (error) {
-      console.error(`Erro ao buscar categoria com slug ${slug}:`, error);
-      return null;
-    }
-
-    console.log("Categoria encontrada:", data);
-    return data as Category;
-  } catch (error) {
-    console.error(`Erro ao buscar categoria com slug ${slug}:`, error);
-    return null;
-  }
-}
-
 export async function getNewReleases() {
   try {
     console.log("Iniciando busca de lançamentos...");
     const { data, error } = await supabase
       .from("products")
-      .select("*")
+      .select(
+        `
+        *,
+        categories:category_id(name, slug),
+        brand:brand_id(name, slug, logo_url)
+      `
+      )
       .eq("is_new_release", true)
       .limit(6)
       .order("created_at", { ascending: false });
@@ -221,15 +152,6 @@ export async function getActivePromoBanners() {
     console.log("Iniciando busca de banners promocionais ativos...");
     const now = new Date().toISOString();
 
-    // Primeiro, vamos buscar todos os banners ativos para debug
-    const { data: allBanners, error: allError } = await supabase
-      .from("promo_banners")
-      .select("*")
-      .eq("is_active", true);
-
-    console.log("Todos os banners ativos:", allBanners);
-
-    // Agora fazemos a busca com os filtros
     const { data, error } = await supabase
       .from("promo_banners")
       .select("*")
@@ -253,10 +175,15 @@ export async function getPromotionalProducts() {
   try {
     console.log("=== BUSCANDO PRODUTOS PROMOCIONAIS ===");
 
-    // Buscar todos os produtos e filtrar no código
     const { data: allProducts, error } = await supabase
       .from("products")
-      .select("*")
+      .select(
+        `
+        *,
+        categories:category_id(name, slug),
+        brand:brand_id(name, slug, logo_url)
+      `
+      )
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -285,5 +212,53 @@ export async function getPromotionalProducts() {
   } catch (error) {
     console.error("Erro ao buscar produtos em promoção:", error);
     return [];
+  }
+}
+
+export async function getBrands() {
+  try {
+    console.log("Iniciando busca de todas as marcas...");
+    const { data, error } = await supabase
+      .from("brands")
+      .select("*")
+      .order("name");
+
+    if (error) {
+      console.error("Erro ao buscar marcas:", error);
+      return [];
+    }
+
+    if (!data || data.length === 0) {
+      console.log("Nenhuma marca encontrada no banco de dados");
+      return [];
+    }
+
+    console.log(`${data.length} marcas encontradas:`, data);
+    return data as Brand[];
+  } catch (error) {
+    console.error("Erro ao buscar marcas:", error);
+    return [];
+  }
+}
+
+export async function getBrandBySlug(slug: string) {
+  try {
+    console.log("Iniciando busca de marca com slug:", slug);
+    const { data, error } = await supabase
+      .from("brands")
+      .select("*")
+      .eq("slug", slug)
+      .single();
+
+    if (error) {
+      console.error(`Erro ao buscar marca com slug ${slug}:`, error);
+      return null;
+    }
+
+    console.log("Marca encontrada:", data);
+    return data as Brand;
+  } catch (error) {
+    console.error(`Erro ao buscar marca com slug ${slug}:`, error);
+    return null;
   }
 }

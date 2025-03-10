@@ -109,6 +109,9 @@ export function ProductCard({
           <h3 className="text-sm text-gray-800 line-clamp-2 min-h-[2.5rem]">
             {product.name}
           </h3>
+          {product.brand && (
+            <p className="text-xs text-gray-500 mt-1">{product.brand.name}</p>
+          )}
           <div className="flex items-center mt-1 mb-1">
             <div className="flex items-center">
               {Array.from({ length: 5 }).map((_, i) => (

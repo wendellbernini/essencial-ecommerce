@@ -1,5 +1,5 @@
-import { createServerSupabaseClient } from "@/lib/supabase";
-import { Category, Product } from "@/lib/supabase";
+import { createServerSupabaseClient } from "@/lib/server-supabase";
+import { Product } from "@/lib/types";
 
 // Tipos
 export type DashboardStats = {
@@ -138,27 +138,6 @@ export async function getProducts(): Promise<Product[]> {
     return data || [];
   } catch (error) {
     console.error("Erro ao buscar produtos:", error);
-    return [];
-  }
-}
-
-export async function getCategories(): Promise<Category[]> {
-  const supabase = createServerSupabaseClient();
-
-  try {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*")
-      .order("name");
-
-    if (error) {
-      console.error("Erro ao buscar categorias:", error);
-      return [];
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error("Erro ao buscar categorias:", error);
     return [];
   }
 }

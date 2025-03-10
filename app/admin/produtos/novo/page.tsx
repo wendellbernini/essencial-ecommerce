@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Category } from "@/lib/supabase";
@@ -15,16 +15,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { Switch } from "@/components/ui/switch";
+import { Brand } from "@/lib/types";
 
 export default function NewProductPage() {
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createClientComponentClient();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -32,6 +34,7 @@ export default function NewProductPage() {
     price: "",
     original_price: "",
     category_id: "",
+    brand_id: "",
     stock_quantity: "",
     featured: false,
     is_new_release: false,
@@ -41,6 +44,7 @@ export default function NewProductPage() {
 
   useEffect(() => {
     loadCategories();
+    loadBrands();
   }, []);
 
   async function loadCategories() {
@@ -49,6 +53,11 @@ export default function NewProductPage() {
       .select("*")
       .order("name");
     if (data) setCategories(data);
+  }
+
+  async function loadBrands() {
+    const { data } = await supabase.from("brands").select("*");
+    if (data) setBrands(data);
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -61,6 +70,7 @@ export default function NewProductPage() {
       const requiredFields = {
         name: "Nome do produto",
         category_id: "Categoria",
+        brand_id: "Marca",
       };
 
       for (const [field, label] of Object.entries(requiredFields)) {
@@ -92,6 +102,7 @@ export default function NewProductPage() {
         sale_price: formData.price ? Number(formData.price) : null,
         stock_quantity: Number(formData.stock_quantity) || 0,
         category_id: Number(formData.category_id),
+        brand_id: Number(formData.brand_id),
         featured: formData.featured,
         is_new_release: formData.is_new_release,
         is_best_seller: formData.is_best_seller,
@@ -219,20 +230,39 @@ export default function NewProductPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="stock">Quantidade em Estoque</Label>
-              <Input
-                id="stock"
-                type="number"
-                min="0"
-                value={formData.stock_quantity}
-                onChange={(e) =>
-                  setFormData({ ...formData, stock_quantity: e.target.value })
-                }
-                placeholder="0"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="stock">Quantidade em Estoque</Label>
+            <Input
+              id="stock"
+              type="number"
+              min="0"
+              value={formData.stock_quantity}
+              onChange={(e) =>
+                setFormData({ ...formData, stock_quantity: e.target.value })
+              }
+              placeholder="0"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="brand">Marca</Label>
+            <Select
+              value={formData.brand_id}
+              onValueChange={(value) =>
+                setFormData({ ...formData, brand_id: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma marca" />
+              </SelectTrigger>
+              <SelectContent>
+                {brands.map((brand) => (
+                  <SelectItem key={brand.id} value={brand.id.toString()}>
+                    {brand.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

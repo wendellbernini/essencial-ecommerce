@@ -5,7 +5,7 @@ import { Heart, Share2, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getProductBySlug } from "@/lib/supabase";
+import { getProductBySlug } from "@/lib/server-data";
 
 interface ProductPageProps {
   params: {

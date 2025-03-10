@@ -46,6 +46,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       current: pathname.startsWith("/admin/categorias"),
     },
     {
+      name: "Marcas",
+      href: "/admin/marcas",
+      icon: Package,
+      current: pathname.startsWith("/admin/marcas"),
+    },
+    {
       name: "Banners",
       href: "/admin/banners",
       icon: Images,

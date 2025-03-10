@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCard } from "@/components/product-card";
-import { getCategoryBySlug, getProductsByCategory } from "@/lib/supabase";
+import { getCategoryBySlug, getProductsByCategory } from "@/lib/server-data";
 
 // Força a página a ser renderizada dinamicamente
 export const dynamic = "force-dynamic";

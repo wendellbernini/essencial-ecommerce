@@ -16,11 +16,12 @@ export interface Product {
   id: number;
   name: string;
   slug: string;
-  description: string;
+  description: string | null;
   price: number;
   sale_price: number | null;
   images: string[];
   category_id: number;
+  brand_id: number;
   stock_quantity: number;
   featured: boolean;
   is_new_release: boolean;
@@ -32,6 +33,11 @@ export interface Product {
     name: string;
     slug: string;
   };
+  brand?: {
+    name: string;
+    slug: string;
+    logo_url: string | null;
+  };
 }
 
 export interface SecondaryBanner {
@@ -42,6 +48,16 @@ export interface SecondaryBanner {
   type: "double" | "carousel";
   order_index: number;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Brand {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  logo_url: string | null;
   created_at: string;
   updated_at: string;
 }

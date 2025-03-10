@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProductCard } from "@/components/product-card";
 import { Product } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProductGrid } from "@/components/product-grid";
 
 export function PromotionalProducts({ products }: { products: Product[] }) {
   const [currentPage, setCurrentPage] = useState(0);
@@ -97,18 +97,13 @@ export function PromotionalProducts({ products }: { products: Product[] }) {
               style={{ transform: `translateX(-${currentPage * 100}%)` }}
             >
               {Array.from({ length: totalPages }).map((_, pageIndex) => (
-                <div
-                  key={pageIndex}
-                  className="w-full flex-shrink-0 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4"
-                >
-                  {filteredProducts
-                    .slice(
+                <div key={pageIndex} className="w-full flex-shrink-0">
+                  <ProductGrid
+                    products={filteredProducts.slice(
                       pageIndex * productsPerPage,
                       (pageIndex + 1) * productsPerPage
-                    )
-                    .map((product) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
+                    )}
+                  />
                 </div>
               ))}
             </div>
