@@ -7,6 +7,7 @@ import {
   User,
   ChevronDown,
   Menu,
+  ChevronRight,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -75,33 +76,19 @@ export default async function Home() {
         <PromoBanner slides={promoBanners} />
 
         {/* Categorias populares */}
-        <section className="py-12 bg-white">
-          <div className="container mx-auto px-4">
-            <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
-              Categorias populares
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <section className="py-6 bg-white">
+          <div className="container mx-auto">
+            <div className="flex items-center justify-between">
               {categories.map((category) => (
                 <Link
                   href={`/categoria/${category.slug}`}
                   key={category.id}
-                  className="text-center group"
+                  className="flex items-center justify-between px-4 py-2.5 text-center rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all text-sm font-medium shadow-[0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] flex-1 mx-2 group"
                 >
-                  <div className="rounded-full overflow-hidden mb-3 mx-auto w-24 h-24 md:w-32 md:h-32">
-                    <Image
-                      src={
-                        category.image_url ||
-                        "/placeholder.svg?height=150&width=150"
-                      }
-                      alt={category.name}
-                      width={150}
-                      height={150}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <h3 className="text-sm font-medium text-gray-800">
+                  <span className="uppercase tracking-[0.2em] w-full text-center">
                     {category.name}
-                  </h3>
+                  </span>
+                  <ChevronRight className="w-4 h-4 flex-shrink-0 text-gray-400 group-hover:text-gray-600" />
                 </Link>
               ))}
             </div>
@@ -116,17 +103,20 @@ export default async function Home() {
         </section>
 
         {/* Banners Secundários */}
-        <section className="py-12 bg-white">
+        <section className="py-8 bg-white">
           <div className="container mx-auto px-4">
             <SecondaryBanners
               doubleBanners={doubleBanners}
               carouselBanners={carouselBanners}
             />
           </div>
+          <div className="container mx-auto px-4 mt-8">
+            <div className="border-b border-gray-100"></div>
+          </div>
         </section>
 
         {/* Produtos em destaque */}
-        <section className="py-12 bg-white">
+        <section className="py-8 bg-white">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900">

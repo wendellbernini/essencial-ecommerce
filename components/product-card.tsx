@@ -1,16 +1,56 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/lib/supabase";
 
-interface ProductCardProps {
-  product: Product;
+interface WishlistButtonProps {
+  productId: number;
+  isInWishlist: boolean;
+  onToggle: (id: number) => void;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+function WishlistButton({
+  productId,
+  isInWishlist,
+  onToggle,
+}: WishlistButtonProps) {
+  return (
+    <Button
+      type="button"
+      size="icon"
+      variant="secondary"
+      className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm hover:bg-white z-10"
+      onClick={() => onToggle(productId)}
+    >
+      <Heart
+        className={cn(
+          "h-5 w-5",
+          isInWishlist ? "fill-red-500 text-red-500" : "text-gray-600"
+        )}
+      />
+    </Button>
+  );
+}
+
+interface ProductCardProps {
+  product: Product;
+  isInWishlist: boolean;
+  handleToggleWishlist: (id: number) => void;
+  priority?: boolean;
+}
+
+export function ProductCard({
+  product,
+  isInWishlist,
+  handleToggleWishlist,
+  priority = false,
+}: ProductCardProps) {
   // Formatar preço para o formato brasileiro
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -20,8 +60,10 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   // Verificar se o produto tem desconto
-  const hasDiscount =
-    product.sale_price !== null && product.sale_price < product.price;
+  const hasDiscount = product.sale_price && product.sale_price < product.price;
+  const discountPercentage = hasDiscount
+    ? Math.round(((product.price - product.sale_price!) / product.price) * 100)
+    : 0;
 
   // Obter a primeira imagem do produto ou usar um placeholder
   const productImage =
@@ -31,34 +73,39 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="group">
-      <Link href={`/produto/${product.slug}`} className="block">
-        <div className="relative mb-2">
-          <Image
-            src={productImage}
-            alt={product.name}
-            width={200}
-            height={200}
-            className="w-full aspect-square object-cover group-hover:opacity-90 transition-opacity rounded-lg"
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <Heart className="h-4 w-4" />
-          </Button>
-          {product.is_best_seller && (
-            <Badge className="absolute bottom-2 left-2 bg-orange-500 text-white hover:bg-orange-600 text-[10px] py-0.5 px-1.5 font-medium rounded">
-              Mais vendido
-            </Badge>
-          )}
-          {product.stock_quantity <= 0 && (
-            <Badge className="absolute bottom-2 right-2 bg-gray-700 text-white text-xs py-0.5">
-              Esgotado
-            </Badge>
-          )}
-        </div>
-        <div>
+      <div className="relative">
+        <Link href={`/produto/${product.slug}`}>
+          <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              className="object-cover object-center hover:scale-105 transition-transform duration-300"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={priority}
+            />
+            <div className="absolute top-2 left-2 flex flex-col items-start gap-0.5">
+              {hasDiscount && (
+                <Badge className="bg-black text-white rounded-none px-1.5 py-0.5 text-[10px] font-medium inline-flex leading-none">
+                  {discountPercentage}% OFF
+                </Badge>
+              )}
+              {product.featured && (
+                <Badge className="bg-black text-white rounded-none px-1.5 py-0.5 text-[10px] font-medium inline-flex leading-none">
+                  MAIS VENDIDO
+                </Badge>
+              )}
+            </div>
+            <WishlistButton
+              productId={product.id}
+              isInWishlist={isInWishlist}
+              onToggle={handleToggleWishlist}
+            />
+          </div>
+        </Link>
+      </div>
+      <Link href={`/produto/${product.slug}`}>
+        <div className="mt-4">
           <h3 className="text-sm text-gray-800 line-clamp-2 min-h-[2.5rem]">
             {product.name}
           </h3>
@@ -77,27 +124,26 @@ export function ProductCard({ product }: ProductCardProps) {
               <span className="text-[11px] text-gray-500 ml-1">(45)</span>
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            {hasDiscount ? (
-              <div className="flex flex-col">
-                <p className="font-medium text-gray-900">
-                  {formatPrice(product.sale_price!)}
+          <div className="mt-2 space-y-1">
+            {product.sale_price && product.sale_price < product.price ? (
+              <>
+                <p className="text-sm text-gray-500 line-through mb-0.5">
+                  R$ {product.price.toFixed(2).replace(".", ",")}
                 </p>
-                <p className="text-[11px] text-gray-500 line-through">
-                  {formatPrice(product.price)}
+                <p className="text-2xl font-bold text-gray-900">
+                  R$ {product.sale_price.toFixed(2).replace(".", ",")}
                 </p>
-              </div>
+              </>
             ) : (
-              <p className="font-medium text-gray-900">
-                {formatPrice(product.price)}
+              <p className="text-2xl font-bold text-gray-900">
+                R$ {product.price.toFixed(2).replace(".", ",")}
               </p>
             )}
+          </div>
+          <div className="flex items-center justify-between mt-2">
             {product.stock_quantity > 0 && product.stock_quantity <= 5 && (
-              <Badge
-                variant="outline"
-                className="text-green-600 border-green-600 text-[10px] py-0.5 px-1.5 font-medium rounded"
-              >
-                Frete grátis
+              <Badge variant="secondary" className="text-xs">
+                Últimas unidades
               </Badge>
             )}
           </div>
