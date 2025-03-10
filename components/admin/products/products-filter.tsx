@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Category } from "@/lib/supabase";
+import { Category, Brand } from "@/lib/types";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState, useCallback } from "react";
 
@@ -17,14 +17,17 @@ interface ProductsFilterProps {
   onFilterChange: (filters: {
     search: string;
     category: string;
+    brand: string;
     status: string;
   }) => void;
 }
 
 export function ProductsFilter({ onFilterChange }: ProductsFilterProps) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedBrand, setSelectedBrand] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const supabase = createClientComponentClient();
 
@@ -39,7 +42,20 @@ export function ProductsFilter({ onFilterChange }: ProductsFilterProps) {
         setCategories(data);
       }
     }
+
+    async function loadBrands() {
+      const { data, error } = await supabase
+        .from("brands")
+        .select("*")
+        .order("name");
+
+      if (!error && data) {
+        setBrands(data);
+      }
+    }
+
     loadCategories();
+    loadBrands();
   }, []);
 
   // Função para atualizar filtros
@@ -47,9 +63,10 @@ export function ProductsFilter({ onFilterChange }: ProductsFilterProps) {
     onFilterChange({
       search,
       category: selectedCategory,
+      brand: selectedBrand,
       status: selectedStatus,
     });
-  }, [search, selectedCategory, selectedStatus, onFilterChange]);
+  }, [search, selectedCategory, selectedBrand, selectedStatus, onFilterChange]);
 
   // Atualiza os filtros quando os valores mudam
   useEffect(() => {
@@ -59,6 +76,7 @@ export function ProductsFilter({ onFilterChange }: ProductsFilterProps) {
   const handleClearFilters = () => {
     setSearch("");
     setSelectedCategory("all");
+    setSelectedBrand("all");
     setSelectedStatus("all");
   };
 
@@ -79,6 +97,19 @@ export function ProductsFilter({ onFilterChange }: ProductsFilterProps) {
           {categories.map((category) => (
             <SelectItem key={category.id} value={String(category.id)}>
               {category.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Marca" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todas as marcas</SelectItem>
+          {brands.map((brand) => (
+            <SelectItem key={brand.id} value={String(brand.id)}>
+              {brand.name}
             </SelectItem>
           ))}
         </SelectContent>

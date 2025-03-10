@@ -147,7 +147,7 @@ export function ProductsTable({ data, onDelete }: ProductsTableProps) {
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           {row.original.name}
-          {row.original.featured && (
+          {row.original.is_best_seller && (
             <Badge variant="secondary">Mais Vendido</Badge>
           )}
         </div>

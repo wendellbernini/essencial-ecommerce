@@ -21,7 +21,16 @@ export default function ProductsPage() {
       setIsLoading(true);
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select(
+          `
+          *,
+          brand:brands(
+            id,
+            name,
+            slug
+          )
+        `
+        )
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -65,10 +74,12 @@ export default function ProductsPage() {
     ({
       search,
       category,
+      brand,
       status,
     }: {
       search: string;
       category: string;
+      brand: string;
       status: string;
     }) => {
       let filtered = [...products];
@@ -84,6 +95,13 @@ export default function ProductsPage() {
       if (category !== "all") {
         filtered = filtered.filter(
           (product) => product.category_id === parseInt(category)
+        );
+      }
+
+      // Filtro de marca
+      if (brand !== "all") {
+        filtered = filtered.filter(
+          (product) => product.brand_id === parseInt(brand)
         );
       }
 

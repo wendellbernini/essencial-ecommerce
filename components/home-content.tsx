@@ -1,6 +1,7 @@
 "use client";
 
 import { ProductGrid } from "@/components/product-grid";
+import { ProductGridWithNavigation } from "@/components/product-grid-with-navigation";
 import { PromoBanner } from "@/components/promo-banner";
 import { PromotionalProducts } from "@/components/promotional-products";
 import { SecondaryBanners } from "@/components/secondary-banners";
@@ -119,7 +120,11 @@ export function HomeContent({
               </Tabs>
             </div>
 
-            <ProductGrid products={featuredProducts.slice(0, 10)} />
+            <ProductGridWithNavigation
+              products={featuredProducts}
+              productsPerPage={10}
+              variant="compact"
+            />
           </div>
         </section>
 

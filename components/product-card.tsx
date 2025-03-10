@@ -90,7 +90,7 @@ export function ProductCard({
                   {discountPercentage}% OFF
                 </Badge>
               )}
-              {product.featured && (
+              {product.is_best_seller && (
                 <Badge className="bg-black text-white rounded-none px-1.5 py-0.5 text-[10px] font-medium inline-flex leading-none">
                   MAIS VENDIDO
                 </Badge>
