@@ -66,7 +66,7 @@ export function CategoryMenu({ categorySlug }: CategoryMenuProps) {
   }, {} as Record<string, Classification[]>);
 
   return (
-    <div className="absolute left-0 right-0 bg-white shadow-lg z-50 min-w-[600px] rounded-b-lg">
+    <div className="absolute left-0 right-0 bg-white shadow-lg z-50 min-w-[600px] rounded-b-lg border-t border-gray-100">
       <div className="p-6 grid grid-cols-3 gap-8">
         {/* Subcategorias */}
         <div>

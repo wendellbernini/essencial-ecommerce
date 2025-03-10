@@ -425,8 +425,8 @@ export function Header() {
                   SKINCARE
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
                 </button>
-                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
-                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="skincare" />
                 </div>
               </div>
@@ -437,8 +437,8 @@ export function Header() {
                   MAQUIAGEM
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
                 </button>
-                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
-                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="maquiagem" />
                 </div>
               </div>
@@ -449,8 +449,8 @@ export function Header() {
                   CABELOS
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
                 </button>
-                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
-                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="cabelos" />
                 </div>
               </div>
@@ -461,8 +461,8 @@ export function Header() {
                   PERFUMES
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
                 </button>
-                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
-                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="perfumes" />
                 </div>
               </div>
@@ -473,8 +473,8 @@ export function Header() {
                   CORPO & BANHO
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
                 </button>
-                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
-                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="corpo-banho" />
                 </div>
               </div>
@@ -485,8 +485,8 @@ export function Header() {
                   UNHAS
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
                 </button>
-                <div className="absolute top-full left-0 right-0 h-4 bg-transparent" />
-                <div className="absolute top-[calc(100%+1rem)] invisible group-hover:visible">
+                <div className="absolute top-full left-0 right-0 h-2 bg-white" />
+                <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <CategoryMenu categorySlug="unhas" />
                 </div>
               </div>
