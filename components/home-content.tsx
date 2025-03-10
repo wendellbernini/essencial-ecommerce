@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { BrandCarousel } from "@/components/brand-carousel";
+import { useState } from "react";
 
 interface HomeContentProps {
   featuredProducts: Product[];
@@ -37,6 +38,27 @@ export function HomeContent({
   carouselBanners,
   brands,
 }: HomeContentProps) {
+  const [priceFilter, setPriceFilter] = useState("all");
+
+  // Função para filtrar produtos por preço
+  const getFilteredProducts = () => {
+    if (priceFilter === "all") return featuredProducts;
+
+    return featuredProducts.filter((product) => {
+      const price = product.sale_price || product.price;
+      switch (priceFilter) {
+        case "under25":
+          return price <= 125;
+        case "under50":
+          return price <= 250;
+        case "under100":
+          return price <= 500;
+        default:
+          return true;
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <main>
@@ -89,6 +111,8 @@ export function HomeContent({
               </h2>
               <Tabs
                 defaultValue="all"
+                value={priceFilter}
+                onValueChange={setPriceFilter}
                 className="bg-white rounded-lg border border-gray-200"
               >
                 <TabsList className="bg-gray-50">
@@ -121,7 +145,7 @@ export function HomeContent({
             </div>
 
             <ProductGridWithNavigation
-              products={featuredProducts}
+              products={getFilteredProducts()}
               productsPerPage={10}
               variant="compact"
             />
