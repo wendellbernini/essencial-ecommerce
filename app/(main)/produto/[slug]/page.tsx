@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getProductBySlug } from "@/lib/server-data";
+import { ProductBreadcrumb } from "@/components/product-breadcrumb";
 
 interface ProductPageProps {
   params: {
@@ -52,6 +53,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumb */}
+        {product.categories && product.subcategories && (
+          <div className="mb-6">
+            <ProductBreadcrumb
+              category={product.categories}
+              subcategory={product.subcategories}
+              classifications={product.classifications}
+            />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Galeria de Imagens */}
           <div className="space-y-4">

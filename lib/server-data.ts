@@ -10,7 +10,9 @@ export async function getProductBySlug(slug: string) {
       .select(
         `
         *,
-        categories:category_id(name, slug),
+        categories:category_id(id, name, slug),
+        subcategories:subcategory_id(id, name, slug),
+        product_classifications(classification_id),
         brand:brand_id(name, slug, logo_url)
       `
       )
@@ -20,6 +22,22 @@ export async function getProductBySlug(slug: string) {
     if (error) {
       console.error(`Erro ao buscar produto com slug ${slug}:`, error);
       throw error;
+    }
+
+    // Se tiver classificações, buscar os detalhes delas
+    if (data?.product_classifications?.length > 0) {
+      const classificationIds = data.product_classifications.map(
+        (pc: { classification_id: number }) => pc.classification_id
+      );
+
+      const { data: classificationsData, error: classError } = await supabase
+        .from("classifications")
+        .select("*")
+        .in("id", classificationIds);
+
+      if (!classError && classificationsData) {
+        data.classifications = classificationsData;
+      }
     }
 
     return data as Product;

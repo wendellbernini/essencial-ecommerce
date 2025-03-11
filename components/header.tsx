@@ -497,15 +497,15 @@ export function Header() {
             <li className="relative group">
               <div className="relative">
                 <Link
-                  href="/categoria/unhas"
+                  href="/categoria/kits"
                   className="text-gray-700 group-hover:text-orange-500 flex items-center font-medium tracking-wide text-[13px]"
                 >
-                  UNHAS
+                  KITS
                   <ChevronDown className="ml-1 h-3.5 w-3.5" />
                 </Link>
                 <div className="absolute top-full left-0 right-0 h-2 bg-white" />
                 <div className="absolute top-[calc(100%+0.5rem)] invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
-                  <CategoryMenu categorySlug="unhas" />
+                  <CategoryMenu categorySlug="kits" />
                 </div>
               </div>
             </li>

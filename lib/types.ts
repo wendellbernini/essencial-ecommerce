@@ -31,9 +31,21 @@ export interface Product {
   rating?: number;
   reviews_count?: number;
   categories?: {
+    id: number;
     name: string;
     slug: string;
   };
+  subcategories?: {
+    id: number;
+    name: string;
+    slug: string;
+  };
+  classifications?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    type: string;
+  }>;
   brand?: {
     name: string;
     slug: string;
