@@ -393,14 +393,21 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
           <div className="space-y-2">
             <Label htmlFor="description">Descrição</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              placeholder="Digite a descrição do produto"
-            />
+            <div className="space-y-2">
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                placeholder="Digite a descrição do produto"
+                className="min-h-[200px]"
+              />
+              <p className="text-sm text-muted-foreground">
+                Suporta formatação Markdown. Use **texto** para negrito, *texto*
+                para itálico, ## para títulos, - para listas.
+              </p>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
