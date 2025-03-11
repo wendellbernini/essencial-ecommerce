@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProductBreadcrumb } from "@/components/product-breadcrumb";
+import { ProductImageZoom } from "@/components/product-image-zoom";
 import Reviews from "./reviews";
 import { Product, ReviewWithUser } from "@/lib/types";
 
@@ -135,15 +136,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Galeria de Imagens */}
           <div className="space-y-3">
-            <div className="aspect-[4/3] relative rounded-lg overflow-hidden border border-gray-200">
-              <Image
-                src={product.images[currentImageIndex]}
-                alt={`${product.name} - Imagem ${currentImageIndex + 1}`}
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
+            <ProductImageZoom
+              src={product.images[currentImageIndex]}
+              alt={`${product.name} - Imagem ${currentImageIndex + 1}`}
+              priority
+            />
             {product.images.length > 1 && (
               <div className="grid grid-cols-6 gap-2">
                 {product.images.map((image, index) => (
