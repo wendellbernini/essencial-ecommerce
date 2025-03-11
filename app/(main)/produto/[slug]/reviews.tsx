@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Star, ThumbsUp, Flag } from "lucide-react";
+import { Star, ThumbsUp, Flag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ export default function Reviews({
   const [rating, setRating] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
   const supabase = createClientComponentClient();
 
@@ -43,6 +44,17 @@ export default function Reviews({
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
+
+      if (user) {
+        // Verificar se o usuário é admin
+        const { data: userData } = await supabase
+          .from("users")
+          .select("is_admin")
+          .eq("id", user.id)
+          .single();
+
+        setIsAdmin(userData?.is_admin || false);
+      }
     };
     getUser();
   }, [supabase.auth]);
@@ -152,21 +164,44 @@ export default function Reviews({
     }
 
     try {
-      const review = reviews.find((r) => r.id === reviewId);
-      if (!review) return;
+      // Primeiro, tentar inserir o voto diretamente
+      const { error: voteError } = await supabase
+        .from("review_helpful_votes")
+        .insert({
+          review_id: reviewId,
+          user_id: user.id,
+        });
 
-      const newHelpfulCount = (review.helpful_count || 0) + 1;
+      // Se der erro de unique_violation, significa que o usuário já votou
+      if (voteError && voteError.code === "23505" && !isAdmin) {
+        toast({
+          title: "Aviso",
+          description: "Você já marcou esta avaliação como útil",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      const { error } = await supabase
-        .from("reviews")
-        .update({ helpful_count: newHelpfulCount })
-        .eq("id", reviewId);
+      if (voteError && voteError.code !== "23505") {
+        throw voteError;
+      }
 
-      if (error) throw error;
+      // Atualizar o contador na review
+      const { error: updateError } = await supabase.rpc(
+        "increment_helpful_count",
+        { review_id_param: reviewId }
+      );
 
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Atualizar estado local
       setReviews((prevReviews) =>
         prevReviews.map((r) =>
-          r.id === reviewId ? { ...r, helpful_count: newHelpfulCount } : r
+          r.id === reviewId
+            ? { ...r, helpful_count: (r.helpful_count || 0) + 1 }
+            : r
         )
       );
 
@@ -178,7 +213,8 @@ export default function Reviews({
       console.error("Erro ao marcar como útil:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível marcar a avaliação como útil",
+        description:
+          "Não foi possível marcar a avaliação como útil. Tente novamente.",
         variant: "destructive",
       });
     }
@@ -220,6 +256,34 @@ export default function Reviews({
       toast({
         title: "Erro",
         description: "Não foi possível reportar a avaliação",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (reviewId: string) => {
+    try {
+      const { error } = await supabase
+        .from("reviews")
+        .delete()
+        .eq("id", reviewId);
+
+      if (error) throw error;
+
+      // Atualizar a lista de reviews localmente
+      setReviews((prevReviews) =>
+        prevReviews.filter((review) => review.id !== reviewId)
+      );
+
+      toast({
+        title: "Sucesso",
+        description: "Avaliação excluída com sucesso",
+      });
+    } catch (error) {
+      console.error("Erro ao excluir avaliação:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a avaliação",
         variant: "destructive",
       });
     }
@@ -357,6 +421,17 @@ export default function Reviews({
                   >
                     <Flag className="w-4 h-4 mr-1" />
                     Reportar
+                  </Button>
+                )}
+                {(isAdmin || user?.id === review.user_id) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(review.id)}
+                    className="text-gray-500 hover:text-red-600"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Excluir
                   </Button>
                 )}
               </div>

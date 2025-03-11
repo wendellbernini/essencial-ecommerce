@@ -3,6 +3,7 @@ drop policy if exists "Qualquer um pode ler reviews" on public.reviews;
 drop policy if exists "Usuários autenticados podem criar reviews" on public.reviews;
 drop policy if exists "Usuários podem atualizar seus próprios reviews" on public.reviews;
 drop policy if exists "Usuários podem deletar seus próprios reviews" on public.reviews;
+drop policy if exists "Usuários e admins podem deletar reviews" on public.reviews;
 
 create table if not exists public.reviews (
   id bigint primary key generated always as identity,
@@ -46,10 +47,17 @@ create policy "Usuários podem atualizar seus próprios reviews"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
--- Política para deleção: usuário só pode deletar seus próprios reviews
-create policy "Usuários podem deletar seus próprios reviews"
+-- Política para deleção: usuário pode deletar seus próprios reviews ou admin pode deletar qualquer review
+create policy "Usuários e admins podem deletar reviews"
   on public.reviews for delete
-  using (auth.uid() = user_id);
+  using (
+    auth.uid() = user_id OR 
+    exists (
+      select 1 from public.users 
+      where id = auth.uid() 
+      and is_admin = true
+    )
+  );
 
 -- Criar função para calcular média das avaliações
 create or replace function get_product_rating(product_id_param bigint)
@@ -77,6 +85,7 @@ create table if not exists public.users (
   full_name text,
   avatar_url text,
   phone text,
+  is_admin boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -129,4 +138,50 @@ select
   created_at,
   updated_at
 from auth.users
-on conflict (id) do nothing; 
+on conflict (id) do nothing;
+
+-- Criar tabela de votos úteis
+create table if not exists public.review_helpful_votes (
+    id uuid default gen_random_uuid() primary key,
+    review_id bigint references public.reviews(id) on delete cascade,
+    user_id uuid references auth.users(id) on delete cascade,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    unique(review_id, user_id)
+);
+
+-- Habilitar RLS
+alter table public.review_helpful_votes enable row level security;
+
+-- Políticas de acesso para votos úteis
+create policy "Usuários podem ver votos úteis"
+on public.review_helpful_votes for select
+using (true);
+
+create policy "Usuários podem votar uma vez por review"
+on public.review_helpful_votes for insert
+to authenticated
+with check (
+    not exists (
+        select 1 from public.review_helpful_votes rhv
+        where rhv.review_id = review_helpful_votes.review_id
+        and rhv.user_id = auth.uid()
+    )
+    or exists (
+        select 1 from public.users
+        where id = auth.uid()
+        and is_admin = true
+    )
+);
+
+-- Função para incrementar o contador de votos úteis
+create or replace function public.increment_helpful_count(review_id_param bigint)
+returns void
+language plpgsql
+security definer
+as $$
+begin
+    update public.reviews
+    set helpful_count = coalesce(helpful_count, 0) + 1
+    where id = review_id_param;
+end;
+$$; 
