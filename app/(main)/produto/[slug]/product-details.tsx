@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Heart, Share2, Star, Truck } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProductBreadcrumb } from "@/components/product-breadcrumb";
-import { Product } from "@/lib/types";
+import Reviews from "./reviews";
+import { Product, ReviewWithUser } from "@/lib/types";
 
 interface ProductDetailsProps {
   product: Product;
@@ -19,6 +21,84 @@ interface ProductDetailsProps {
 export function ProductDetails({ product }: ProductDetailsProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [reviews, setReviews] = useState<ReviewWithUser[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        console.log(
+          "Iniciando carregamento de reviews para produto:",
+          product.id
+        );
+        // Buscar as reviews do produto
+        const { data: reviewsData, error: reviewsError } = await supabase
+          .from("reviews")
+          .select("*")
+          .eq("product_id", product.id)
+          .order("created_at", { ascending: false });
+
+        if (reviewsError) {
+          console.error("Erro ao buscar reviews:", reviewsError);
+          return;
+        }
+
+        if (!reviewsData) {
+          console.log("Nenhuma review encontrada");
+          setReviews([]);
+          setAverageRating(0);
+          setTotalReviews(0);
+          return;
+        }
+
+        console.log("Reviews encontradas:", reviewsData);
+
+        // Processar cada review para incluir dados do usuário
+        const processedReviews = await Promise.all(
+          reviewsData.map(async (review) => {
+            // Buscar dados do usuário para cada review
+            const { data: userData } = await supabase
+              .from("users")
+              .select("full_name, avatar_url")
+              .eq("id", review.user_id)
+              .single();
+
+            return {
+              ...review,
+              user: {
+                name: userData?.full_name || "Usuário anônimo",
+                avatar_url: userData?.avatar_url,
+              },
+            };
+          })
+        );
+
+        console.log("Reviews processadas:", processedReviews);
+
+        // Atualiza o estado com as reviews processadas
+        setReviews(processedReviews || []);
+
+        // Calcula a média das avaliações
+        const total = processedReviews.length;
+        const sum = processedReviews.reduce(
+          (acc, review) => acc + review.rating,
+          0
+        );
+        setAverageRating(total > 0 ? sum / total : 0);
+        setTotalReviews(total);
+      } catch (error) {
+        console.error("Erro ao carregar avaliações:", error);
+        // Em caso de erro, limpa o estado
+        setReviews([]);
+        setAverageRating(0);
+        setTotalReviews(0);
+      }
+    };
+
+    loadReviews();
+  }, [product.id, supabase]);
 
   // Formatar preço para o formato brasileiro
   const formatPrice = (price: number) => {
@@ -99,11 +179,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className="w-4 h-4 text-yellow-400 fill-current"
+                      className={`w-4 h-4 ${
+                        i < Math.round(averageRating)
+                          ? "text-yellow-400 fill-current"
+                          : "text-gray-300"
+                      }`}
                     />
                   ))}
                   <span className="ml-2 text-sm text-gray-600">
-                    (45 avaliações)
+                    ({totalReviews} avaliações)
                   </span>
                 </div>
                 <Button
@@ -290,6 +374,98 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 Envio e devoluções
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="reviews" className="pt-6">
+              <Reviews
+                productId={product.id}
+                initialReviews={reviews}
+                averageRating={averageRating}
+                totalReviews={totalReviews}
+              />
+            </TabsContent>
+
+            <TabsContent value="details" className="pt-6">
+              <div className="prose prose-sm max-w-none">
+                <h3 className="text-lg font-medium mb-4">
+                  Especificações do Produto
+                </h3>
+                <table className="w-full">
+                  <tbody>
+                    <tr className="border-t">
+                      <td className="py-2 text-sm font-medium text-gray-900">
+                        Marca
+                      </td>
+                      <td className="py-2 text-sm text-gray-600">
+                        {product.brand?.name}
+                      </td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="py-2 text-sm font-medium text-gray-900">
+                        Categoria
+                      </td>
+                      <td className="py-2 text-sm text-gray-600">
+                        {product.categories?.name}
+                      </td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="py-2 text-sm font-medium text-gray-900">
+                        Subcategoria
+                      </td>
+                      <td className="py-2 text-sm text-gray-600">
+                        {product.subcategories?.name}
+                      </td>
+                    </tr>
+                    {product.classifications?.map((classification) => (
+                      <tr key={classification.id} className="border-t">
+                        <td className="py-2 text-sm font-medium text-gray-900">
+                          {classification.type}
+                        </td>
+                        <td className="py-2 text-sm text-gray-600">
+                          {classification.name}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="shipping" className="pt-6">
+              <div className="prose prose-sm max-w-none">
+                <h3 className="text-lg font-medium mb-4">
+                  Informações de Envio
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-gray-900">
+                      Prazo de Entrega
+                    </h4>
+                    <p className="text-gray-600">
+                      O prazo médio de entrega é de 3 a 7 dias úteis para todo o
+                      Brasil. Entregas para regiões mais distantes podem levar
+                      até 12 dias úteis.
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">
+                      Política de Devolução
+                    </h4>
+                    <p className="text-gray-600">
+                      Você tem até 7 dias após o recebimento do produto para
+                      solicitar a devolução. O produto deve estar em perfeito
+                      estado, na embalagem original e com todos os acessórios.
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Frete Grátis</h4>
+                    <p className="text-gray-600">
+                      Oferecemos frete grátis para todo o Brasil em compras
+                      acima de R$ 99,00. Promoção por tempo limitado.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </div>

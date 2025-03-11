@@ -1,3 +1,27 @@
+import { Database } from "./database.types";
+
+export type Tables = Database["public"]["Tables"];
+export type Reviews = Tables["reviews"]["Row"];
+
+export interface Review {
+  id: string;
+  product_id: number;
+  user_id: string;
+  rating: number;
+  title: string;
+  comment: string;
+  helpful_count: number;
+  reported: boolean;
+  created_at: string;
+}
+
+export interface ReviewWithUser extends Review {
+  user: {
+    name: string;
+    avatar_url: string | null;
+  };
+}
+
 export interface PromoBanner {
   id: number;
   image_url: string;
