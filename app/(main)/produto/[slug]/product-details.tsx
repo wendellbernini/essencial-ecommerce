@@ -6,12 +6,14 @@ import { Heart, Share2, Star, Truck } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProductBreadcrumb } from "@/components/product-breadcrumb";
 import { ProductImageZoom } from "@/components/product-image-zoom";
+import { useWishlist } from "@/hooks/use-wishlist";
 import Reviews from "./reviews";
 import { Product, ReviewWithUser } from "@/lib/types";
 
@@ -26,6 +28,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
   const supabase = createClientComponentClient();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -239,8 +242,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   variant="outline"
                   size="icon"
                   className="text-gray-600 hover:text-orange-500 hover:bg-orange-50 border-gray-200"
+                  onClick={() => toggleWishlist(product.id)}
                 >
-                  <Heart className="h-5 w-5" />
+                  <Heart
+                    className={cn(
+                      "h-5 w-5",
+                      isInWishlist(product.id)
+                        ? "fill-red-500 text-red-500"
+                        : "text-gray-600"
+                    )}
+                  />
                 </Button>
               </div>
 

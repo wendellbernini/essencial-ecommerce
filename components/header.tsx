@@ -29,6 +29,7 @@ import { useCart } from "@/contexts/cart-context";
 import { useSearch } from "@/hooks/useSearch";
 import { formatPrice } from "@/lib/utils";
 import { CategoryMenu } from "@/components/category-menu";
+import { useWishlist } from "@/hooks/use-wishlist";
 
 export function Header() {
   const [session, setSession] = useState<any>(null);
@@ -40,6 +41,7 @@ export function Header() {
   const router = useRouter();
   const { toggleCart, total_items } = useCart();
   const { query, setQuery, results, isLoading } = useSearch();
+  const { wishlistItems } = useWishlist();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -314,10 +316,15 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-gray-700 hover:text-orange-500 hover:bg-orange-50"
+              className="text-gray-700 hover:text-orange-500 hover:bg-orange-50 relative"
               onClick={() => router.push("/perfil/wishlist")}
             >
               <Heart className="h-5 w-5" />
+              {wishlistItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[10px] font-medium text-white">
+                  {wishlistItems.length}
+                </span>
+              )}
             </Button>
             <Button
               variant="ghost"
