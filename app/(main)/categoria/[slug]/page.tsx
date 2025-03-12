@@ -1,23 +1,36 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ChevronDown } from "lucide-react";
+import { Heart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCard } from "@/components/product-card";
 import { getCategoryBySlug, getProductsByCategory } from "@/lib/server-data";
+import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { Database } from "@/types/supabase";
+import { Filters } from "@/components/category/filters";
+import { ProductGrid } from "@/components/product-grid";
 
 // Força a página a ser renderizada dinamicamente
 export const dynamic = "force-dynamic";
+
+type Subcategory = Database["public"]["Tables"]["subcategories"]["Row"];
 
 interface CategoryPageProps {
   params: {
     slug: string;
   };
+  searchParams?: {
+    subcategory?: string;
+    maxPrice?: string;
+    minPrice?: string;
+    sortBy?: string;
+  };
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({
+  params,
+  searchParams,
+}: CategoryPageProps) {
   // Buscar categoria e produtos
   const category = await getCategoryBySlug(params.slug);
 
@@ -42,8 +55,46 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     );
   }
 
-  // Buscar produtos da categoria
-  const products = await getProductsByCategory(category.id);
+  // Buscar subcategorias da categoria
+  const supabase = createServerSupabaseClient();
+  const { data: subcategories } = await supabase
+    .from("subcategories")
+    .select("*")
+    .eq("category_id", category.id)
+    .order("name");
+
+  // Preparar filtros
+  const filters: {
+    subcategoryId?: number;
+    maxPrice?: number;
+    minPrice?: number;
+    sortBy?: string;
+  } = {};
+
+  // Aplicar filtros dos parâmetros da URL
+  if (searchParams?.subcategory) {
+    const selectedSubcategory = subcategories?.find(
+      (sub: Subcategory) => sub.slug === searchParams.subcategory
+    );
+    if (selectedSubcategory) {
+      filters.subcategoryId = selectedSubcategory.id;
+    }
+  }
+
+  if (searchParams?.maxPrice) {
+    filters.maxPrice = parseFloat(searchParams.maxPrice);
+  }
+
+  if (searchParams?.minPrice) {
+    filters.minPrice = parseFloat(searchParams.minPrice);
+  }
+
+  if (searchParams?.sortBy) {
+    filters.sortBy = searchParams.sortBy;
+  }
+
+  // Buscar produtos da categoria com filtros
+  const products = await getProductsByCategory(category.id, filters);
 
   return (
     <div className="min-h-screen bg-white">
@@ -60,79 +111,26 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       </div>
 
       {/* Filtros e Ordenação */}
-      <div className="border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                className="text-gray-600 hover:text-orange-500 hover:bg-orange-50 border border-gray-200"
-              >
-                Filtrar
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                className="text-gray-600 hover:text-orange-500 hover:bg-orange-50 border border-gray-200"
-              >
-                Ordenar por
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-            <div>
-              <Tabs
-                defaultValue="all"
-                className="bg-white rounded-lg border border-gray-200"
-              >
-                <TabsList className="bg-white">
-                  <TabsTrigger
-                    value="all"
-                    className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
-                  >
-                    Todos
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="under125"
-                    className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
-                  >
-                    Até R$125
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="under250"
-                    className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
-                  >
-                    Até R$250
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="under500"
-                    className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
-                  >
-                    Até R$500
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Filters
+        subcategories={subcategories || []}
+        currentSubcategory={searchParams?.subcategory}
+        currentSortBy={searchParams?.sortBy}
+        currentMaxPrice={searchParams?.maxPrice}
+      />
 
       {/* Lista de produtos */}
       <div className="container mx-auto px-4 py-8">
         {products.length === 0 ? (
           <div className="text-center py-12">
             <h2 className="text-xl font-medium text-gray-900 mb-2">
-              Nenhum produto encontrado nesta categoria
+              Nenhum produto encontrado
             </h2>
             <p className="text-gray-600">
-              Tente buscar em outras categorias ou volte mais tarde.
+              Tente ajustar os filtros ou buscar em outras categorias.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <ProductGrid products={products} />
         )}
       </div>
 

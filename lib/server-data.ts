@@ -47,21 +47,65 @@ export async function getProductBySlug(slug: string) {
   }
 }
 
-export async function getProductsByCategory(categoryId: number) {
+export async function getProductsByCategory(
+  categoryId: number,
+  filters?: {
+    subcategoryId?: number;
+    maxPrice?: number;
+    minPrice?: number;
+    sortBy?: string;
+  }
+) {
   const supabase = createServerSupabaseClient();
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("products")
       .select(
         `
         *,
         categories:category_id(name, slug),
+        subcategories:subcategory_id(name, slug),
         brand:brand_id(name, slug, logo_url)
       `
       )
-      .eq("category_id", categoryId)
-      .order("created_at", { ascending: false });
+      .eq("category_id", categoryId);
+
+    // Aplicar filtros
+    if (filters) {
+      if (filters.subcategoryId) {
+        query = query.eq("subcategory_id", filters.subcategoryId);
+      }
+      if (filters.maxPrice) {
+        query = query.lte("price", filters.maxPrice);
+      }
+      if (filters.minPrice) {
+        query = query.gte("price", filters.minPrice);
+      }
+
+      // Ordenação
+      switch (filters.sortBy) {
+        case "price_asc":
+          query = query.order("price", { ascending: true });
+          break;
+        case "price_desc":
+          query = query.order("price", { ascending: false });
+          break;
+        case "newest":
+          query = query.order("created_at", { ascending: false });
+          break;
+        case "oldest":
+          query = query.order("created_at", { ascending: true });
+          break;
+        default:
+          query = query.order("created_at", { ascending: false });
+      }
+    } else {
+      // Ordenação padrão
+      query = query.order("created_at", { ascending: false });
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error(

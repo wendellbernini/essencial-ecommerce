@@ -2206,6 +2206,1253 @@ Apenas execute o deploy no GitHub. Os arquivos essenciais, como .gitignore, já 
 
 _**Assistant**_
 
+Vou executar os comandos necessários para fazer o deploy no GitHub. Primeiro, vou verificar o status do Git para ver quais arquivos precisam ser commitados.
+
+---
+
+_****_
+
+```bash
+git status
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   ".specstory/history/2025-03-11_11-18-projeto-essencial-e-commerce-re
+sumo-e-investiga\303\247\303\243o.md"
+        modified:   app/(main)/produto/[slug]/product-details.tsx
+        modified:   components/header.tsx
+        modified:   components/product-card.tsx
+        modified:   components/product-grid.tsx
+        modified:   components/profile/wishlist-section.tsx
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        app/(main)/perfil/wishlist/
+        app/_document.tsx
+        components/wishlist-button.tsx
+        hooks/use-wishlist.ts
+        supabase/migrations/20240312000000_create_wishlist_table.sql
+
+no changes added to commit (use "git add" and/or "git commit -a")
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Agora vou adicionar todos os arquivos modificados e novos ao staging.
+
+---
+
+_****_
+
+```bash
+git add .
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ 
+
+```
+
+---
+
+_****_
+
+Agora vou criar um commit com uma mensagem descritiva das alterações.
+
+---
+
+_****_
+
+Command contains newline characters.
+
+---
+
+_****_
+
+Desculpe pelo erro. Vou tentar novamente com a mensagem em uma única linha.
+
+---
+
+_****_
+
+```bash
+git commit -m "feat: implementa sistema de wishlist completo e corrige _document.tsx"
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git commit -m "feat: implementa
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git commit -m "feat: implementa
+ sistema de wishlist completo e corrige _document.tsx"
+[main e636716] feat: implementa sistema de wishlist completo e corrige _document.tsx
+ 11 files changed, 1925 insertions(+), 55 deletions(-)
+ create mode 100644 app/(main)/perfil/wishlist/page.tsx
+ create mode 100644 app/_document.tsx
+ rewrite components/profile/wishlist-section.tsx (63%)
+ create mode 100644 components/wishlist-button.tsx
+ create mode 100644 hooks/use-wishlist.ts
+ create mode 100644 supabase/migrations/20240312000000_create_wishlist_table.sql
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Agora vou fazer o push das alterações para o repositório remoto.
+
+---
+
+_****_
+
+```bash
+git push origin main
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git push origin main
+Enumerating objects: 45, done.
+Counting objects: 100% (45/45), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (22/22), done.
+Writing objects: 100% (26/26), 24.34 KiB | 3.48 MiB/s, done.
+Total 26 (delta 11), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (11/11), completed with 11 local objects.
+To github.com:wendellbernini/essencial-ecommerce.git
+   eaf4290..e636716  main -> main
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Pronto! O deploy foi realizado com sucesso. Aqui está um resumo das ações:
+
+1. ✅ Verificamos o status do Git
+2. ✅ Adicionamos todos os arquivos modificados ao staging
+3. ✅ Criamos um commit com uma mensagem descritiva
+4. ✅ Enviamos as alterações para o repositório remoto no GitHub
+
+Como o projeto está configurado com a Vercel, o deploy será automaticamente iniciado assim que as alterações forem detectadas no repositório do GitHub. Você pode acompanhar o progresso do deploy no painel da Vercel.
+
+---
+
+_**User**_
+
+Otimo, agora acho que seria um bom momento para focarmos na funcionalidade dos filtros nas paginas de categoria, o que acha? As paginas de categoria ja possuem um modelo visual de filtro otimo, no entanto, sem funcionalidade ainda, eu pensei em implementarmos por ex: categoria skincare, seria interessante poder filtrar (alem do basico de preco e essas coisas) filtrar pelas subcategorias dentro de skincare, o que acha?
+
+---
+
+_**Assistant**_
+
+Ótima sugestão! Vou analisar a estrutura atual dos filtros na página de categoria e implementar a funcionalidade, começando com os filtros de subcategorias e preço.
+
+Primeiro, vou verificar como está implementada a página de categoria atual.
+
+---
+
+_****_
+
+<details>
+            <summary>Searched codebase "página de categoria [slug] implementação atual" • **7** results</summary>
+        
+| File | Lines |
+|------|-------|
+| `app/(main)/categoria/[slug]/page.tsx` | L12-18 |
+| `app/(main)/categoria/[slug]/page.tsx` | L18-46 |
+| `app/(main)/categoria/[slug]/page.tsx` | L46-81 |
+| `app/(main)/categoria/[slug]/page.tsx` | L1-12 |
+| `app/(main)/categoria/[slug]/page.tsx` | L119-144 |
+| `app/(main)/categoria/[slug]/page.tsx` | L144-179 |
+| `app/(main)/categoria/[slug]/page.tsx` | L81-119 |
+
+</details>
+
+---
+
+_****_
+
+Vou verificar também como estão estruturadas as subcategorias no banco de dados.
+
+---
+
+_****_
+
+<details>
+            <summary>Searched codebase "função que busca subcategorias no Supabase" • **25** results</summary>
+        
+| File | Lines |
+|------|-------|
+| `lib/supabase.ts` | L61-91 |
+| `lib/server-data.ts` | L79-103 |
+| `lib/supabase.ts` | L1-12 |
+| `lib/server-data.ts` | L1-48 |
+| `lib/supabase.ts` | L119-148 |
+| `lib/server-data.ts` | L48-79 |
+| `lib/supabase.ts` | L91-119 |
+| `lib/supabase.ts` | L172-216 |
+| `lib/supabase.ts` | L216-242 |
+| `lib/supabase.ts` | L242-264 |
+| `lib/supabase.ts` | L148-172 |
+| `lib/admin.ts` | L122-143 |
+| `lib/supabase.ts` | L12-40 |
+| `lib/supabase.ts` | L49-61 |
+| `lib/admin.ts` | L39-64 |
+| `lib/server-supabase.ts` | L1-41 |
+| `lib/supabase.ts` | L40-49 |
+| `lib/admin.ts` | L64-122 |
+| `lib/admin.ts` | L26-39 |
+| `lib/admin.ts` | L1-10 |
+| `lib/types.ts` | L37-78 |
+| `lib/database.types.ts` | L7-62 |
+| `lib/types.ts` | L90-100 |
+| `lib/types.ts` | L1-3 |
+| `lib/admin.ts` | L15-26 |
+
+</details>
+
+---
+
+_****_
+
+Vou verificar também a estrutura atual dos componentes de filtro.
+
+---
+
+_****_
+
+<details>
+            <summary>Searched codebase "componentes de filtro e ordenação" • **25** results</summary>
+        
+| File | Lines |
+|------|-------|
+| `components/admin/products/products-filter.tsx` | L23-81 |
+| `components/admin/products/products-filter.tsx` | L81-133 |
+| `components/home-content.tsx` | L29-63 |
+| `components/promotional-products.tsx` | L1-50 |
+| `components/home-content.tsx` | L105-158 |
+| `components/promotional-products.tsx` | L90-138 |
+| `components/admin/products/products-table.tsx` | L112-178 |
+| `components/header.tsx` | L373-415 |
+| `components/promotional-products.tsx` | L50-90 |
+| `components/category-menu.tsx` | L86-138 |
+| `components/header.tsx` | L163-194 |
+| `components/header.tsx` | L194-230 |
+| `components/admin/products/products-table.tsx` | L297-354 |
+| `components/admin/products/products-table.tsx` | L64-112 |
+| `components/header.tsx` | L134-163 |
+| `components/category-menu.tsx` | L138-190 |
+| `components/admin/products/products-table.tsx` | L178-209 |
+| `components/category-menu.tsx` | L31-86 |
+| `components/product-breadcrumb.tsx` | L19-57 |
+| `components/header.tsx` | L415-458 |
+| `components/header.tsx` | L328-373 |
+| `components/product-card.tsx` | L20-85 |
+| `components/profile/orders-section.tsx` | L1-7 |
+| `components/header.tsx` | L32-101 |
+| `components/header.tsx` | L250-286 |
+
+</details>
+
+---
+
+_****_
+
+Baseado na análise do código, vou implementar a funcionalidade dos filtros na página de categoria. Primeiro, vou atualizar a função que busca produtos para incluir os filtros de subcategoria e preço.
+
+---
+
+_****_
+
+```diff
+  }
+  
+- export async function getProductsByCategory(categoryId: number) {
++ export async function getProductsByCategory(
++   categoryId: number,
++   filters?: {
++     subcategoryId?: number;
++     maxPrice?: number;
++     minPrice?: number;
++     sortBy?: string;
++   }
++ ) {
+    const supabase = createServerSupabaseClient();
+  
+    try {
+-     const { data, error } = await supabase
++     let query = supabase
+        .from("products")
+        .select(
+          `
+          *,
+          categories:category_id(name, slug),
++         subcategories:subcategory_id(name, slug),
+          brand:brand_id(name, slug, logo_url)
+        `
+        )
+-       .eq("category_id", categoryId)
+-       .order("created_at", { ascending: false });
++       .eq("category_id", categoryId);
++ 
++     // Aplicar filtros
++     if (filters) {
++       if (filters.subcategoryId) {
++         query = query.eq("subcategory_id", filters.subcategoryId);
++       }
++       if (filters.maxPrice) {
++         query = query.lte("price", filters.maxPrice);
++       }
++       if (filters.minPrice) {
++         query = query.gte("price", filters.minPrice);
++       }
++ 
++       // Ordenação
++       switch (filters.sortBy) {
++         case "price_asc":
++           query = query.order("price", { ascending: true });
++           break;
++         case "price_desc":
++           query = query.order("price", { ascending: false });
++           break;
++         case "newest":
++           query = query.order("created_at", { ascending: false });
++           break;
++         case "oldest":
++           query = query.order("created_at", { ascending: true });
++           break;
++         default:
++           query = query.order("created_at", { ascending: false });
++       }
++     } else {
++       // Ordenação padrão
++       query = query.order("created_at", { ascending: false });
++     }
++ 
++     const { data, error } = await query;
+  
+      if (error) {
+```
+
+---
+
+_****_
+
+Agora vou atualizar a página de categoria para implementar os filtros e a ordenação.
+
+---
+
+_****_
+
+```diff
+  import { ProductCard } from "@/components/product-card";
+  import { getCategoryBySlug, getProductsByCategory } from "@/lib/server-data";
++ import { createServerSupabaseClient } from "@/lib/supabase-server";
++ import {
++   Select,
++   SelectContent,
++   SelectItem,
++   SelectTrigger,
++   SelectValue,
++ } from "@/components/ui/select";
+  
+  // Força a página a ser renderizada dinamicamente
+      slug: string;
+    };
++   searchParams?: {
++     subcategory?: string;
++     maxPrice?: string;
++     minPrice?: string;
++     sortBy?: string;
++   };
+  }
+  
+- export default async function CategoryPage({ params }: CategoryPageProps) {
++ export default async function CategoryPage({
++   params,
++   searchParams,
++ }: CategoryPageProps) {
+    // Buscar categoria e produtos
+    const category = await getCategoryBySlug(params.slug);
+    }
+  
+-   // Buscar produtos da categoria
+-   const products = await getProductsByCategory(category.id);
++   // Buscar subcategorias da categoria
++   const supabase = createServerSupabaseClient();
++   const { data: subcategories } = await supabase
++     .from("subcategories")
++     .select("*")
++     .eq("category_id", category.id)
++     .order("name");
++ 
++   // Preparar filtros
++   const filters: {
++     subcategoryId?: number;
++     maxPrice?: number;
++     minPrice?: number;
++     sortBy?: string;
++   } = {};
++ 
++   // Aplicar filtros dos parâmetros da URL
++   if (searchParams?.subcategory) {
++     const selectedSubcategory = subcategories?.find(
++       (sub) => sub.slug === searchParams.subcategory
++     );
++     if (selectedSubcategory) {
++       filters.subcategoryId = selectedSubcategory.id;
++     }
++   }
++ 
++   if (searchParams?.maxPrice) {
++     filters.maxPrice = parseFloat(searchParams.maxPrice);
++   }
++ 
++   if (searchParams?.minPrice) {
++     filters.minPrice = parseFloat(searchParams.minPrice);
++   }
++ 
++   if (searchParams?.sortBy) {
++     filters.sortBy = searchParams.sortBy;
++   }
++ 
++   // Buscar produtos da categoria com filtros
++   const products = await getProductsByCategory(category.id, filters);
+  
+    return (
+        <div className="border-b border-gray-200">
+          <div className="container mx-auto px-4 py-4">
+-           <div className="flex justify-between items-center">
+-             <div className="flex items-center space-x-4">
+-               <Button
+-                 variant="ghost"
+-                 className="text-gray-600 hover:text-orange-500 hover:bg-orange-50 border border-gray-200"
+-               >
+-                 Filtrar
+-                 <ChevronDown className="ml-2 h-4 w-4" />
+-               </Button>
+-               <Button
+-                 variant="ghost"
+-                 className="text-gray-600 hover:text-orange-500 hover:bg-orange-50 border border-gray-200"
+-               >
+-                 Ordenar por
+-                 <ChevronDown className="ml-2 h-4 w-4" />
+-               </Button>
++           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
++             <div className="flex flex-wrap items-center gap-4">
++               {/* Filtro de Subcategorias */}
++               <Select
++                 defaultValue={searchParams?.subcategory || "all"}
++                 onValueChange={(value) => {
++                   const url = new URL(window.location.href);
++                   if (value === "all") {
++                     url.searchParams.delete("subcategory");
++                   } else {
++                     url.searchParams.set("subcategory", value);
++                   }
++                   window.location.href = url.toString();
++                 }}
++               >
++                 <SelectTrigger className="w-[180px]">
++                   <SelectValue placeholder="Subcategoria" />
++                 </SelectTrigger>
++                 <SelectContent>
++                   <SelectItem value="all">Todas as subcategorias</SelectItem>
++                   {subcategories?.map((subcategory) => (
++                     <SelectItem key={subcategory.id} value={subcategory.slug}>
++                       {subcategory.name}
++                     </SelectItem>
++                   ))}
++                 </SelectContent>
++               </Select>
++ 
++               {/* Ordenação */}
++               <Select
++                 defaultValue={searchParams?.sortBy || "newest"}
++                 onValueChange={(value) => {
++                   const url = new URL(window.location.href);
++                   url.searchParams.set("sortBy", value);
++                   window.location.href = url.toString();
++                 }}
++               >
++                 <SelectTrigger className="w-[180px]">
++                   <SelectValue placeholder="Ordenar por" />
++                 </SelectTrigger>
++                 <SelectContent>
++                   <SelectItem value="newest">Mais recentes</SelectItem>
++                   <SelectItem value="oldest">Mais antigos</SelectItem>
++                   <SelectItem value="price_asc">Menor preço</SelectItem>
++                   <SelectItem value="price_desc">Maior preço</SelectItem>
++                 </SelectContent>
++               </Select>
+              </div>
++ 
++             {/* Filtros de Preço */}
+              <div>
+                <Tabs
+-                 defaultValue="all"
++                 defaultValue={getDefaultPriceTab(searchParams?.maxPrice)}
++                 onValueChange={(value) => {
++                   const url = new URL(window.location.href);
++                   if (value === "all") {
++                     url.searchParams.delete("maxPrice");
++                   } else {
++                     url.searchParams.set("maxPrice", value);
++                   }
++                   window.location.href = url.toString();
++                 }}
+                  className="bg-white rounded-lg border border-gray-200"
+                >
+                    </TabsTrigger>
+                    <TabsTrigger
+-                     value="under125"
++                     value="125"
+                      className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
+                    >
+                      Até R$125
+                    </TabsTrigger>
+                    <TabsTrigger
+-                     value="under250"
++                     value="250"
+                      className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
+                    >
+                      Até R$250
+                    </TabsTrigger>
+                    <TabsTrigger
+-                     value="under500"
++                     value="500"
+                      className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
+                    >
+            <div className="text-center py-12">
+              <h2 className="text-xl font-medium text-gray-900 mb-2">
+-               Nenhum produto encontrado nesta categoria
++               Nenhum produto encontrado
+              </h2>
+              <p className="text-gray-600">
+-               Tente buscar em outras categorias ou volte mais tarde.
++               Tente ajustar os filtros ou buscar em outras categorias.
+              </p>
+            </div>
+    );
+  }
++ 
++ // Função auxiliar para determinar a aba de preço padrão
++ function getDefaultPriceTab(maxPrice?: string) {
++   if (!maxPrice) return "all";
++   const price = parseFloat(maxPrice);
++   if (price <= 125) return "125";
++   if (price <= 250) return "250";
++   if (price <= 500) return "500";
++   return "all";
++ }
+  
+```
+
+---
+
+_****_
+
+Vou corrigir os erros de lint e adicionar os tipos necessários.
+
+---
+
+_****_
+
+```diff
+- 
++ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
++ import { cookies } from "next/headers";
++ import { Database } from "@/types/supabase";
++ 
++ export function createServerSupabaseClient() {
++   return createServerComponentClient<Database>({
++     cookies,
++   });
++ }
++ 
+```
+
+---
+
+_****_
+
+Vou criar o arquivo de tipos do Supabase.
+
+---
+
+_****_
+
+```diff
+- 
++ export type Json =
++   | string
++   | number
++   | boolean
++   | null
++   | { [key: string]: Json | undefined }
++   | Json[];
++ 
++ export interface Database {
++   public: {
++     Tables: {
++       categories: {
++         Row: {
++           id: number;
++           name: string;
++           slug: string;
++           description: string | null;
++           created_at: string;
++           updated_at: string;
++         };
++         Insert: {
++           id?: number;
++           name: string;
++           slug: string;
++           description?: string | null;
++           created_at?: string;
++           updated_at?: string;
++         };
++         Update: {
++           id?: number;
++           name?: string;
++           slug?: string;
++           description?: string | null;
++           created_at?: string;
++           updated_at?: string;
++         };
++       };
++       subcategories: {
++         Row: {
++           id: number;
++           name: string;
++           slug: string;
++           category_id: number;
++           created_at: string;
++           updated_at: string;
++         };
++         Insert: {
++           id?: number;
++           name: string;
++           slug: string;
++           category_id: number;
++           created_at?: string;
++           updated_at?: string;
++         };
++         Update: {
++           id?: number;
++           name?: string;
++           slug?: string;
++           category_id?: number;
++           created_at?: string;
++           updated_at?: string;
++         };
++       };
++       products: {
++         Row: {
++           id: number;
++           name: string;
++           slug: string;
++           description: string;
++           price: number;
++           category_id: number;
++           subcategory_id: number | null;
++           images: string[];
++           created_at: string;
++           updated_at: string;
++         };
++         Insert: {
++           id?: number;
++           name: string;
++           slug: string;
++           description: string;
++           price: number;
++           category_id: number;
++           subcategory_id?: number | null;
++           images: string[];
++           created_at?: string;
++           updated_at?: string;
++         };
++         Update: {
++           id?: number;
++           name?: string;
++           slug?: string;
++           description?: string;
++           price?: number;
++           category_id?: number;
++           subcategory_id?: number | null;
++           images?: string[];
++           created_at?: string;
++           updated_at?: string;
++         };
++       };
++       wishlist: {
++         Row: {
++           id: number;
++           user_id: string;
++           product_id: number;
++           created_at: string;
++         };
++         Insert: {
++           id?: number;
++           user_id: string;
++           product_id: number;
++           created_at?: string;
++         };
++         Update: {
++           id?: number;
++           user_id?: string;
++           product_id?: number;
++           created_at?: string;
++         };
++       };
++     };
++     Views: {
++       [_ in never]: never;
++     };
++     Functions: {
++       [_ in never]: never;
++     };
++     Enums: {
++       [_ in never]: never;
++     };
++   };
++ }
++ 
+```
+
+---
+
+_****_
+
+Agora vou atualizar a página de categoria para corrigir os erros de lint restantes.
+
+---
+
+_****_
+
+```diff
+    SelectValue,
+  } from "@/components/ui/select";
++ import { Database } from "@/types/supabase";
+  
+  // Força a página a ser renderizada dinamicamente
+  export const dynamic = "force-dynamic";
++ 
++ type Subcategory = Database["public"]["Tables"]["subcategories"]["Row"];
+  
+  interface CategoryPageProps {
+    if (searchParams?.subcategory) {
+      const selectedSubcategory = subcategories?.find(
+-       (sub) => sub.slug === searchParams.subcategory
++       (sub: Subcategory) => sub.slug === searchParams.subcategory
+      );
+      if (selectedSubcategory) {
+                  <SelectContent>
+                    <SelectItem value="all">Todas as subcategorias</SelectItem>
+-                   {subcategories?.map((subcategory) => (
++                   {subcategories?.map((subcategory: Subcategory) => (
+                      <SelectItem key={subcategory.id} value={subcategory.slug}>
+                        {subcategory.name}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+              {products.map((product) => (
+-               <ProductCard key={product.id} product={product} />
++               <ProductCard
++                 key={product.id}
++                 product={product}
++                 isInWishlist={false} // Será atualizado quando implementarmos o hook useWishlist
++                 handleToggleWishlist={() => {}} // Será atualizado quando implementarmos o hook useWishlist
++               />
+              ))}
+            </div>
+```
+
+---
+
+_****_
+
+Agora que implementamos os filtros na página de categoria, vamos testar se está tudo funcionando corretamente. Vou executar o build para verificar se não há mais erros.
+
+---
+
+_****_
+
+Cancelled
+
+---
+
+_****_
+
+
+
+---
+
+_**User**_
+
+estou recebendo erros
+
+---
+
+_**Assistant**_
+
+Vejo que você está recebendo um erro relacionado a Event handlers em um componente. O erro específico é:
+
+```
+Error: Event handlers cannot be passed to Client Component props.
+<...defaultValue={function onValueChange(value) {
+  const url = new URL(window.location.href);
+  if (value === "all") {
+    url.searchParams.delete("subcategory");
+  } else {
+    url.searchParams.set("subcategory", value);
+  }
+  window.location.href = url.toString();
+}}>
+```
+
+Este erro ocorre porque estamos tentando passar funções de manipulação de eventos diretamente em um componente do servidor. Vou corrigir isso criando um componente do cliente para os filtros.
+
+Primeiro, vou criar um novo componente para os filtros:
+
+---
+
+_****_
+
+```diff
+- 
++ "use client";
++ 
++ import { useRouter } from "next/navigation";
++ import {
++   Select,
++   SelectContent,
++   SelectItem,
++   SelectTrigger,
++   SelectValue,
++ } from "@/components/ui/select";
++ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
++ import { Database } from "@/types/supabase";
++ 
++ type Subcategory = Database["public"]["Tables"]["subcategories"]["Row"];
++ 
++ interface FiltersProps {
++   subcategories: Subcategory[];
++   currentSubcategory?: string;
++   currentSortBy?: string;
++   currentMaxPrice?: string;
++ }
++ 
++ export function Filters({
++   subcategories,
++   currentSubcategory,
++   currentSortBy,
++   currentMaxPrice,
++ }: FiltersProps) {
++   const router = useRouter();
++ 
++   const handleSubcategoryChange = (value: string) => {
++     const url = new URL(window.location.href);
++     if (value === "all") {
++       url.searchParams.delete("subcategory");
++     } else {
++       url.searchParams.set("subcategory", value);
++     }
++     router.push(url.toString());
++   };
++ 
++   const handleSortChange = (value: string) => {
++     const url = new URL(window.location.href);
++     url.searchParams.set("sortBy", value);
++     router.push(url.toString());
++   };
++ 
++   const handlePriceChange = (value: string) => {
++     const url = new URL(window.location.href);
++     if (value === "all") {
++       url.searchParams.delete("maxPrice");
++     } else {
++       url.searchParams.set("maxPrice", value);
++     }
++     router.push(url.toString());
++   };
++ 
++   return (
++     <div className="border-b border-gray-200">
++       <div className="container mx-auto px-4 py-4">
++         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
++           <div className="flex flex-wrap items-center gap-4">
++             {/* Filtro de Subcategorias */}
++             <Select
++               defaultValue={currentSubcategory || "all"}
++               onValueChange={handleSubcategoryChange}
++             >
++               <SelectTrigger className="w-[180px]">
++                 <SelectValue placeholder="Subcategoria" />
++               </SelectTrigger>
++               <SelectContent>
++                 <SelectItem value="all">Todas as subcategorias</SelectItem>
++                 {subcategories?.map((subcategory) => (
++                   <SelectItem key={subcategory.id} value={subcategory.slug}>
++                     {subcategory.name}
++                   </SelectItem>
++                 ))}
++               </SelectContent>
++             </Select>
++ 
++             {/* Ordenação */}
++             <Select
++               defaultValue={currentSortBy || "newest"}
++               onValueChange={handleSortChange}
++             >
++               <SelectTrigger className="w-[180px]">
++                 <SelectValue placeholder="Ordenar por" />
++               </SelectTrigger>
++               <SelectContent>
++                 <SelectItem value="newest">Mais recentes</SelectItem>
++                 <SelectItem value="oldest">Mais antigos</SelectItem>
++                 <SelectItem value="price_asc">Menor preço</SelectItem>
++                 <SelectItem value="price_desc">Maior preço</SelectItem>
++               </SelectContent>
++             </Select>
++           </div>
++ 
++           {/* Filtros de Preço */}
++           <div>
++             <Tabs
++               defaultValue={getDefaultPriceTab(currentMaxPrice)}
++               onValueChange={handlePriceChange}
++               className="bg-white rounded-lg border border-gray-200"
++             >
++               <TabsList className="bg-white">
++                 <TabsTrigger
++                   value="all"
++                   className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
++                 >
++                   Todos
++                 </TabsTrigger>
++                 <TabsTrigger
++                   value="125"
++                   className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
++                 >
++                   Até R$125
++                 </TabsTrigger>
++                 <TabsTrigger
++                   value="250"
++                   className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
++                 >
++                   Até R$250
++                 </TabsTrigger>
++                 <TabsTrigger
++                   value="500"
++                   className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
++                 >
++                   Até R$500
++                 </TabsTrigger>
++               </TabsList>
++             </Tabs>
++           </div>
++         </div>
++       </div>
++     </div>
++   );
++ }
++ 
++ // Função auxiliar para determinar a aba de preço padrão
++ function getDefaultPriceTab(maxPrice?: string) {
++   if (!maxPrice) return "all";
++   const price = parseFloat(maxPrice);
++   if (price <= 125) return "125";
++   if (price <= 250) return "250";
++   if (price <= 500) return "500";
++   return "all";
++ }
++ 
+```
+
+---
+
+_****_
+
+Agora vou atualizar a página de categoria para usar o novo componente de filtros:
+
+---
+
+_****_
+
+```diff
+  import Image from "next/image";
+  import Link from "next/link";
+- import { Heart, ChevronDown } from "lucide-react";
++ import { Heart } from "lucide-react";
+  
+  import { Button } from "@/components/ui/button";
+- import { Badge } from "@/components/ui/badge";
+- import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  import { ProductCard } from "@/components/product-card";
+  import { getCategoryBySlug, getProductsByCategory } from "@/lib/server-data";
+  import { createServerSupabaseClient } from "@/lib/supabase-server";
+- import {
+-   Select,
+-   SelectContent,
+-   SelectItem,
+-   SelectTrigger,
+-   SelectValue,
+- } from "@/components/ui/select";
+  import { Database } from "@/types/supabase";
++ import { Filters } from "@/components/category/filters";
+  
+  // Força a página a ser renderizada dinamicamente
+  
+        {/* Filtros e Ordenação */}
+-       <div className="border-b border-gray-200">
+-         <div className="container mx-auto px-4 py-4">
+-           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+-             <div className="flex flex-wrap items-center gap-4">
+-               {/* Filtro de Subcategorias */}
+-               <Select
+-                 defaultValue={searchParams?.subcategory || "all"}
+-                 onValueChange={(value) => {
+-                   const url = new URL(window.location.href);
+-                   if (value === "all") {
+-                     url.searchParams.delete("subcategory");
+-                   } else {
+-                     url.searchParams.set("subcategory", value);
+-                   }
+-                   window.location.href = url.toString();
+-                 }}
+-               >
+-                 <SelectTrigger className="w-[180px]">
+-                   <SelectValue placeholder="Subcategoria" />
+-                 </SelectTrigger>
+-                 <SelectContent>
+-                   <SelectItem value="all">Todas as subcategorias</SelectItem>
+-                   {subcategories?.map((subcategory: Subcategory) => (
+-                     <SelectItem key={subcategory.id} value={subcategory.slug}>
+-                       {subcategory.name}
+-                     </SelectItem>
+-                   ))}
+-                 </SelectContent>
+-               </Select>
+- 
+-               {/* Ordenação */}
+-               <Select
+-                 defaultValue={searchParams?.sortBy || "newest"}
+-                 onValueChange={(value) => {
+-                   const url = new URL(window.location.href);
+-                   url.searchParams.set("sortBy", value);
+-                   window.location.href = url.toString();
+-                 }}
+-               >
+-                 <SelectTrigger className="w-[180px]">
+-                   <SelectValue placeholder="Ordenar por" />
+-                 </SelectTrigger>
+-                 <SelectContent>
+-                   <SelectItem value="newest">Mais recentes</SelectItem>
+-                   <SelectItem value="oldest">Mais antigos</SelectItem>
+-                   <SelectItem value="price_asc">Menor preço</SelectItem>
+-                   <SelectItem value="price_desc">Maior preço</SelectItem>
+-                 </SelectContent>
+-               </Select>
+-             </div>
+- 
+-             {/* Filtros de Preço */}
+-             <div>
+-               <Tabs
+-                 defaultValue={getDefaultPriceTab(searchParams?.maxPrice)}
+-                 onValueChange={(value) => {
+-                   const url = new URL(window.location.href);
+-                   if (value === "all") {
+-                     url.searchParams.delete("maxPrice");
+-                   } else {
+-                     url.searchParams.set("maxPrice", value);
+-                   }
+-                   window.location.href = url.toString();
+-                 }}
+-                 className="bg-white rounded-lg border border-gray-200"
+-               >
+-                 <TabsList className="bg-white">
+-                   <TabsTrigger
+-                     value="all"
+-                     className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
+-                   >
+-                     Todos
+-                   </TabsTrigger>
+-                   <TabsTrigger
+-                     value="125"
+-                     className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
+-                   >
+-                     Até R$125
+-                   </TabsTrigger>
+-                   <TabsTrigger
+-                     value="250"
+-                     className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
+-                   >
+-                     Até R$250
+-                   </TabsTrigger>
+-                   <TabsTrigger
+-                     value="500"
+-                     className="text-gray-600 hover:text-orange-500 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-500"
+-                   >
+-                     Até R$500
+-                   </TabsTrigger>
+-                 </TabsList>
+-               </Tabs>
+-             </div>
+-           </div>
+-         </div>
+-       </div>
++       <Filters
++         subcategories={subcategories || []}
++         currentSubcategory={searchParams?.subcategory}
++         currentSortBy={searchParams?.sortBy}
++         currentMaxPrice={searchParams?.maxPrice}
++       />
+  
+        {/* Lista de produtos */}
+    );
+  }
+- 
+- // Função auxiliar para determinar a aba de preço padrão
+- function getDefaultPriceTab(maxPrice?: string) {
+-   if (!maxPrice) return "all";
+-   const price = parseFloat(maxPrice);
+-   if (price <= 125) return "125";
+-   if (price <= 250) return "250";
+-   if (price <= 500) return "500";
+-   return "all";
+- }
+  
+```
+
+---
+
+_****_
+
+Agora vou atualizar o componente `ProductGrid` para usar o hook `useWishlist`:
+
+---
+
+_****_
+
+```diff
+  import { Database } from "@/types/supabase";
+  import { Filters } from "@/components/category/filters";
++ import { ProductGrid } from "@/components/product-grid";
+  
+  // Força a página a ser renderizada dinamicamente
+            </div>
+          ) : (
+-           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+-             {products.map((product) => (
+-               <ProductCard
+-                 key={product.id}
+-                 product={product}
+-                 isInWishlist={false} // Será atualizado quando implementarmos o hook useWishlist
+-                 handleToggleWishlist={() => {}} // Será atualizado quando implementarmos o hook useWishlist
+-               />
+-             ))}
+-           </div>
++           <ProductGrid products={products} />
+          )}
+        </div>
+```
+
+---
+
+_****_
+
+Agora vou executar o build para verificar se os erros foram resolvidos:
+
+---
+
+_****_
+
+Cancelled
+
+---
+
+_****_
+
+
+
+---
+
+_**User**_
+
+Otimo o erro foi corrigido, mas note que o texto no filtro Todas as categorias ta cortado para Todas as... poderiamos tentar solucionar isso, o que acha?
+
+---
+
+_**Assistant**_
+
+Sim, podemos ajustar o tamanho do Select para acomodar melhor o texto. Vou atualizar o componente de filtros:
+
+---
+
+_****_
+
+```diff
+                onValueChange={handleSubcategoryChange}
+              >
+-               <SelectTrigger className="w-[180px]">
++               <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder="Subcategoria" />
+                </SelectTrigger>
+```
+
+---
+
+_****_
+
+Aumentei a largura do Select de subcategorias de `180px` para `220px`, o que deve ser suficiente para mostrar o texto "Todas as subcategorias" sem cortar. O texto agora deve aparecer completo no dropdown.
+
+Você pode verificar se a largura está adequada agora. Se ainda precisar de ajustes, podemos aumentar ou diminuir conforme necessário.
+
+---
+
+_**User**_
+
+otimo, agora Execute npm run build e continue trabalhando até corrigir todos os possíveis erros que possam impedir a conclusão bem-sucedida do build. Se forem necessárias alterações, analise o contexto com cuidado, evitando conclusões precipitadas. Priorize soluções enxutas, mantendo o código o mais conciso possível. @Next.js 15 Caso ajude, navegue pela documentação oficial do Next.js para encontrar uma solução para os erros no build ou lint.
+
+---
+
+_**Assistant**_
+
+Vou executar o build e analisar quaisquer erros que apareçam.
+
+---
+
+_****_
+
+```bash
+npm run build
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ npm run build
+
+> my-v0-project@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.16
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+```
+
+---
+
+_****_
+
 
 
 ---
