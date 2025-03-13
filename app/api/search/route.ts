@@ -18,7 +18,16 @@ export async function GET(request: Request) {
 
     const { data: products, error } = await supabase
       .from("products")
-      .select("*")
+      .select(
+        `
+        *,
+        categories:category_id (
+          id,
+          name,
+          slug
+        )
+      `
+      )
       .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
       .order("created_at", { ascending: false });
 

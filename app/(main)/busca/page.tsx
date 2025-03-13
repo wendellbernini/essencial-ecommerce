@@ -175,9 +175,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               }
             >
               {products.length > 0 ? (
-                products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))
+                <>
+                  <div className="col-span-full mb-6">
+                    <p className="text-sm text-gray-600">
+                      {products.length}{" "}
+                      {products.length === 1
+                        ? "produto encontrado"
+                        : "produtos encontrados"}
+                    </p>
+                  </div>
+                  {products.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </>
               ) : (
                 <div className="col-span-full text-center py-12">
                   <p className="text-gray-500">Nenhum produto encontrado</p>

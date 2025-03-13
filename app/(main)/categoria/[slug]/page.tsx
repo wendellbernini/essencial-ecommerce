@@ -187,7 +187,17 @@ export default async function CategoryPage({
                 </p>
               </div>
             ) : (
-              <ProductGrid products={products} />
+              <>
+                <div className="mb-6">
+                  <p className="text-sm text-gray-600">
+                    {products.length}{" "}
+                    {products.length === 1
+                      ? "produto encontrado"
+                      : "produtos encontrados"}
+                  </p>
+                </div>
+                <ProductGrid products={products} />
+              </>
             )}
           </div>
         </div>
