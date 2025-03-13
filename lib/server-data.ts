@@ -49,12 +49,13 @@ export async function getProductBySlug(slug: string) {
 
 export async function getProductsByCategory(
   categoryId: number,
-  filters?: {
+  filters: {
     subcategoryId?: number;
     maxPrice?: number;
     minPrice?: number;
     sortBy?: string;
-    [key: string]: any;
+    brandSlug?: string;
+    classifications?: { [key: string]: string[] };
   }
 ) {
   const supabase = createServerSupabaseClient();
@@ -67,9 +68,8 @@ export async function getProductsByCategory(
       .select(
         `
         *,
-        categories:category_id(*),
-        subcategories:subcategory_id(*),
-        brand:brand_id(name, slug, logo_url),
+        subcategory:subcategory_id(*),
+        brand:brand_id(*),
         product_classifications(
           classification:classification_id(*)
         )
@@ -77,35 +77,56 @@ export async function getProductsByCategory(
       )
       .eq("category_id", categoryId);
 
-    // Aplicar filtros básicos
-    if (filters) {
-      if (filters.subcategoryId) {
-        query = query.eq("subcategory_id", filters.subcategoryId);
-      }
-      if (filters.maxPrice) {
-        query = query.lte("price", filters.maxPrice);
-      }
-      if (filters.minPrice) {
-        query = query.gte("price", filters.minPrice);
-      }
+    // Aplicar filtro de subcategoria se especificado
+    if (filters.subcategoryId) {
+      query = query.eq("subcategory_id", filters.subcategoryId);
+    }
 
-      // Ordenação
+    // Aplicar filtro de marca se especificado
+    if (filters.brandSlug) {
+      console.log("Aplicando filtro de marca:", filters.brandSlug);
+      // Primeiro, buscar o ID da marca pelo slug
+      const { data: brandData } = await supabase
+        .from("brands")
+        .select("id")
+        .eq("slug", filters.brandSlug)
+        .single();
+
+      if (brandData) {
+        query = query.eq("brand_id", brandData.id);
+      } else {
+        console.log("Marca não encontrada com o slug:", filters.brandSlug);
+      }
+    }
+
+    // Aplicar filtros de preço
+    if (filters.maxPrice) {
+      query = query.lte("price", filters.maxPrice);
+    }
+    if (filters.minPrice) {
+      query = query.gte("price", filters.minPrice);
+    }
+
+    // Aplicar ordenação
+    if (filters.sortBy) {
       switch (filters.sortBy) {
-        case "price_asc":
+        case "price-asc":
           query = query.order("price", { ascending: true });
           break;
-        case "price_desc":
+        case "price-desc":
           query = query.order("price", { ascending: false });
           break;
-        case "newest":
-          query = query.order("created_at", { ascending: false });
+        case "name-asc":
+          query = query.order("name", { ascending: true });
           break;
-        case "oldest":
-          query = query.order("created_at", { ascending: true });
+        case "name-desc":
+          query = query.order("name", { ascending: false });
           break;
         default:
           query = query.order("created_at", { ascending: false });
       }
+    } else {
+      query = query.order("created_at", { ascending: false });
     }
 
     const { data: products, error } = await query;
@@ -124,7 +145,13 @@ export async function getProductsByCategory(
     const classificationFilters = filters
       ? Object.entries(filters).filter(
           ([key]) =>
-            !["subcategoryId", "maxPrice", "minPrice", "sortBy"].includes(key)
+            ![
+              "subcategoryId",
+              "maxPrice",
+              "minPrice",
+              "sortBy",
+              "brandSlug",
+            ].includes(key)
         )
       : [];
 

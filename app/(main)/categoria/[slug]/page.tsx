@@ -26,6 +26,7 @@ interface CategoryPageProps {
     sortBy?: string;
     necessidade?: string[];
     tipo_pele?: string[];
+    brand?: string;
   };
 }
 
@@ -59,22 +60,25 @@ export default async function CategoryPage({
 
   // Buscar subcategorias e classificações da categoria
   const supabase = createServerSupabaseClient();
-  const [subcategoriesResult, classificationsResult] = await Promise.all([
-    supabase
-      .from("subcategories")
-      .select("*")
-      .eq("category_id", category.id)
-      .order("name"),
-    supabase
-      .from("classifications")
-      .select("*")
-      .eq("category_id", category.id)
-      .order("type", { ascending: true })
-      .order("name", { ascending: true }),
-  ]);
+  const [subcategoriesResult, classificationsResult, brandsResult] =
+    await Promise.all([
+      supabase
+        .from("subcategories")
+        .select("*")
+        .eq("category_id", category.id)
+        .order("name"),
+      supabase
+        .from("classifications")
+        .select("*")
+        .eq("category_id", category.id)
+        .order("type", { ascending: true })
+        .order("name", { ascending: true }),
+      supabase.from("brands").select("*").order("name"),
+    ]);
 
   const subcategories = subcategoriesResult.data || [];
   const classifications = classificationsResult.data || [];
+  const brands = brandsResult.data || [];
 
   // Preparar filtros
   const filters: {
@@ -82,6 +86,7 @@ export default async function CategoryPage({
     maxPrice?: number;
     minPrice?: number;
     sortBy?: string;
+    brandSlug?: string;
     [key: string]: any;
   } = {};
 
@@ -99,6 +104,10 @@ export default async function CategoryPage({
       }
     }
 
+    if (searchParams.brand) {
+      filters.brandSlug = searchParams.brand;
+    }
+
     if (searchParams.maxPrice) {
       filters.maxPrice = parseFloat(searchParams.maxPrice);
     }
@@ -113,7 +122,11 @@ export default async function CategoryPage({
 
     // Processar todos os outros parâmetros como filtros de classificação
     Object.entries(searchParams).forEach(([key, value]) => {
-      if (!["subcategory", "maxPrice", "minPrice", "sortBy"].includes(key)) {
+      if (
+        !["subcategory", "maxPrice", "minPrice", "sortBy", "brand"].includes(
+          key
+        )
+      ) {
         // Converter para array se não for
         const values = Array.isArray(value) ? value : [value];
         filters[key] = values;
@@ -146,7 +159,9 @@ export default async function CategoryPage({
       <Filters
         subcategories={subcategories}
         classifications={classifications}
+        brands={brands}
         currentSubcategory={searchParams?.subcategory}
+        currentBrand={searchParams?.brand}
         currentSortBy={searchParams?.sortBy}
         currentMaxPrice={searchParams?.maxPrice}
         currentNecessidade={filters.necessidade || []}

@@ -119,6 +119,32 @@ export interface Database {
           created_at?: string;
         };
       };
+      brands: {
+        Row: {
+          id: number;
+          name: string;
+          slug: string;
+          logo_url: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          name: string;
+          slug: string;
+          logo_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          name?: string;
+          slug?: string;
+          logo_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;

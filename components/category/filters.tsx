@@ -22,11 +22,14 @@ type Classification = {
   type: string;
   category_id: number;
 };
+type Brand = Database["public"]["Tables"]["brands"]["Row"];
 
 interface FiltersProps {
   subcategories: Subcategory[];
   classifications?: Classification[];
+  brands: Brand[];
   currentSubcategory?: string;
+  currentBrand?: string;
   currentSortBy?: string;
   currentMaxPrice?: string;
   currentNecessidade?: string[];
@@ -37,7 +40,9 @@ interface FiltersProps {
 export function Filters({
   subcategories,
   classifications = [],
+  brands = [],
   currentSubcategory,
+  currentBrand,
   currentSortBy,
   currentMaxPrice,
   currentNecessidade = [],
@@ -83,6 +88,11 @@ export function Filters({
 
   const handleSubcategoryChange = (value: string) => {
     const updates = { subcategory: value === "all" ? null : value };
+    router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
+  };
+
+  const handleBrandChange = (value: string) => {
+    const updates = { brand: value === "all" ? null : value };
     router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
   };
 
@@ -149,6 +159,24 @@ export function Filters({
                 {subcategories?.map((subcategory) => (
                   <SelectItem key={subcategory.id} value={subcategory.slug}>
                     {subcategory.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Filtro de Marcas */}
+            <Select
+              value={currentBrand || "all"}
+              onValueChange={handleBrandChange}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Marca" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as marcas</SelectItem>
+                {brands?.map((brand) => (
+                  <SelectItem key={brand.id} value={brand.slug}>
+                    {brand.name}
                   </SelectItem>
                 ))}
               </SelectContent>
