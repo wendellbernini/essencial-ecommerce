@@ -4539,6 +4539,190 @@ Otimo, agora os filtros estao funcionando perfeitamente, mas uma coisa que  esto
 
 _**Assistant**_
 
+Sim, você tem razão! Essa latência acontece porque cada vez que uma checkbox é marcada, estamos:
+
+1. Atualizando a URL com os novos parâmetros
+2. O Next.js está fazendo uma navegação completa
+3. Os dados estão sendo buscados novamente do Supabase
+4. A página está sendo re-renderizada
+
+Existem algumas maneiras de melhorar isso:
+
+1. **Solução Imediata (Feedback Visual)**:
+Podemos adicionar um feedback visual imediato na checkbox, atualizando seu estado localmente antes da navegação. Isso dará a sensação de resposta instantânea para o usuário.
+
+2. **Solução Mais Complexa (para futuro)**:
+- Implementar um estado local para os filtros
+- Usar debounce para agrupar múltiplas seleções
+- Fazer a busca dos produtos via API client-side
+- Implementar cache dos resultados
+
+Vou implementar a solução imediata, que é mais simples e já vai melhorar a experiência do usuário:
+
+---
+
+_****_
+
+```diff
+      [number, number]
+    >([0, 1000]);
++ 
++   // Estado local para controle visual das checkboxes
++   const [localCheckedItems, setLocalCheckedItems] = useState<
++     Record<string, boolean>
++   >({});
+  
+    // Inicializar o range com os valores da URL
+      setDebouncedPriceRange([minPrice, maxPrice]);
+    }, [currentMinPrice, currentMaxPrice]);
++ 
++   // Inicializar estado local com valores da URL
++   useEffect(() => {
++     const newCheckedItems: Record<string, boolean> = {};
++     classifications.forEach((classification) => {
++       const normalizedType = normalizeType(classification.type);
++       const selectedValues = Array.from(searchParams.getAll(normalizedType));
++       const key = `${normalizedType}-${classification.id}`;
++       newCheckedItems[key] = selectedValues.includes(classification.name);
++     });
++     setLocalCheckedItems(newCheckedItems);
++   }, [classifications, searchParams]);
+  
+    // Debounce para o range de preço
+      type: string,
+      value: string,
+-     checked: boolean
+-   ) => {
+-     console.log(
+-       `Alterando classificação: tipo=${type}, valor=${value}, checked=${checked}`
+-     );
++     checked: boolean,
++     itemId: number
++   ) => {
++     // Atualizar estado local imediatamente
++     const key = `${normalizeType(type)}-${itemId}`;
++     setLocalCheckedItems((prev) => ({ ...prev, [key]: checked }));
+  
+      // Normalizar o tipo para lowercase e remover espaços
+      const normalizedType = normalizeType(type);
+- 
+-     console.log("Tipo normalizado:", normalizedType);
+  
+      // Obter valores atuais do searchParams para este tipo específico
+      const currentValues = Array.from(searchParams.getAll(normalizedType));
+-     console.log(`Valores atuais para ${normalizedType}:`, currentValues);
+  
+      let newValues: string[];
+        newValues = currentValues.filter((v) => v !== value);
+      }
+- 
+-     console.log(`Novos valores para ${normalizedType}:`, newValues);
+  
+      const updates = {
+        [normalizedType]: newValues.length > 0 ? newValues : null,
+      };
+  
+-     console.log("Atualizando URL com:", updates);
++     // Atualizar URL
+      router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
+    };
+                  <div className="space-y-2">
+                    {items.map((item) => {
+-                     const isChecked = selectedValues.includes(item.name);
++                     const key = `${normalizedType}-${item.id}`;
++                     const isChecked =
++                       localCheckedItems[key] ??
++                       selectedValues.includes(item.name);
+  
+                      return (
+                        >
+                          <Checkbox
+-                           id={`${normalizedType}-${item.id}`}
++                           id={key}
+                            checked={isChecked}
+                            onCheckedChange={(checked) =>
+                              handleClassificationChange(
+                                type,
+                                item.name,
+-                               checked as boolean
++                               checked as boolean,
++                               item.id
+                              )
+                            }
+                            className="border-2 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                          />
+                          <Label
+-                           htmlFor={`${normalizedType}-${item.id}`}
++                           htmlFor={key}
+                            className={cn(
+                              "text-sm cursor-pointer",
+```
+
+---
+
+_****_
+
+Agora vou fazer o commit das alterações:
+
+---
+
+_****_
+
+```bash
+git add . && git commit -m "perf: adiciona feedback visual imediato nas checkboxes dos filtros" && git push origin main
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git add . && git commit -m "per
+f: adiciona feedback visual imediato nas checkboxes dos filtros" && git push origin main
+                                                         git add . && git commit -m "per
+f: adiciona feedback visual imediato nas checkboxes dos filtros" && git push origin main
+                                                                                       n
+[main 34d5b27] perf: adiciona feedback visual imediato nas checkboxes dos filtros
+ 2 files changed, 136 insertions(+), 14 deletions(-)
+Enumerating objects: 15, done.
+Counting objects: 100% (15/15), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (8/8), 1.81 KiB | 925.00 KiB/s, done.
+Total 8 (delta 5), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (5/5), completed with 5 local objects.
+To github.com:wendellbernini/essencial-ecommerce.git
+   1f137f7..34d5b27  main -> main
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+_****_
+
+Pronto! Agora as checkboxes terão uma resposta visual imediata quando clicadas. O que fizemos foi:
+
+1. Adicionamos um estado local `localCheckedItems` para controlar o estado visual das checkboxes
+2. Atualizamos esse estado imediatamente quando o usuário clica
+3. Mantivemos a sincronização com a URL e os filtros reais
+4. Removemos os console.logs que não eram mais necessários
+
+Isso vai dar uma sensação de resposta mais rápida para o usuário, mesmo que o filtro real ainda demore os mesmos 2 segundos para atualizar.
+
+Para uma solução mais robusta no futuro, poderíamos:
+1. Implementar um estado global com Zustand ou Redux
+2. Fazer o filtro client-side inicialmente
+3. Usar SWR ou React Query para cache dos dados
+4. Implementar um debounce para agrupar múltiplas seleções
+
+Mas por enquanto, essa solução já deve melhorar bastante a experiência do usuário. O que você acha?
+
+---
+
+_**User**_
+
+Otimo, agora note que no menu suspenso das categorias nos temos como selecionar as subcategorias e especificas para ir ate elas, eu pensei que seria legal irmos por exemplo quando clico em Hidratantes no submenu de skincare ser redirecionado para http://localhost:3000/categoria/skincare?subcategory=hidratantes --- entende? algo nesse sentido, nao precisa ser exatamente isso pq foi so um exemplo, nao sei se deu para entender, mas isso para todas as subcategorias dos menus suspensos, entende?
+
+---
+
+_**Assistant**_
+
 
 
 ---

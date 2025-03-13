@@ -125,7 +125,7 @@ export function CategoryMenu({ categorySlug }: CategoryMenuProps) {
             {subcategories.map((subcategory) => (
               <li key={subcategory.id}>
                 <Link
-                  href={`/categoria/${categorySlug}/${subcategory.slug}`}
+                  href={`/categoria/${categorySlug}?subcategory=${subcategory.slug}`}
                   className="text-sm text-gray-600 hover:text-orange-500"
                 >
                   {subcategory.name}
@@ -145,7 +145,9 @@ export function CategoryMenu({ categorySlug }: CategoryMenuProps) {
               {items.map((classification) => (
                 <li key={classification.id}>
                   <Link
-                    href={`/categoria/${categorySlug}?filter=${classification.slug}`}
+                    href={`/categoria/${categorySlug}?${encodeURIComponent(
+                      type.toLowerCase().replace(/\s+/g, "_")
+                    )}=${encodeURIComponent(classification.name)}`}
                     className="text-sm text-gray-600 hover:text-orange-500"
                   >
                     {classification.name}
