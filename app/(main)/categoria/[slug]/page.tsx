@@ -155,34 +155,42 @@ export default async function CategoryPage({
         </div>
       </div>
 
-      {/* Filtros e Ordenação */}
-      <Filters
-        subcategories={subcategories}
-        classifications={classifications}
-        brands={brands}
-        currentSubcategory={searchParams?.subcategory}
-        currentBrand={searchParams?.brand}
-        currentSortBy={searchParams?.sortBy}
-        currentMaxPrice={searchParams?.maxPrice}
-        currentNecessidade={filters.necessidade || []}
-        currentTipoPele={filters.tipoPele || []}
-        categorySlug={params.slug}
-      />
-
-      {/* Lista de produtos */}
+      {/* Container principal com grid */}
       <div className="container mx-auto px-4 py-8">
-        {products.length === 0 ? (
-          <div className="text-center py-12">
-            <h2 className="text-xl font-medium text-gray-900 mb-2">
-              Nenhum produto encontrado
-            </h2>
-            <p className="text-gray-600">
-              Tente ajustar os filtros ou buscar em outras categorias.
-            </p>
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Coluna de filtros */}
+          <div className="w-full md:w-64 flex-shrink-0">
+            <Filters
+              subcategories={subcategories}
+              classifications={classifications}
+              brands={brands}
+              currentSubcategory={searchParams?.subcategory}
+              currentBrand={searchParams?.brand}
+              currentSortBy={searchParams?.sortBy}
+              currentMaxPrice={searchParams?.maxPrice}
+              currentMinPrice={searchParams?.minPrice}
+              currentNecessidade={filters.necessidade || []}
+              currentTipoPele={filters.tipoPele || []}
+              categorySlug={params.slug}
+            />
           </div>
-        ) : (
-          <ProductGrid products={products} />
-        )}
+
+          {/* Coluna de produtos */}
+          <div className="flex-1">
+            {products.length === 0 ? (
+              <div className="text-center py-12">
+                <h2 className="text-xl font-medium text-gray-900 mb-2">
+                  Nenhum produto encontrado
+                </h2>
+                <p className="text-gray-600">
+                  Tente ajustar os filtros ou buscar em outras categorias.
+                </p>
+              </div>
+            ) : (
+              <ProductGrid products={products} />
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Produtos relacionados */}

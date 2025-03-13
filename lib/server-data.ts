@@ -109,6 +109,7 @@ export async function getProductsByCategory(
 
     // Aplicar ordenação
     if (filters.sortBy) {
+      console.log("Aplicando ordenação:", filters.sortBy);
       switch (filters.sortBy) {
         case "price-asc":
           query = query.order("price", { ascending: true });
@@ -116,16 +117,17 @@ export async function getProductsByCategory(
         case "price-desc":
           query = query.order("price", { ascending: false });
           break;
-        case "name-asc":
-          query = query.order("name", { ascending: true });
+        case "created-asc":
+          query = query.order("created_at", { ascending: true });
           break;
-        case "name-desc":
-          query = query.order("name", { ascending: false });
+        case "created-desc":
+          query = query.order("created_at", { ascending: false });
           break;
         default:
           query = query.order("created_at", { ascending: false });
       }
     } else {
+      // Por padrão, mostrar os mais recentes primeiro
       query = query.order("created_at", { ascending: false });
     }
 
