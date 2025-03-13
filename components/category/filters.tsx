@@ -81,6 +81,11 @@ export function Filters({
     [number, number]
   >([0, 1000]);
 
+  // Estado local para controle visual das checkboxes
+  const [localCheckedItems, setLocalCheckedItems] = useState<
+    Record<string, boolean>
+  >({});
+
   // Inicializar o range com os valores da URL
   useEffect(() => {
     const minPrice = currentMinPrice ? parseFloat(currentMinPrice) : 0;
@@ -88,6 +93,18 @@ export function Filters({
     setPriceRange([minPrice, maxPrice]);
     setDebouncedPriceRange([minPrice, maxPrice]);
   }, [currentMinPrice, currentMaxPrice]);
+
+  // Inicializar estado local com valores da URL
+  useEffect(() => {
+    const newCheckedItems: Record<string, boolean> = {};
+    classifications.forEach((classification) => {
+      const normalizedType = normalizeType(classification.type);
+      const selectedValues = Array.from(searchParams.getAll(normalizedType));
+      const key = `${normalizedType}-${classification.id}`;
+      newCheckedItems[key] = selectedValues.includes(classification.name);
+    });
+    setLocalCheckedItems(newCheckedItems);
+  }, [classifications, searchParams]);
 
   // Debounce para o range de preço
   useEffect(() => {
@@ -166,20 +183,18 @@ export function Filters({
   const handleClassificationChange = (
     type: string,
     value: string,
-    checked: boolean
+    checked: boolean,
+    itemId: number
   ) => {
-    console.log(
-      `Alterando classificação: tipo=${type}, valor=${value}, checked=${checked}`
-    );
+    // Atualizar estado local imediatamente
+    const key = `${normalizeType(type)}-${itemId}`;
+    setLocalCheckedItems((prev) => ({ ...prev, [key]: checked }));
 
     // Normalizar o tipo para lowercase e remover espaços
     const normalizedType = normalizeType(type);
 
-    console.log("Tipo normalizado:", normalizedType);
-
     // Obter valores atuais do searchParams para este tipo específico
     const currentValues = Array.from(searchParams.getAll(normalizedType));
-    console.log(`Valores atuais para ${normalizedType}:`, currentValues);
 
     let newValues: string[];
     if (checked) {
@@ -188,13 +203,11 @@ export function Filters({
       newValues = currentValues.filter((v) => v !== value);
     }
 
-    console.log(`Novos valores para ${normalizedType}:`, newValues);
-
     const updates = {
       [normalizedType]: newValues.length > 0 ? newValues : null,
     };
 
-    console.log("Atualizando URL com:", updates);
+    // Atualizar URL
     router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
   };
 
@@ -293,7 +306,10 @@ export function Filters({
                 </h3>
                 <div className="space-y-2">
                   {items.map((item) => {
-                    const isChecked = selectedValues.includes(item.name);
+                    const key = `${normalizedType}-${item.id}`;
+                    const isChecked =
+                      localCheckedItems[key] ??
+                      selectedValues.includes(item.name);
 
                     return (
                       <div
@@ -301,19 +317,20 @@ export function Filters({
                         className="flex items-center space-x-2"
                       >
                         <Checkbox
-                          id={`${normalizedType}-${item.id}`}
+                          id={key}
                           checked={isChecked}
                           onCheckedChange={(checked) =>
                             handleClassificationChange(
                               type,
                               item.name,
-                              checked as boolean
+                              checked as boolean,
+                              item.id
                             )
                           }
                           className="border-2 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
                         />
                         <Label
-                          htmlFor={`${normalizedType}-${item.id}`}
+                          htmlFor={key}
                           className={cn(
                             "text-sm cursor-pointer",
                             isChecked
