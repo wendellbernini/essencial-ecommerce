@@ -24,6 +24,8 @@ interface CategoryPageProps {
     maxPrice?: string;
     minPrice?: string;
     sortBy?: string;
+    necessidade?: string[];
+    tipo_pele?: string[];
   };
 }
 
@@ -55,13 +57,24 @@ export default async function CategoryPage({
     );
   }
 
-  // Buscar subcategorias da categoria
+  // Buscar subcategorias e classificações da categoria
   const supabase = createServerSupabaseClient();
-  const { data: subcategories } = await supabase
-    .from("subcategories")
-    .select("*")
-    .eq("category_id", category.id)
-    .order("name");
+  const [subcategoriesResult, classificationsResult] = await Promise.all([
+    supabase
+      .from("subcategories")
+      .select("*")
+      .eq("category_id", category.id)
+      .order("name"),
+    supabase
+      .from("classifications")
+      .select("*")
+      .eq("category_id", category.id)
+      .order("type", { ascending: true })
+      .order("name", { ascending: true }),
+  ]);
+
+  const subcategories = subcategoriesResult.data || [];
+  const classifications = classificationsResult.data || [];
 
   // Preparar filtros
   const filters: {
@@ -69,32 +82,51 @@ export default async function CategoryPage({
     maxPrice?: number;
     minPrice?: number;
     sortBy?: string;
+    [key: string]: any;
   } = {};
 
+  console.log("Parâmetros de URL recebidos:", searchParams);
+
   // Aplicar filtros dos parâmetros da URL
-  if (searchParams?.subcategory) {
-    const selectedSubcategory = subcategories?.find(
-      (sub: Subcategory) => sub.slug === searchParams.subcategory
-    );
-    if (selectedSubcategory) {
-      filters.subcategoryId = selectedSubcategory.id;
+  if (searchParams) {
+    // Filtros básicos
+    if (searchParams.subcategory) {
+      const selectedSubcategory = subcategories?.find(
+        (sub: Subcategory) => sub.slug === searchParams.subcategory
+      );
+      if (selectedSubcategory) {
+        filters.subcategoryId = selectedSubcategory.id;
+      }
     }
+
+    if (searchParams.maxPrice) {
+      filters.maxPrice = parseFloat(searchParams.maxPrice);
+    }
+
+    if (searchParams.minPrice) {
+      filters.minPrice = parseFloat(searchParams.minPrice);
+    }
+
+    if (searchParams.sortBy) {
+      filters.sortBy = searchParams.sortBy;
+    }
+
+    // Processar todos os outros parâmetros como filtros de classificação
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (!["subcategory", "maxPrice", "minPrice", "sortBy"].includes(key)) {
+        // Converter para array se não for
+        const values = Array.isArray(value) ? value : [value];
+        filters[key] = values;
+      }
+    });
   }
 
-  if (searchParams?.maxPrice) {
-    filters.maxPrice = parseFloat(searchParams.maxPrice);
-  }
-
-  if (searchParams?.minPrice) {
-    filters.minPrice = parseFloat(searchParams.minPrice);
-  }
-
-  if (searchParams?.sortBy) {
-    filters.sortBy = searchParams.sortBy;
-  }
+  console.log("Filtros processados:", filters);
 
   // Buscar produtos da categoria com filtros
   const products = await getProductsByCategory(category.id, filters);
+
+  console.log(`Produtos retornados: ${products.length}`);
 
   return (
     <div className="min-h-screen bg-white">
@@ -112,10 +144,14 @@ export default async function CategoryPage({
 
       {/* Filtros e Ordenação */}
       <Filters
-        subcategories={subcategories || []}
+        subcategories={subcategories}
+        classifications={classifications}
         currentSubcategory={searchParams?.subcategory}
         currentSortBy={searchParams?.sortBy}
         currentMaxPrice={searchParams?.maxPrice}
+        currentNecessidade={filters.necessidade || []}
+        currentTipoPele={filters.tipoPele || []}
+        categorySlug={params.slug}
       />
 
       {/* Lista de produtos */}

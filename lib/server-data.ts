@@ -54,24 +54,30 @@ export async function getProductsByCategory(
     maxPrice?: number;
     minPrice?: number;
     sortBy?: string;
+    [key: string]: any;
   }
 ) {
   const supabase = createServerSupabaseClient();
 
   try {
+    console.log("Iniciando busca de produtos com filtros:", filters);
+
     let query = supabase
       .from("products")
       .select(
         `
         *,
-        categories:category_id(name, slug),
-        subcategories:subcategory_id(name, slug),
-        brand:brand_id(name, slug, logo_url)
+        categories:category_id(*),
+        subcategories:subcategory_id(*),
+        brand:brand_id(name, slug, logo_url),
+        product_classifications(
+          classification:classification_id(*)
+        )
       `
       )
       .eq("category_id", categoryId);
 
-    // Aplicar filtros
+    // Aplicar filtros básicos
     if (filters) {
       if (filters.subcategoryId) {
         query = query.eq("subcategory_id", filters.subcategoryId);
@@ -100,12 +106,9 @@ export async function getProductsByCategory(
         default:
           query = query.order("created_at", { ascending: false });
       }
-    } else {
-      // Ordenação padrão
-      query = query.order("created_at", { ascending: false });
     }
 
-    const { data, error } = await query;
+    const { data: products, error } = await query;
 
     if (error) {
       console.error(
@@ -115,7 +118,113 @@ export async function getProductsByCategory(
       throw error;
     }
 
-    return data as Product[];
+    console.log(`Encontrados ${products?.length || 0} produtos inicialmente`);
+
+    // Identificar filtros de classificação (excluindo filtros básicos)
+    const classificationFilters = filters
+      ? Object.entries(filters).filter(
+          ([key]) =>
+            !["subcategoryId", "maxPrice", "minPrice", "sortBy"].includes(key)
+        )
+      : [];
+
+    // Se houver filtros de classificação
+    if (classificationFilters.length > 0) {
+      console.log("Aplicando filtros de classificação:", classificationFilters);
+
+      // Filtrar produtos que atendem aos critérios
+      const filteredProducts = products.filter((product) => {
+        // Pegar todas as classificações deste produto
+        const productClassifications =
+          product.product_classifications?.map(
+            (pc: any) => pc.classification
+          ) || [];
+
+        // Se não há filtros de classificação ativos, retorna true
+        if (classificationFilters.length === 0) {
+          return true;
+        }
+
+        // Se há filtros mas o produto não tem classificações, retorna false
+        if (productClassifications.length === 0) {
+          return false;
+        }
+
+        console.log(
+          `Produto ${product.id} - Classificações:`,
+          productClassifications.map((c: any) => ({
+            name: c.name,
+            type: c.type,
+          }))
+        );
+
+        // Verificar cada tipo de classificação
+        const matches = classificationFilters.map(
+          ([filterType, selectedValues]) => {
+            // Se não houver valores selecionados, considera como match
+            if (!Array.isArray(selectedValues) || selectedValues.length === 0) {
+              return true;
+            }
+
+            // Encontrar classificações do produto que correspondem ao tipo do filtro
+            const classificationsOfType = productClassifications.filter(
+              (classification: any) => {
+                const normalizedClassificationType = classification.type
+                  .toLowerCase()
+                  .replace(/\s+/g, "_");
+                return (
+                  normalizedClassificationType === filterType.toLowerCase()
+                );
+              }
+            );
+
+            console.log(`Filtro ${filterType}:`, {
+              valoresSelecionados: selectedValues,
+              classificacoesDisponiveis: classificationsOfType.map(
+                (c: any) => ({
+                  name: c.name,
+                  type: c.type,
+                  normalizedType: c.type.toLowerCase().replace(/\s+/g, "_"),
+                })
+              ),
+              tipoFiltro: filterType.toLowerCase(),
+            });
+
+            // Produto deve ter todas as classificações selecionadas deste tipo
+            const match = selectedValues.every((value) =>
+              classificationsOfType.some(
+                (classification: any) =>
+                  classification.name.toLowerCase() === value.toLowerCase()
+              )
+            );
+
+            console.log(`Resultado do filtro ${filterType}:`, match);
+            return match;
+          }
+        );
+
+        // Log detalhado do resultado da filtragem
+        console.log(`Produto ${product.id} - Resultado final:`, {
+          filtrosAplicados: classificationFilters.map(([type, values]) => ({
+            type,
+            values,
+          })),
+          matches,
+          incluir: matches.every(Boolean),
+        });
+
+        // Produto deve atender a TODOS os critérios de TODOS os tipos de classificação
+        return matches.every(Boolean);
+      });
+
+      console.log(
+        "Produtos filtrados:",
+        filteredProducts.map((p) => p.id)
+      );
+      return filteredProducts;
+    }
+
+    return products;
   } catch (error) {
     console.error(`Erro ao buscar produtos da categoria ${categoryId}:`, error);
     return [];

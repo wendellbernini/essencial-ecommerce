@@ -1,12 +1,29 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "2mb",
+    },
+  },
   images: {
-    domains: [
-      "images.unsplash.com",
-      "plus.unsplash.com",
-      "source.unsplash.com",
-      "api.dicebear.com",
-      "res.cloudinary.com",
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "plus.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "source.unsplash.com",
+      },
     ],
   },
   typescript: {
@@ -17,7 +34,8 @@ const nextConfig = {
     // Não falha o build se houver erros de lint
     ignoreDuringBuilds: true,
   },
-  output: "standalone",
+  swcMinify: true,
+  poweredByHeader: false,
 };
 
 module.exports = nextConfig;

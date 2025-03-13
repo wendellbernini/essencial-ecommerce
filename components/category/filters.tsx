@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -10,58 +10,135 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Database } from "@/types/supabase";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { useCallback } from "react";
+import { cn } from "@/lib/utils";
 
 type Subcategory = Database["public"]["Tables"]["subcategories"]["Row"];
+type Classification = {
+  id: number;
+  name: string;
+  type: string;
+  category_id: number;
+};
 
 interface FiltersProps {
   subcategories: Subcategory[];
+  classifications?: Classification[];
   currentSubcategory?: string;
   currentSortBy?: string;
   currentMaxPrice?: string;
+  currentNecessidade?: string[];
+  currentTipoPele?: string[];
+  categorySlug: string;
 }
 
 export function Filters({
   subcategories,
+  classifications = [],
   currentSubcategory,
   currentSortBy,
   currentMaxPrice,
+  currentNecessidade = [],
+  currentTipoPele = [],
+  categorySlug,
 }: FiltersProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Agrupar classificações por tipo
+  const groupedClassifications = classifications.reduce((acc, item) => {
+    if (!acc[item.type]) {
+      acc[item.type] = [];
+    }
+    acc[item.type].push(item);
+    return acc;
+  }, {} as Record<string, Classification[]>);
+
+  // Função auxiliar para normalizar o tipo de classificação
+  const normalizeType = (type: string) => {
+    return type.toLowerCase().replace(/\s+/g, "_");
+  };
+
+  // Função auxiliar para atualizar URL mantendo outros parâmetros
+  const updateSearchParams = useCallback(
+    (updates: Record<string, string | string[] | null>) => {
+      const newParams = new URLSearchParams(searchParams.toString());
+
+      Object.entries(updates).forEach(([key, value]) => {
+        newParams.delete(key);
+        if (value === null) return;
+        if (Array.isArray(value)) {
+          value.forEach((v) => newParams.append(key, v));
+        } else {
+          newParams.set(key, value);
+        }
+      });
+
+      return newParams.toString();
+    },
+    [searchParams]
+  );
 
   const handleSubcategoryChange = (value: string) => {
-    const url = new URL(window.location.href);
-    if (value === "all") {
-      url.searchParams.delete("subcategory");
-    } else {
-      url.searchParams.set("subcategory", value);
-    }
-    router.push(url.toString());
+    const updates = { subcategory: value === "all" ? null : value };
+    router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
   };
 
   const handleSortChange = (value: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("sortBy", value);
-    router.push(url.toString());
+    const updates = { sortBy: value };
+    router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
   };
 
   const handlePriceChange = (value: string) => {
-    const url = new URL(window.location.href);
-    if (value === "all") {
-      url.searchParams.delete("maxPrice");
+    const updates = { maxPrice: value === "all" ? null : value };
+    router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
+  };
+
+  const handleClassificationChange = (
+    type: string,
+    value: string,
+    checked: boolean
+  ) => {
+    console.log(
+      `Alterando classificação: tipo=${type}, valor=${value}, checked=${checked}`
+    );
+
+    // Normalizar o tipo para lowercase e remover espaços
+    const normalizedType = normalizeType(type);
+
+    console.log("Tipo normalizado:", normalizedType);
+
+    // Obter valores atuais do searchParams para este tipo específico
+    const currentValues = Array.from(searchParams.getAll(normalizedType));
+    console.log(`Valores atuais para ${normalizedType}:`, currentValues);
+
+    let newValues: string[];
+    if (checked) {
+      newValues = [...new Set([...currentValues, value])];
     } else {
-      url.searchParams.set("maxPrice", value);
+      newValues = currentValues.filter((v) => v !== value);
     }
-    router.push(url.toString());
+
+    console.log(`Novos valores para ${normalizedType}:`, newValues);
+
+    const updates = {
+      [normalizedType]: newValues.length > 0 ? newValues : null,
+    };
+
+    console.log("Atualizando URL com:", updates);
+    router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
   };
 
   return (
     <div className="border-b border-gray-200">
       <div className="container mx-auto px-4 py-4">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div className="flex flex-col gap-6">
           <div className="flex flex-wrap items-center gap-4">
             {/* Filtro de Subcategorias */}
             <Select
-              defaultValue={currentSubcategory || "all"}
+              value={currentSubcategory || "all"}
               onValueChange={handleSubcategoryChange}
             >
               <SelectTrigger className="w-[220px]">
@@ -79,7 +156,7 @@ export function Filters({
 
             {/* Ordenação */}
             <Select
-              defaultValue={currentSortBy || "newest"}
+              value={currentSortBy || "newest"}
               onValueChange={handleSortChange}
             >
               <SelectTrigger className="w-[180px]">
@@ -92,12 +169,10 @@ export function Filters({
                 <SelectItem value="price_desc">Maior preço</SelectItem>
               </SelectContent>
             </Select>
-          </div>
 
-          {/* Filtros de Preço */}
-          <div>
+            {/* Filtros de Preço */}
             <Tabs
-              defaultValue={getDefaultPriceTab(currentMaxPrice)}
+              value={getDefaultPriceTab(currentMaxPrice)}
               onValueChange={handlePriceChange}
               className="bg-white rounded-lg border border-gray-200"
             >
@@ -129,6 +204,67 @@ export function Filters({
               </TabsList>
             </Tabs>
           </div>
+
+          {/* Filtros específicos por categoria */}
+          {Object.entries(groupedClassifications).length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
+              {Object.entries(groupedClassifications).map(([type, items]) => {
+                const normalizedType = normalizeType(type);
+                const selectedValues = Array.from(
+                  searchParams.getAll(normalizedType)
+                );
+
+                console.log(`Processando grupo de classificação:`, {
+                  type,
+                  normalizedType,
+                });
+
+                return (
+                  <div key={type} className="space-y-2">
+                    <h3 className="font-medium text-sm text-gray-900 mb-3">
+                      {type}
+                    </h3>
+                    <div className="space-y-2">
+                      {items.map((item) => {
+                        const isChecked = selectedValues.includes(item.name);
+
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={`${normalizedType}-${item.id}`}
+                              checked={isChecked}
+                              onCheckedChange={(checked) =>
+                                handleClassificationChange(
+                                  type,
+                                  item.name,
+                                  checked as boolean
+                                )
+                              }
+                              className="border-2 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                            />
+                            <Label
+                              htmlFor={`${normalizedType}-${item.id}`}
+                              className={cn(
+                                "text-sm cursor-pointer",
+                                isChecked
+                                  ? "text-orange-500 font-medium"
+                                  : "text-gray-600 hover:text-gray-900"
+                              )}
+                            >
+                              {item.name}
+                            </Label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
