@@ -18,8 +18,12 @@ export function WishlistButton({
       type="button"
       size="icon"
       variant="secondary"
-      className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm hover:bg-white z-10"
-      onClick={() => onToggle(productId)}
+      className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm hover:bg-white z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onToggle(productId);
+      }}
     >
       <Heart
         className={cn(
