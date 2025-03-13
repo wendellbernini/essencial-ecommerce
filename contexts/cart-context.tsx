@@ -8,6 +8,7 @@ import {
   ReactNode,
 } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { toast } from "sonner";
 
 // Tipos
 export interface CartItem {
@@ -25,6 +26,7 @@ interface CartState {
   total: number;
   total_items: number;
   isOpen: boolean;
+  isLoading: boolean;
 }
 
 type CartAction =
@@ -33,13 +35,14 @@ type CartAction =
   | { type: "UPDATE_QUANTITY"; payload: { id: string; quantity: number } }
   | { type: "CLEAR_CART" }
   | { type: "LOAD_CART"; payload: CartItem[] }
-  | { type: "TOGGLE_CART" };
+  | { type: "TOGGLE_CART" }
+  | { type: "SET_LOADING"; payload: boolean };
 
 interface CartContextType extends CartState {
-  addItem: (item: CartItem) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
+  addItem: (item: CartItem) => Promise<void>;
+  removeItem: (id: string) => Promise<void>;
+  updateQuantity: (id: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
   toggleCart: () => void;
 }
 
@@ -62,6 +65,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
             : item
         );
       } else {
+        // Limite de 20 itens diferentes no carrinho
+        if (state.items.length >= 20) {
+          toast.error("Limite máximo de 20 itens diferentes no carrinho");
+          return state;
+        }
         newItems = [...state.items, action.payload];
       }
 

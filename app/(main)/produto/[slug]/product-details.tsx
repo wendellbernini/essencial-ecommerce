@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProductBreadcrumb } from "@/components/product-breadcrumb";
 import { ProductImageZoom } from "@/components/product-image-zoom";
 import { useWishlist } from "@/hooks/use-wishlist";
+import { useCart } from "@/contexts/cart-context";
 import Reviews from "./reviews";
 import { Product, ReviewWithUser } from "@/lib/types";
 
@@ -29,6 +30,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [totalReviews, setTotalReviews] = useState(0);
   const supabase = createClientComponentClient();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { addItem, toggleCart } = useCart();
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -120,6 +122,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     // Garante que a quantidade não seja menor que 1 ou maior que o estoque
     const newQuantity = Math.max(1, Math.min(value, product.stock_quantity));
     setQuantity(newQuantity);
+  };
+
+  const handleAddToCart = () => {
+    addItem({
+      id: crypto.randomUUID(),
+      product_id: String(product.id),
+      name: product.name,
+      price: product.price,
+      sale_price: product.sale_price || undefined,
+      quantity: quantity,
+      image_url: product.images[0],
+    });
+    toggleCart();
   };
 
   return (
@@ -235,8 +250,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
             <div className="space-y-3">
               <div className="flex space-x-2">
-                <Button className="flex-1 bg-orange-100 hover:bg-orange-200 text-orange-700">
-                  Adicionar ao carrinho
+                <Button
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                  onClick={handleAddToCart}
+                  disabled={product.stock_quantity === 0}
+                >
+                  {product.stock_quantity === 0
+                    ? "Produto esgotado"
+                    : "Adicionar ao carrinho"}
                 </Button>
                 <Button
                   variant="outline"
@@ -248,7 +269,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     className={cn(
                       "h-5 w-5",
                       isInWishlist(product.id)
-                        ? "fill-red-500 text-red-500"
+                        ? "fill-orange-500 text-orange-500"
                         : "text-gray-600"
                     )}
                   />

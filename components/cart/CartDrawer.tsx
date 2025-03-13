@@ -14,9 +14,11 @@ import { CartItem } from "./CartItem";
 import { CartEmpty } from "./CartEmpty";
 import { formatPrice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 export function CartDrawer() {
-  const { items, total, isOpen, toggleCart, total_items } = useCart();
+  const { items, total, isOpen, toggleCart, total_items, isLoading } =
+    useCart();
   const router = useRouter();
 
   const handleCheckout = () => {
@@ -36,7 +38,11 @@ export function CartDrawer() {
           )}
         </SheetHeader>
 
-        {items.length === 0 ? (
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 text-orange-500 animate-spin" />
+          </div>
+        ) : items.length === 0 ? (
           <CartEmpty />
         ) : (
           <>
