@@ -19,14 +19,32 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface AddressCardProps {
   address: Address;
+  onSuccess: () => Promise<void>;
 }
 
-export function AddressCard({ address }: AddressCardProps) {
+export function AddressCard({ address, onSuccess }: AddressCardProps) {
   const { deleteAddress } = useAddresses();
   const { Dialog, openDialog, closeDialog } = useDialog();
+
+  const handleDelete = async () => {
+    try {
+      await deleteAddress(address.id);
+      await onSuccess();
+      toast.success("Endereço excluído com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao excluir endereço");
+    }
+  };
+
+  // Função para lidar com o sucesso da edição
+  const handleSuccess = async () => {
+    await onSuccess();
+    closeDialog();
+  };
 
   return (
     <>
@@ -69,7 +87,7 @@ export function AddressCard({ address }: AddressCardProps) {
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
                     className="bg-red-500 hover:bg-red-600"
-                    onClick={() => deleteAddress(address.id)}
+                    onClick={handleDelete}
                   >
                     Remover
                   </AlertDialogAction>
@@ -95,7 +113,7 @@ export function AddressCard({ address }: AddressCardProps) {
       </Card>
 
       <Dialog title="Editar Endereço">
-        <AddressForm address={address} onSuccess={closeDialog} />
+        <AddressForm address={address} onSuccess={handleSuccess} />
       </Dialog>
     </>
   );

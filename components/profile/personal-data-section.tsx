@@ -7,16 +7,16 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface UserData {
+  email: string;
   full_name: string;
   phone: string;
-  email?: string;
 }
 
 export function PersonalDataSection() {
   const [userData, setUserData] = useState<UserData>({
+    email: "",
     full_name: "",
     phone: "",
-    email: "",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -42,9 +42,9 @@ export function PersonalDataSection() {
       if (error) throw error;
 
       setUserData({
+        email: session.user.email || "",
         full_name: data?.full_name || "",
         phone: data?.phone || "",
-        email: session.user.email || "",
       });
     } catch (error) {
       console.error("Erro ao buscar dados do usuário:", error);
@@ -141,7 +141,7 @@ export function PersonalDataSection() {
 
           <Button
             type="submit"
-            className="px-6 text-white bg-gray-800 hover:bg-gray-700 focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+            className="bg-orange-500 hover:bg-orange-600 text-white"
             disabled={isSaving}
           >
             {isSaving ? "Salvando..." : "Salvar alterações"}

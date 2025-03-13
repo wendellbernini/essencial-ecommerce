@@ -18,6 +18,8 @@ import {
 import { useAddresses } from "@/hooks/useAddresses";
 import { Address, AddressFormData } from "@/types/address";
 
+const phoneRegex = /^(\d{2})(\d{4,5})(\d{4})$/;
+
 const addressFormSchema = z.object({
   name: z.string().min(1, "Nome do endereço é obrigatório"),
   recipient: z.string().min(1, "Nome do destinatário é obrigatório"),
@@ -28,7 +30,19 @@ const addressFormSchema = z.object({
   neighborhood: z.string().min(1, "Bairro é obrigatório"),
   city: z.string().min(1, "Cidade é obrigatória"),
   state: z.string().length(2, "Estado deve ter 2 letras"),
-  phone: z.string().optional(),
+  phone: z
+    .string()
+    .min(10, "Telefone deve ter pelo menos 10 dígitos")
+    .max(11, "Telefone deve ter no máximo 11 dígitos")
+    .regex(/^\d+$/, "Telefone deve conter apenas números")
+    .transform((value) => {
+      const numbers = value.replace(/\D/g, "");
+      if (numbers.length === 10 || numbers.length === 11) {
+        return numbers.replace(phoneRegex, "($1) $2-$3");
+      }
+      return value;
+    })
+    .optional(),
   is_default: z.boolean().optional(),
 });
 
@@ -59,10 +73,16 @@ export function AddressForm({ address, onSuccess }: AddressFormProps) {
 
   const onSubmit = async (data: AddressFormData) => {
     try {
+      // Remove formatação do telefone antes de salvar
+      const formattedData = {
+        ...data,
+        phone: data.phone?.replace(/\D/g, ""),
+      };
+
       if (address) {
-        await updateAddress(address.id, data);
+        await updateAddress(address.id, formattedData);
       } else {
-        await createAddress(data);
+        await createAddress(formattedData);
       }
       onSuccess?.();
     } catch (error) {
@@ -80,6 +100,23 @@ export function AddressForm({ address, onSuccess }: AddressFormProps) {
         });
       }
     }
+  };
+
+  const formatCep = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .substr(0, 9);
+  };
+
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length === 11) {
+      return numbers.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+    } else if (numbers.length === 10) {
+      return numbers.replace(/^(\d{2})(\d{4})(\d{4})$/, "($1) $2-$3");
+    }
+    return value;
   };
 
   return (
@@ -121,9 +158,14 @@ export function AddressForm({ address, onSuccess }: AddressFormProps) {
               <FormLabel>CEP</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="00000000"
-                  maxLength={8}
+                  placeholder="00000-000"
+                  maxLength={9}
                   {...field}
+                  value={formatCep(field.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    field.onChange(value);
+                  }}
                   onBlur={(e) => {
                     field.onBlur();
                     handleCepBlur(e);
@@ -237,7 +279,15 @@ export function AddressForm({ address, onSuccess }: AddressFormProps) {
             <FormItem>
               <FormLabel>Telefone</FormLabel>
               <FormControl>
-                <Input placeholder="Opcional" {...field} />
+                <Input
+                  placeholder="(00) 00000-0000"
+                  {...field}
+                  value={formatPhone(field.value || "")}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    field.onChange(value);
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -264,7 +314,7 @@ export function AddressForm({ address, onSuccess }: AddressFormProps) {
 
         <Button
           type="submit"
-          className="w-full text-white bg-gray-800 hover:bg-gray-700 focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+          className="w-full text-white bg-orange-500 hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
         >
           {address ? "Atualizar" : "Adicionar"} Endereço
         </Button>
