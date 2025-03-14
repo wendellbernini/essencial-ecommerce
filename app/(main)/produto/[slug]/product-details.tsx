@@ -17,6 +17,7 @@ import { useWishlist } from "@/hooks/use-wishlist";
 import { useCart } from "@/contexts/cart-context";
 import Reviews from "./reviews";
 import { Product, ReviewWithUser } from "@/lib/types";
+import { ShippingCalculator } from "@/components/shipping/shipping-calculator";
 
 interface ProductDetailsProps {
   product: Product;
@@ -275,6 +276,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   />
                 </Button>
               </div>
+
+              {/* Calculador de Frete */}
+              <ShippingCalculator
+                weight={product.weight || 300} // Peso padrão de 300g se não especificado
+                length={product.length || 16} // Dimensões padrão de uma caixa pequena
+                height={product.height || 12}
+                width={product.width || 12}
+                originZipCode="01153000" // CEP de origem padrão
+              />
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3">

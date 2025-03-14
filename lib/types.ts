@@ -54,6 +54,10 @@ export interface Product {
   updated_at: string;
   rating?: number;
   reviews_count?: number;
+  weight?: number; // em gramas
+  length?: number; // em cm
+  height?: number; // em cm
+  width?: number; // em cm
   categories?: {
     id: number;
     name: string;

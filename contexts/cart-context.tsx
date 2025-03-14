@@ -120,6 +120,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         items: [],
         total: 0,
         total_items: 0,
+        isOpen: false,
       };
 
     case "LOAD_CART": {

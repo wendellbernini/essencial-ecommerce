@@ -51,6 +51,10 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     is_new_release: false,
     is_best_seller: false,
     images: [] as string[],
+    weight: "",
+    length: "",
+    height: "",
+    width: "",
   });
 
   useEffect(() => {
@@ -136,6 +140,10 @@ export default function EditProductPage({ params }: EditProductPageProps) {
             is_new_release: Boolean(product.is_new_release),
             is_best_seller: Boolean(product.is_best_seller),
             images: product.images || [],
+            weight: product.weight ? product.weight.toString() : "",
+            length: product.length ? product.length.toString() : "",
+            height: product.height ? product.height.toString() : "",
+            width: product.width ? product.width.toString() : "",
           };
 
           console.log("Atualizando formData com:", formDataUpdate);
@@ -250,6 +258,10 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         is_new_release: formData.is_new_release,
         is_best_seller: formData.is_best_seller,
         images: formData.images,
+        weight: Number(formData.weight) || 300,
+        length: Number(formData.length) || 16,
+        height: Number(formData.height) || 12,
+        width: Number(formData.width) || 12,
         updated_at: new Date().toISOString(),
       };
 
@@ -442,41 +454,98 @@ export default function EditProductPage({ params }: EditProductPageProps) {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="stock">Quantidade em Estoque</Label>
+            <Input
+              id="stock"
+              type="number"
+              min="0"
+              value={formData.stock_quantity}
+              onChange={(e) =>
+                setFormData({ ...formData, stock_quantity: e.target.value })
+              }
+              placeholder="0"
+            />
+          </div>
+
+          {/* Dimensões e Peso */}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="stock">Quantidade em Estoque</Label>
+              <Label htmlFor="weight">Peso (em gramas)</Label>
               <Input
-                id="stock"
+                id="weight"
                 type="number"
                 min="0"
-                value={formData.stock_quantity}
+                value={formData.weight}
                 onChange={(e) =>
-                  setFormData({ ...formData, stock_quantity: e.target.value })
+                  setFormData({ ...formData, weight: e.target.value })
                 }
-                placeholder="0"
+                placeholder="300"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="brand">Marca</Label>
-              <Select
-                value={formData.brand_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, brand_id: value })
+              <Label htmlFor="length">Comprimento (em cm)</Label>
+              <Input
+                id="length"
+                type="number"
+                min="0"
+                value={formData.length}
+                onChange={(e) =>
+                  setFormData({ ...formData, length: e.target.value })
                 }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma marca" />
-                </SelectTrigger>
-                <SelectContent>
-                  {brands.map((brand) => (
-                    <SelectItem key={brand.id} value={brand.id.toString()}>
-                      {brand.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="16"
+              />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="height">Altura (em cm)</Label>
+              <Input
+                id="height"
+                type="number"
+                min="0"
+                value={formData.height}
+                onChange={(e) =>
+                  setFormData({ ...formData, height: e.target.value })
+                }
+                placeholder="12"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="width">Largura (em cm)</Label>
+              <Input
+                id="width"
+                type="number"
+                min="0"
+                value={formData.width}
+                onChange={(e) =>
+                  setFormData({ ...formData, width: e.target.value })
+                }
+                placeholder="12"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="brand">Marca</Label>
+            <Select
+              value={formData.brand_id}
+              onValueChange={(value) =>
+                setFormData({ ...formData, brand_id: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma marca" />
+              </SelectTrigger>
+              <SelectContent>
+                {brands.map((brand) => (
+                  <SelectItem key={brand.id} value={brand.id.toString()}>
+                    {brand.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

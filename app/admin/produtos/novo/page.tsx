@@ -46,6 +46,10 @@ export default function NewProductPage() {
     is_new_release: false,
     is_best_seller: false,
     images: [] as string[],
+    weight: "",
+    length: "",
+    height: "",
+    width: "",
   });
 
   useEffect(() => {
@@ -140,6 +144,10 @@ export default function NewProductPage() {
         is_new_release: formData.is_new_release,
         is_best_seller: formData.is_best_seller,
         images: formData.images,
+        weight: Number(formData.weight) || 300,
+        length: Number(formData.length) || 16,
+        height: Number(formData.height) || 12,
+        width: Number(formData.width) || 12,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -331,6 +339,65 @@ export default function NewProductPage() {
               }
               placeholder="0"
             />
+          </div>
+
+          {/* Dimensões e Peso */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="weight">Peso (em gramas)</Label>
+              <Input
+                id="weight"
+                type="number"
+                min="0"
+                value={formData.weight}
+                onChange={(e) =>
+                  setFormData({ ...formData, weight: e.target.value })
+                }
+                placeholder="300"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="length">Comprimento (em cm)</Label>
+              <Input
+                id="length"
+                type="number"
+                min="0"
+                value={formData.length}
+                onChange={(e) =>
+                  setFormData({ ...formData, length: e.target.value })
+                }
+                placeholder="16"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="height">Altura (em cm)</Label>
+              <Input
+                id="height"
+                type="number"
+                min="0"
+                value={formData.height}
+                onChange={(e) =>
+                  setFormData({ ...formData, height: e.target.value })
+                }
+                placeholder="12"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="width">Largura (em cm)</Label>
+              <Input
+                id="width"
+                type="number"
+                min="0"
+                value={formData.width}
+                onChange={(e) =>
+                  setFormData({ ...formData, width: e.target.value })
+                }
+                placeholder="12"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
