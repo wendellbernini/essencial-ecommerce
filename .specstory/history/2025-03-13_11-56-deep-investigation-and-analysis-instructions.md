@@ -17486,9 +17486,989 @@ Vou ajudar você a configurar isso:
 
 ---
 
+```diff
+  
+  # Vercel
+- VERCEL_URL=seu_url_da_vercel 
++ VERCEL_URL=essencial-ecommerce.vercel.app
+  
+  #Stripe
+  MELHOR_ENVIO_CLIENT_ID=5719
+  MELHOR_ENVIO_CLIENT_SECRET=bHLU4qgWZhenWEU2jJwL4x5nVrASQC2Re99J210x
+- MELHOR_ENVIO_SANDBOX=true
++ MELHOR_ENVIO_SANDBOX=true # Mude para false em produção
+  MELHOR_ENVIO_TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5NTYiLCJqdGkiOiI4ZTc3YWMxYWIyYTY3ZWQ4ZjFkZjk1ZDk0MzBhN2M0N2FmMDUxOTNjZjU3OTYzMDFiOGQ4NzAxMTI3YjFiMTBkMWY1ZTNkMGM3ZjgwNjk3NyIsImlhdCI6MTc0MjA2MDIzOS4wNTI3NDIsIm5iZiI6MTc0MjA2MDIzOS4wNTI3NDUsImV4cCI6MTc3MzU5NjIzOS4wNDQyNTUsInN1YiI6IjllNzA3M2YzLTFiN2UtNGRmNy1iNjNjLWFlNWEyNTdjZGVmNSIsInNjb3BlcyI6WyJjYXJ0LXJlYWQiLCJjYXJ0LXdyaXRlIiwib3JkZXJzLXJlYWQiLCJzaGlwcGluZy1jaGVja291dCIsInNoaXBwaW5nLXByZXZpZXciLCJzaGlwcGluZy10cmFja2luZyIsInNoaXBwaW5nLWdlbmVyYXRlIiwic2hpcHBpbmctY2FsY3VsYXRlIiwic2hpcHBpbmctY29tcGFuaWVzIl19.pD-nxJyYPeQOdAqE7gsOavZUaXejPlvt-Hl3b_Y4CTGDVIlQiiMmtRXbtURELa7F4Z2lEwdRvwTCJza7Mqx58cmMLZvx9W7CSIZ26WutISE-Gm7AqVRxmYYJa1HBpEkSah0dbRPM3lTW743FRoA__8lxQU0w_ZGzHKWl28oa-AMGtFjTqFj5jpeZ_i0D7bc_H4Kkv3sdYFA4Ww07mQwoVsiaaBgguEqwA3N60qvznjIfBjMFlZFX2U6MStCCJSRZl2MwawJCH3Gh41iyDK-lTjlu79Eu9I0lzu7pQEU6D2w7EIA6Mg0mwcO-PzvuTHxY7aEfh71s6nSEWpZ2YYF0_vlUg7E3_xeJmZHwdB6t7ss_AsDshoqPh_y4MgCbDbqzyGcfTxroYL_TgSJ0dKUD_EMWy_WnrcdvIkAj-xULfmRk6eYIMcMovVh8EtpSE9N6yfDbDDM8aNR8M0yTaf5l9fqmd6_h_CLJQ876m1q8Yt2wHx2Kp78F9jABGtbQHFDzu-xTICn5fHg3wgBquCVt3ERijIY9Hwl1dutHyK_Fh8LdZG9gzML1VXHSAIXwn38dlHPCKcdcMqFVtSLnmvZVteoOSYVr6vL5e3HBNckSgflSoghgESUhBUS7bKh8N93ggk1VAf68MQcvt3GwzoMoPuQFh8ndBJJzdlB64UMDLEs
+```
+
+---
+
+Agora vou ajustar o cliente do Melhor Envio para usar a URL correta em produção:
+
+---
+
+```diff
+    // Método para gerar token de autenticação
+    static async generateToken(code: string): Promise<string> {
+-     const response = await fetch(
+-       "https://sandbox.melhorenvio.com.br/oauth/token",
+-       {
++     const baseUrl =
++       process.env.MELHOR_ENVIO_SANDBOX === "true"
++         ? "https://sandbox.melhorenvio.com.br"
++         : "https://www.melhorenvio.com.br";
++ 
++     const redirectUri = process.env.VERCEL_URL
++       ? `https://${process.env.VERCEL_URL}/api/shipping/auth/callback`
++       : "http://localhost:3000/api/shipping/auth/callback";
++ 
++     const response = await fetch(`${baseUrl}/oauth/token`, {
+        method: "POST",
+        headers: {
+          client_secret: process.env.MELHOR_ENVIO_CLIENT_SECRET,
+          code,
+-           redirect_uri:
+-             "https://a23a-177-12-49-168.ngrok-free.app/api/shipping/auth/callback",
++         redirect_uri: redirectUri,
+        }),
+-       }
+-     );
++     });
+  
+      if (!response.ok) {
+```
+
+---
+
+Agora vou fazer o commit dessas alterações e enviar para o GitHub:
+
+---
+
+```bash
+git add . && git commit -m "fix: ajusta URLs do Melhor Envio para funcionar em produção" && git push origin main
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git add . && git commit -m "fix
+: ajusta URLs do Melhor Envio para funcionar em produção"git add . && git commit -m "fix
+: ajusta URLs do Melhor Envio para funcionar em produção" && git push origin main
+[main 800786d] fix: ajusta URLs do Melhor Envio para funcionar em produção
+ 2 files changed, 495 insertions(+), 17 deletions(-)
+Enumerating objects: 15, done.
+Counting objects: 100% (15/15), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (7/7), done.
+Writing objects: 100% (8/8), 3.76 KiB | 427.00 KiB/s, done.
+Total 8 (delta 5), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (5/5), completed with 5 local objects.
+To github.com:wendellbernini/essencial-ecommerce.git
+   2038ca6..800786d  main -> main
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+Pronto! Agora você precisa fazer algumas coisas para que funcione em produção:
+
+1. Acesse o painel da Vercel e adicione as variáveis de ambiente do Melhor Envio:
+   - `MELHOR_ENVIO_CLIENT_ID`
+   - `MELHOR_ENVIO_CLIENT_SECRET`
+   - `MELHOR_ENVIO_SANDBOX` (você pode deixar como `true` por enquanto para testes)
+   - `MELHOR_ENVIO_TOKEN`
+
+2. No painel do Melhor Envio, você precisará atualizar a URL de callback do seu aplicativo para:
+   ```
+   https://essencial-ecommerce.vercel.app/api/shipping/auth/callback
+   ```
+
+3. Quando estiver tudo pronto para produção, você deverá:
+   - Gerar um novo token de produção do Melhor Envio
+   - Atualizar o `MELHOR_ENVIO_TOKEN` na Vercel
+   - Mudar `MELHOR_ENVIO_SANDBOX` para `false`
+
+As alterações que fizemos permitem que o sistema funcione tanto em desenvolvimento local quanto em produção, usando as URLs corretas em cada ambiente. O sistema detecta automaticamente se está rodando localmente ou na Vercel e ajusta as URLs de acordo.
+
+Quer que eu te ajude a configurar essas variáveis de ambiente na Vercel?
+
+---
+
+_**User**_
+
+aonde eu coloco essa url? @   https://essencial-ecommerce.vercel.app/api/shipping/auth/callback 
+
+---
+
+_**Assistant**_
+
+No painel do Melhor Envio que você está vendo na imagem, você precisa atualizar dois campos:
+
+1. No campo "URL do seu ambiente para testes" coloque:
+```
+https://essencial-ecommerce.vercel.app/api/shipping/auth/callback
+```
+
+2. No campo "URL de redirecionamento após autorização" coloque a mesma URL:
+```
+https://essencial-ecommerce.vercel.app/api/shipping/auth/callback
+```
+
+Você pode fazer isso diretamente no formulário que está aberto na sua tela, substituindo as URLs do ngrok que estão lá atualmente. Depois clique em "SALVAR ALTERAÇÕES" para confirmar.
+
+Isso garantirá que o fluxo de autenticação funcione corretamente quando o aplicativo estiver rodando em produção na Vercel. O sistema redirecionará para essa URL após a autenticação ser concluída.
+
+Depois que você salvar, será necessário gerar um novo token de acesso para produção, já que o token atual está vinculado às URLs do ambiente de desenvolvimento. Quer que eu te ajude com esse processo depois que você atualizar as URLs?
+
+---
+
+_**User**_
+
+mas eu substituindo nao vai parar de funcionar em desenvolvimento nao ne?
+
+---
+
+_**Assistant**_
+
+Ah, boa pergunta! Sim, se substituirmos diretamente, o ambiente de desenvolvimento local deixará de funcionar. O ideal é criar dois aplicativos no Melhor Envio:
+
+1. Um aplicativo para desenvolvimento (que já temos, configurado com ngrok)
+2. Um novo aplicativo para produção (com as URLs da Vercel)
+
+Vamos fazer assim:
+
+1. Mantenha o aplicativo atual como está (com as URLs do ngrok) - este será seu ambiente de desenvolvimento
+2. Clique no botão "+" ou "Novo Aplicativo" no painel do Melhor Envio para criar um novo aplicativo
+3. No novo aplicativo, configure:
+   - Nome: "Essencial E-commerce (Produção)"
+   - URLs: `https://essencial-ecommerce.vercel.app/api/shipping/auth/callback`
+   - Descrição: A mesma do ambiente de desenvolvimento
+
+Dessa forma, você terá:
+- Um aplicativo para desenvolvimento local (com ngrok)
+- Um aplicativo para produção (com Vercel)
+
+E no seu arquivo `.env.local` e nas variáveis de ambiente da Vercel, você usará:
+- Em desenvolvimento: as credenciais do aplicativo de desenvolvimento
+- Em produção: as credenciais do aplicativo de produção
+
+Quer que eu te ajude a criar esse novo aplicativo de produção?
+
+---
+
+_**User**_
+
+Ficou assim, ta certo?
+
+---
+
+_**Assistant**_
+
+Sim, está correto! Você configurou:
+
+1. Nome da plataforma: "Essencial E-commerce (Produção)"
+2. Site da plataforma: "https://essencial-ecommerce.vercel.app"
+3. URLs de callback/redirecionamento: "https://essencial-ecommerce.vercel.app/api/shipping/auth/callback"
+4. E-mails de contato preenchidos corretamente
+5. Descrição adequada do aplicativo
+
+Você pode clicar em "CADASTRAR" para criar o aplicativo de produção. Depois que criar, você receberá:
+- Client ID
+- Client Secret
+
+Esses serão diferentes dos que você usa em desenvolvimento. Você deverá:
+1. Guardar essas credenciais
+2. Configurá-las nas variáveis de ambiente da Vercel (não no seu `.env.local`)
+3. Gerar um novo token de acesso para produção
+
+Quer que eu te ajude com esses próximos passos depois que você criar o aplicativo?
+
+---
+
+_**User**_
+
+Agora para gerar um novo token para o site em producao, quais opcoes eu escolho?
+
+---
+
+_**Assistant**_
+
+Para o cálculo de frete e gerenciamento de envios, você precisa selecionar as seguintes permissões:
+
+Essenciais para o cálculo de frete:
+- ✓ `shipping-calculate` (Cálculo de fretes)
+- ✓ `shipping-companies` (Visualização das transportadoras)
+
+Adicionais para funcionalidades futuras de envio:
+- ✓ `shipping-generate` (Geração de etiquetas)
+- ✓ `shipping-preview` (Visualização das etiquetas)
+- ✓ `shipping-tracking` (Rastreamento de envios)
+- ✓ `shipping-checkout` (Checkout de fretes)
+
+Opcionais mas recomendados:
+- ✓ `cart-read` (Visualização dos itens do carrinho)
+- ✓ `cart-write` (Cadastro e edição dos itens do carrinho)
+- ✓ `orders-read` (Visualização das etiquetas)
+
+Você pode dar um nome descritivo ao token como "Essencial E-commerce - Produção" para identificá-lo facilmente depois.
+
+Depois de gerar o token, você deverá:
+1. Copiar o token gerado
+2. Adicionar nas variáveis de ambiente da Vercel como `MELHOR_ENVIO_TOKEN`
+3. Configurar `MELHOR_ENVIO_SANDBOX=false` também na Vercel
+
+Quer que eu te ajude com a configuração na Vercel depois que você gerar o token?
+
+---
+
+_**User**_
+
+Otimo, agora o calculo do frete aparece corretamente tanto em desenvolvimento quanto em producao, no entanto, note que o frete parece nao ser incluido em nenhuma etapa do pagamento
+
+---
+
+_**Assistant**_
+
+Você tem razão! O valor do frete não está sendo incluído no valor total do pedido. Vamos ajustar isso em duas partes:
+
+1. Primeiro, vamos modificar o contexto do carrinho para incluir o frete selecionado
+2. Depois, vamos ajustar o componente de checkout para incluir o frete no valor total
+
+Primeiro, vamos atualizar o contexto do carrinho:
+
+---
+
+```diff
+    image_url: string;
+  }
++ 
++ export interface ShippingOption {
++   service: string;
++   code: string;
++   price: number;
++   deadline: number;
++   company: string;
++ }
+  
+  interface CartState {
+    isOpen: boolean;
+    isLoading: boolean;
++   selectedShipping: ShippingOption | null;
+  }
+  
+    | { type: "LOAD_CART"; payload: CartItem[] }
+    | { type: "TOGGLE_CART" }
+-   | { type: "SET_LOADING"; payload: boolean };
++   | { type: "SET_LOADING"; payload: boolean }
++   | { type: "SET_SHIPPING"; payload: ShippingOption | null };
+  
+  interface CartContextType extends CartState {
+    clearCart: () => Promise<void>;
+    toggleCart: () => void;
++   setSelectedShipping: (option: ShippingOption | null) => void;
+  }
+  
+        };
+  
++     case "SET_SHIPPING": {
++       return {
++         ...state,
++         selectedShipping: action.payload,
++       };
++     }
++ 
+      default:
+        return state;
+      total_items: 0,
+      isOpen: false,
++     isLoading: false,
++     selectedShipping: null,
+    });
+  
+      dispatch({ type: "TOGGLE_CART" });
+    };
++ 
++   const setSelectedShipping = (option: ShippingOption | null) => {
++     dispatch({ type: "SET_SHIPPING", payload: option });
++   };
+  
+    return (
+          clearCart,
+          toggleCart,
++         setSelectedShipping,
+        }}
+      >
+```
+
+---
+
+Agora vamos atualizar o componente de calculadora de frete para usar o contexto do carrinho:
+
+---
+
+```diff
+  } from "@/components/ui/table";
+  import { formatPrice } from "@/lib/utils";
++ import { useCart } from "@/contexts/cart-context";
++ import { ShippingOption } from "@/contexts/cart-context";
+  
+  // Schema para validação do CEP
+  
+  type ZipCodeFormData = z.infer<typeof zipCodeSchema>;
+- 
+- interface ShippingOption {
+-   service: string;
+-   code: string;
+-   price: number;
+-   deadline: number;
+-   company: string;
+- }
+  
+  interface ShippingCalculatorProps {
+    const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+    const [showResults, setShowResults] = useState(false);
++   const { selectedShipping, setSelectedShipping } = useCart();
+  
+    const form = useForm<z.infer<typeof zipCodeSchema>>({
+        setShowResults(false);
+        setShippingOptions([]);
++       setSelectedShipping(null);
+  
+        const requestData = {
+      return `${numbers.slice(0, 5)}-${numbers.slice(5, 8)}`;
+    };
++ 
++   const handleShippingSelect = (option: ShippingOption) => {
++     setSelectedShipping(option);
++   };
+  
+    return (
+                  <TableHead>Prazo</TableHead>
+                  <TableHead>Valor</TableHead>
++                 <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+                    <TableCell>{option.deadline} dias úteis</TableCell>
+                    <TableCell>{formatPrice(option.price)}</TableCell>
++                   <TableCell>
++                     <Button
++                       variant={
++                         selectedShipping?.code === option.code
++                           ? "default"
++                           : "outline"
++                       }
++                       size="sm"
++                       onClick={() => handleShippingSelect(option)}
++                       className={
++                         selectedShipping?.code === option.code
++                           ? "bg-orange-500 hover:bg-orange-600 text-white"
++                           : ""
++                       }
++                     >
++                       {selectedShipping?.code === option.code
++                         ? "Selecionado"
++                         : "Selecionar"}
++                     </Button>
++                   </TableCell>
+                  </TableRow>
+                ))}
+```
+
+---
+
+Agora vamos atualizar o componente de checkout para incluir o frete no valor total:
+
+---
+
+```diff
+  
+  export default function CheckoutPage() {
+-   const { items, total, isLoading } = useCart();
++   const { items, total, isLoading, selectedShipping } = useCart();
+    const router = useRouter();
+    const [currentStep, setCurrentStep] = useState(1);
+    const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
++ 
++   // Calcula o valor total incluindo o frete
++   const totalWithShipping = total + (selectedShipping?.price || 0);
+  
+    if (isLoading) {
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Frete</span>
+-                 <span>Grátis</span>
++                 <span>
++                   {selectedShipping
++                     ? formatPrice(selectedShipping.price)
++                     : "Calculado no checkout"}
++                 </span>
+                </div>
+  
+                <div className="flex justify-between text-base font-medium">
+                  <span>Total</span>
+-                 <span>{formatPrice(total)}</span>
++                 <span>{formatPrice(totalWithShipping)}</span>
+                </div>
+              </div>
+```
+
+---
+
+Por fim, vamos atualizar o componente de pagamento para incluir o frete na sessão do Stripe:
+
+---
+
+```diff
+      // Processa o corpo da requisição
+      const body = await request.json();
+-     const { items, selectedAddress } = body;
++     const { items, selectedAddress, selectedShipping } = body;
+  
+-     if (!items?.length || !selectedAddress) {
+-       console.error("🔴 Checkout: Dados inválidos", { items, selectedAddress });
++     if (!items?.length || !selectedAddress || !selectedShipping) {
++       console.error("🔴 Checkout: Dados inválidos", {
++         items,
++         selectedAddress,
++         selectedShipping,
++       });
+        return NextResponse.json(
+          { error: "Dados inválidos para checkout" },
+      console.log("🟡 Checkout: Criando line items para Stripe");
+      // Criar os line items para o Stripe
+-     const lineItems = items.map((item: any) => ({
++     const lineItems = [
++       ...items.map((item: any) => ({
+          price_data: {
+            currency: "brl",
+          },
+          quantity: item.quantity,
+-     }));
++       })),
++       // Adiciona o frete como um item separado
++       {
++         price_data: {
++           currency: "brl",
++           product_data: {
++             name: `Frete - ${selectedShipping.company} - ${selectedShipping.service}`,
++             metadata: {
++               type: "shipping",
++               service: selectedShipping.service,
++               company: selectedShipping.company,
++               code: selectedShipping.code,
++             },
++           },
++           unit_amount: Math.round(selectedShipping.price * 100),
++         },
++         quantity: 1,
++       },
++     ];
+  
+      console.log("🟡 Checkout: Criando sessão no Stripe");
+      console.log("Metadata sendo enviada:", {
+        user_id: user.id,
+        address: JSON.stringify(selectedAddress),
++       shipping: JSON.stringify(selectedShipping),
+      });
+  
+          allowed_countries: ["BR"],
+        },
+-       shipping_options: [
+-         {
+-           shipping_rate_data: {
+-             type: "fixed_amount",
+-             fixed_amount: {
+-               amount: 0,
+-               currency: "brl",
+-             },
+-             display_name: "Frete Grátis",
+-             delivery_estimate: {
+-               minimum: {
+-                 unit: "business_day",
+-                 value: 5,
+-               },
+-               maximum: {
+-                 unit: "business_day",
+-                 value: 7,
+-               },
+-             },
+-           },
+-         },
+-       ],
+        metadata: {
+          user_id: user.id,
+          address: JSON.stringify(selectedAddress),
++         shipping: JSON.stringify(selectedShipping),
+        },
+      });
+```
+
+---
+
+Por fim, vamos atualizar o componente de pagamento para enviar o frete selecionado:
+
+---
+
+```diff
+  
+  export function PaymentForm({ selectedAddress }: PaymentFormProps) {
+-   const { items } = useCart();
++   const { items, selectedShipping } = useCart();
+  
+    const handlePayment = async () => {
+      try {
++       // Verifica se um método de envio foi selecionado
++       if (!selectedShipping) {
++         toast.error(
++           "Por favor, selecione uma opção de frete antes de continuar"
++         );
++         return;
++       }
++ 
+        const response = await fetch("/api/checkout", {
+          method: "POST",
+            items,
+            selectedAddress,
++           selectedShipping,
+          }),
+        });
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+          size="lg"
++         disabled={!selectedShipping}
+        >
+          Finalizar Compra
+        </Button>
++       {!selectedShipping && (
++         <p className="text-sm text-red-500 text-center">
++           Selecione uma opção de frete para continuar
++         </p>
++       )}
+      </div>
+    );
+```
+
+---
+
+Agora o sistema está completo com relação ao frete:
+
+1. O usuário pode calcular o frete na página do produto
+2. O frete selecionado é armazenado no contexto do carrinho
+3. O valor do frete é exibido no resumo do pedido
+4. O frete é incluído como um item separado na sessão do Stripe
+5. O botão de finalizar compra só é habilitado quando um frete é selecionado
+6. O valor total inclui o frete selecionado
+
+Você pode testar o fluxo completo:
+1. Adicione um produto ao carrinho
+2. Calcule o frete usando um CEP válido
+3. Selecione uma opção de frete
+4. Vá para o checkout
+5. Observe que o valor do frete está incluído no resumo
+6. Finalize a compra e verifique que o frete aparece como um item separado no Stripe
+
+O frete também será registrado no banco de dados junto com o pedido, pois estamos incluindo os detalhes do frete nos metadados da sessão do Stripe.
+
+---
+
+_**User**_
+
+Otimo, agora note que eu nao quero que seja possivel selecionar o frete fora da pagina de compra mesmo, a secao de calcular frete do produto e mais para o usuario ter uma nocao de quanto aquele frete vai custar, entende? E ai depois quando ele selecionar o endereco dele, ou adicionar um novo que o frete vai ser considerado para o CEP fornecido ai sim ele pode selecionar alguma opcao, entende?
+
+---
+
+_**Assistant**_
+
+Sim, entendi perfeitamente! Vamos ajustar isso para que:
+
+1. Na página do produto, o usuário possa apenas visualizar as opções de frete (sem selecionar)
+2. Na página de checkout, após selecionar/adicionar o endereço, ele poderá selecionar a opção de frete
+
+Vamos fazer essas alterações:
+
+---
+
+```diff
+  "use client";
+  
+- import { useState } from "react";
++ import { useState, useEffect } from "react";
+  import { useForm } from "react-hook-form";
+  import { zodResolver } from "@hookform/resolvers/zod";
+    height: number;
+    width: number;
++   allowSelection?: boolean;
++   prefilledZipCode?: string;
+  }
+  
+    height,
+    width,
++   allowSelection = false,
++   prefilledZipCode,
+  }: ShippingCalculatorProps) {
+    const [isLoading, setIsLoading] = useState(false);
+      resolver: zodResolver(zipCodeSchema),
+      defaultValues: {
+-       zipCode: "",
++       zipCode: prefilledZipCode || "",
+      },
+    });
++ 
++   useEffect(() => {
++     if (prefilledZipCode) {
++       form.setValue("zipCode", prefilledZipCode);
++       form.handleSubmit(calculateShipping)();
++     }
++   }, [prefilledZipCode]);
+  
+    async function calculateShipping(values: z.infer<typeof zipCodeSchema>) {
+    return (
+      <div className="space-y-4 border rounded-lg p-4">
+-       <h3 className="text-lg font-medium">Calcular Frete</h3>
++       <h3 className="text-lg font-medium">
++         {allowSelection ? "Selecionar Frete" : "Calcular Frete"}
++       </h3>
+        <Form {...form}>
+          <form
+                        placeholder="00000-000"
+                        maxLength={9}
+-                       disabled={isLoading}
++                       disabled={isLoading || !!prefilledZipCode}
+                        className="max-w-[200px]"
+                      />
+-                     <Button type="submit" disabled={isLoading}>
++                     <Button
++                       type="submit"
++                       disabled={isLoading || !!prefilledZipCode}
++                     >
+                        {isLoading ? (
+                          <>
+                  <TableHead>Prazo</TableHead>
+                  <TableHead>Valor</TableHead>
+-                 <TableHead></TableHead>
++                 {allowSelection && <TableHead></TableHead>}
+                </TableRow>
+              </TableHeader>
+                    <TableCell>{option.deadline} dias úteis</TableCell>
+                    <TableCell>{formatPrice(option.price)}</TableCell>
++                   {allowSelection && (
+                      <TableCell>
+                        <Button
+                        </Button>
+                      </TableCell>
++                   )}
+                  </TableRow>
+                ))}
+        )}
+  
++       {!prefilledZipCode && (
+          <div className="text-sm text-gray-500">
+            <a
+            </a>
+          </div>
++       )}
+      </div>
+    );
+```
+
+---
+
+Agora vamos atualizar o componente de seleção de endereço para incluir o cálculo de frete:
+
+---
+
+```diff
+  import { Address } from "@/types/address";
+  import { Loader2 } from "lucide-react";
++ import { ShippingCalculator } from "@/components/shipping/shipping-calculator";
++ import { useCart } from "@/contexts/cart-context";
+  
+  interface AddressSelectionProps {
+    const { addresses, isLoading } = useAddresses();
+    const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+-   const [selectedAddress, setSelectedAddress] = useState<string | null>(
++   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+      addresses.find((addr) => addr.is_default)?.id || null
+    );
++   const { selectedShipping } = useCart();
+  
+    if (isLoading) {
+      );
+    }
++ 
++   const selectedAddress = addresses.find(
++     (addr) => addr.id === selectedAddressId
++   );
+  
+    const handleAddressSelect = (addressId: string) => {
+-     setSelectedAddress(addressId);
+-     const address = addresses.find((addr) => addr.id === addressId);
+-     if (address) {
+-       onSelect(address);
+-     }
++     setSelectedAddressId(addressId);
+    };
+  
+      setShowNewAddressForm(false);
+    };
++ 
++   const handleContinue = () => {
++     if (selectedAddress && selectedShipping) {
++       onSelect(selectedAddress);
++     }
++   };
+  
+    if (showNewAddressForm) {
+          <div className="space-y-4">
+            <RadioGroup
+-             value={selectedAddress || undefined}
++             value={selectedAddressId || undefined}
+              onValueChange={handleAddressSelect}
+              className="space-y-4"
+                  key={address.id}
+                  className={`relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none ${
+-                   selectedAddress === address.id
++                   selectedAddressId === address.id
+                      ? "border-orange-500 ring-2 ring-orange-500"
+                      : "border-gray-300"
+              ))}
+            </RadioGroup>
++ 
++           {selectedAddress && (
++             <div className="mt-6">
++               <ShippingCalculator
++                 originZipCode="01153000" // CEP de origem padrão
++                 weight={300} // Peso padrão de 300g
++                 length={16} // Dimensões padrão
++                 height={12}
++                 width={12}
++                 allowSelection={true}
++                 prefilledZipCode={selectedAddress.zip_code}
++               />
++             </div>
++           )}
+          </div>
+        ) : (
+        </Button>
+  
+-       {selectedAddress && (
++       {selectedAddress && selectedShipping && (
+          <Button
+            type="button"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+-           onClick={() => {
+-             const address = addresses.find(
+-               (addr) => addr.id === selectedAddress
+-             );
+-             if (address) {
+-               onSelect(address);
+-             }
+-           }}
++           onClick={handleContinue}
+          >
+            Continuar com este endereço
+```
+
+---
+
+Agora o fluxo está mais lógico:
+
+1. Na página do produto:
+   - O usuário pode calcular o frete para ter uma estimativa
+   - Não é possível selecionar a opção de frete neste momento
+   - O botão "Adicionar ao carrinho" não depende do frete
+
+2. Na página de checkout:
+   - O usuário seleciona ou adiciona um endereço
+   - O calculador de frete é exibido automaticamente com o CEP do endereço selecionado
+   - O usuário pode selecionar uma opção de frete
+   - O botão "Continuar" só aparece quando tanto o endereço quanto o frete estão selecionados
+   - O valor do frete é incluído no total do pedido
+
+Você pode testar o novo fluxo:
+1. Na página do produto, calcule o frete para ter uma estimativa
+2. Adicione o produto ao carrinho
+3. Vá para o checkout
+4. Selecione um endereço
+5. O calculador de frete aparecerá automaticamente com o CEP do endereço
+6. Selecione uma opção de frete
+7. Clique em "Continuar" para prosseguir com o pagamento
+
+O valor do frete será incluído corretamente no pagamento e nos metadados do pedido.
+
+---
+
+_**User**_
+
+Otimo, agora Execute npm run build e continue trabalhando até corrigir todos os possíveis erros que possam impedir a conclusão bem-sucedida do build. Se forem necessárias alterações, analise o contexto com cuidado, evitando conclusões precipitadas. Priorize soluções enxutas, mantendo o código o mais conciso possível. @Next.js 15 Caso ajude, navegue pela documentação oficial do Next.js para encontrar uma solução para os erros no build ou lint.
+
+---
+
+_**Assistant**_
+
+Vou executar o build e analisar os possíveis erros:
+
+---
+
+```bash
+npm run build
+```
+
+```
+
+> my-v0-project@0.1.0 build
+> next build
+
+ ⚠ Invalid next.config.js options detected: 
+ ⚠     Unrecognized key(s) in object: 'appDir' at "experimental"
+ ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+  ▲ Next.js 14.2.16
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data  ..(node:9223) [DEP0040] DeprecationWarning: The `punyco
+de` modu
+le is deprecated. Please use a userland alternative instead.
+        (Use `node --trace-deprecation ...` to show where the warning was create
+d)
+(node:9229) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. P
+lease us
+e a userland alternative instead.
+        (Use `node --trace-deprecation ...` to show where the warning was create
+d)
+   Collecting page data  ...(node:9230) [DEP0040] DeprecationWarning: The `punyc
+ode` mod
+ule is deprecated. Please use a userland alternative instead.
+        (Use `node --trace-deprecation ...` to show where the warning was create
+d)
+ ✓ Collecting page data    
+   Generating static pages (0/25)  [    ]Erro ao gerar token: B [Error]: Dynamic
+ server 
+usage: Route /api/shipping/auth/callback couldn't be rendered statically because
+ it used `request.url`. See more info here: https://nextjs.org/docs/messages/dyn
+amic-server-error
+                            at V (/home/vboxuser/Desktop/projects/essencial-ecom
+merce/node_modules/next/dist/com
+piled/next-server/app-route.runtime.prod.js:6:21777)
+            at Object.get (/home/vboxuser/Desktop/projects/essencial-ecommerce/n
+ode_modules/next
+/dist/compiled/next-server/app-route.runtime.prod.js:6:29137)
+            at p (/home/vboxuser/Desktop/projects/essencial-ecommerce/.next/serv
+er/app/api/shipp
+ing/auth/callback/route.js:1:557)
+            at /home/vboxuser/Desktop/projects/essencial-ecommerce/node_modules/
+next/dist/compil
+ed/next-server/app-route.runtime.prod.js:6:37016
+            at /home/vboxuser/Desktop/projects/essencial-ecommerce/node_modules/
+next/dist/server
+/lib/trace/tracer.js:140:36
+            at NoopContextManager.with (/home/vboxuser/Desktop/projects/essencia
+l-ecommerce/node
+_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+            at ContextAPI.with (/home/vboxuser/Desktop/projects/essencial-ecomme
+rce/node_modules
+/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+            at NoopTracer.startActiveSpan (/home/vboxuser/Desktop/projects/essen
+cial-ecommerce/n
+ode_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+            at ProxyTracer.startActiveSpan (/home/vboxuser/Desktop/projects/esse
+ncial-ecommerce/
+node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854)
+            at /home/vboxuser/Desktop/projects/essencial-ecommerce/node_modules/
+next/dist/server
+/lib/trace/tracer.js:122:103 {
+          description: "Route /api/shipping/auth/callback couldn't be rendered s
+tatically becaus
+e it used `request.url`. See more info here: https://nextjs.org/docs/messages/dy
+namic-server-error",
+                  digest: 'DYNAMIC_SERVER_USAGE'
+}
+ ✓ Generating static pages (25/25)
+ ✓ Collecting build traces    
+ ✓ Finalizing page optimization    
+
+Route (app)                              Size     First Load JS
+┌ ƒ /                                    7.28 kB         159 kB
+├ ○ /_not-found                          155 B          87.6 kB
+├ ƒ /admin                               98 kB           193 kB
+├ ○ /admin/banners                       3.65 kB         169 kB
+├ ○ /admin/banners-secundarios           3.84 kB         162 kB
+├ ○ /admin/banners-secundarios/novo      2.54 kB         207 kB
+├ ƒ /admin/banners/[id]                  2.41 kB         182 kB
+├ ƒ /admin/banners/[id]/editar           2.15 kB         182 kB
+├ ○ /admin/banners/novo                  1.88 kB         182 kB
+├ ○ /admin/marcas                        3.58 kB         162 kB
+├ ƒ /admin/marcas/[id]/editar            4.28 kB         179 kB
+├ ○ /admin/marcas/novo                   4.12 kB         179 kB
+├ ○ /admin/produtos                      22 kB           199 kB
+├ ƒ /admin/produtos/[id]/editar          7.07 kB         210 kB
+├ ○ /admin/produtos/novo                 6.49 kB         209 kB
+├ ƒ /api/checkout                        0 B                0 B
+├ ƒ /api/orders/[id]/invoice             0 B                0 B
+├ ƒ /api/search                          0 B                0 B
+├ ƒ /api/shipping/auth/callback          0 B                0 B
+├ ƒ /api/shipping/calculate              0 B                0 B
+├ ƒ /api/sign-cloudinary-params          0 B                0 B
+├ ƒ /api/webhooks/stripe                 0 B                0 B
+├ ƒ /auth/callback                       0 B                0 B
+├ ƒ /busca                               3.78 kB         181 kB
+├ ƒ /categoria/[slug]                    172 B           184 kB
+├ ○ /checkout                            9.21 kB         185 kB
+├ ○ /checkout/success                    3.06 kB         148 kB
+├ ○ /login                               21.6 kB         159 kB
+├ ƒ /marca/[slug]                        172 B           184 kB
+├ ƒ /perfil                              9.54 kB         202 kB
+├ ƒ /perfil/pedidos                      5.16 kB         155 kB
+├ ƒ /perfil/wishlist                     5.13 kB         150 kB
+└ ƒ /produto/[slug]                      52.7 kB         236 kB
++ First Load JS shared by all            87.4 kB
+  ├ chunks/2117-1f110562c6abdcb5.js      31.8 kB
+  ├ chunks/fd9d1056-f15be2910e68db45.js  53.6 kB
+  └ other shared chunks (total)          2.06 kB
+
+
+ƒ Middleware                             57.8 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+```
+
+---
+
+Encontramos dois problemas principais:
+
+1. Aviso sobre configuração inválida no `next.config.js`:
+```
+⚠ Invalid next.config.js options detected: 
+⚠     Unrecognized key(s) in object: 'appDir' at "experimental"
+```
+
+2. Erro na rota `/api/shipping/auth/callback`:
+```
+Dynamic server usage: Route /api/shipping/auth/callback couldn't be rendered statically because it used `request.url`
+```
+
+Vamos corrigir esses problemas:
+
+1. Primeiro, vamos atualizar o `next.config.js`:
+
+---
+
 
 
 ---
+
+
+
+---
+
+_**User**_
+
+Apenas execute o deploy no GitHub. Os arquivos essenciais, como .gitignore, já estão configurados, e o repositório Git já foi inicializado.
+
+---
+
+_**Assistant**_
 
 
 

@@ -14,10 +14,13 @@ import { useState } from "react";
 import { Address } from "@/types/address";
 
 export default function CheckoutPage() {
-  const { items, total, isLoading } = useCart();
+  const { items, total, isLoading, selectedShipping } = useCart();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+
+  // Calcula o valor total incluindo o frete
+  const totalWithShipping = total + (selectedShipping?.price || 0);
 
   if (isLoading) {
     return (
@@ -137,14 +140,18 @@ export default function CheckoutPage() {
 
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Frete</span>
-                <span>Grátis</span>
+                <span>
+                  {selectedShipping
+                    ? formatPrice(selectedShipping.price)
+                    : "Calculado no checkout"}
+                </span>
               </div>
 
               <Separator />
 
               <div className="flex justify-between text-base font-medium">
                 <span>Total</span>
-                <span>{formatPrice(total)}</span>
+                <span>{formatPrice(totalWithShipping)}</span>
               </div>
             </div>
 

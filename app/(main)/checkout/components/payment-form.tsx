@@ -16,10 +16,18 @@ interface PaymentFormProps {
 }
 
 export function PaymentForm({ selectedAddress }: PaymentFormProps) {
-  const { items } = useCart();
+  const { items, selectedShipping } = useCart();
 
   const handlePayment = async () => {
     try {
+      // Verifica se um método de envio foi selecionado
+      if (!selectedShipping) {
+        toast.error(
+          "Por favor, selecione uma opção de frete antes de continuar"
+        );
+        return;
+      }
+
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: {
@@ -28,6 +36,7 @@ export function PaymentForm({ selectedAddress }: PaymentFormProps) {
         body: JSON.stringify({
           items,
           selectedAddress,
+          selectedShipping,
         }),
       });
 
@@ -113,9 +122,15 @@ export function PaymentForm({ selectedAddress }: PaymentFormProps) {
         onClick={handlePayment}
         className="w-full bg-orange-500 hover:bg-orange-600 text-white"
         size="lg"
+        disabled={!selectedShipping}
       >
         Finalizar Compra
       </Button>
+      {!selectedShipping && (
+        <p className="text-sm text-red-500 text-center">
+          Selecione uma opção de frete para continuar
+        </p>
+      )}
     </div>
   );
 }

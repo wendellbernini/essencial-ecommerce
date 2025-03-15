@@ -32,10 +32,14 @@ export async function POST(request: Request) {
 
     // Processa o corpo da requisição
     const body = await request.json();
-    const { items, selectedAddress } = body;
+    const { items, selectedAddress, selectedShipping } = body;
 
-    if (!items?.length || !selectedAddress) {
-      console.error("🔴 Checkout: Dados inválidos", { items, selectedAddress });
+    if (!items?.length || !selectedAddress || !selectedShipping) {
+      console.error("🔴 Checkout: Dados inválidos", {
+        items,
+        selectedAddress,
+        selectedShipping,
+      });
       return NextResponse.json(
         { error: "Dados inválidos para checkout" },
         { status: 400 }
@@ -44,25 +48,45 @@ export async function POST(request: Request) {
 
     console.log("🟡 Checkout: Criando line items para Stripe");
     // Criar os line items para o Stripe
-    const lineItems = items.map((item: any) => ({
-      price_data: {
-        currency: "brl",
-        product_data: {
-          name: item.name,
-          images: [item.image_url],
-          metadata: {
-            product_id: item.product_id,
+    const lineItems = [
+      ...items.map((item: any) => ({
+        price_data: {
+          currency: "brl",
+          product_data: {
+            name: item.name,
+            images: [item.image_url],
+            metadata: {
+              product_id: item.product_id,
+            },
           },
+          unit_amount: Math.round((item.sale_price || item.price) * 100), // Stripe trabalha com centavos
         },
-        unit_amount: Math.round((item.sale_price || item.price) * 100), // Stripe trabalha com centavos
+        quantity: item.quantity,
+      })),
+      // Adiciona o frete como um item separado
+      {
+        price_data: {
+          currency: "brl",
+          product_data: {
+            name: `Frete - ${selectedShipping.company} - ${selectedShipping.service}`,
+            metadata: {
+              type: "shipping",
+              service: selectedShipping.service,
+              company: selectedShipping.company,
+              code: selectedShipping.code,
+            },
+          },
+          unit_amount: Math.round(selectedShipping.price * 100),
+        },
+        quantity: 1,
       },
-      quantity: item.quantity,
-    }));
+    ];
 
     console.log("🟡 Checkout: Criando sessão no Stripe");
     console.log("Metadata sendo enviada:", {
       user_id: user.id,
       address: JSON.stringify(selectedAddress),
+      shipping: JSON.stringify(selectedShipping),
     });
 
     // Criar a sessão de checkout
@@ -75,31 +99,10 @@ export async function POST(request: Request) {
       shipping_address_collection: {
         allowed_countries: ["BR"],
       },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: "fixed_amount",
-            fixed_amount: {
-              amount: 0,
-              currency: "brl",
-            },
-            display_name: "Frete Grátis",
-            delivery_estimate: {
-              minimum: {
-                unit: "business_day",
-                value: 5,
-              },
-              maximum: {
-                unit: "business_day",
-                value: 7,
-              },
-            },
-          },
-        },
-      ],
       metadata: {
         user_id: user.id,
         address: JSON.stringify(selectedAddress),
+        shipping: JSON.stringify(selectedShipping),
       },
     });
 

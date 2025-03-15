@@ -8,6 +8,8 @@ import { useAddresses } from "@/hooks/useAddresses";
 import { AddressForm } from "./address-form";
 import { Address } from "@/types/address";
 import { Loader2 } from "lucide-react";
+import { ShippingCalculator } from "@/components/shipping/shipping-calculator";
+import { useCart } from "@/contexts/cart-context";
 
 interface AddressSelectionProps {
   onSelect: (address: Address) => void;
@@ -16,9 +18,10 @@ interface AddressSelectionProps {
 export function AddressSelection({ onSelect }: AddressSelectionProps) {
   const { addresses, isLoading } = useAddresses();
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     addresses.find((addr) => addr.is_default)?.id || null
   );
+  const { selectedShipping } = useCart();
 
   if (isLoading) {
     return (
@@ -28,17 +31,23 @@ export function AddressSelection({ onSelect }: AddressSelectionProps) {
     );
   }
 
+  const selectedAddress = addresses.find(
+    (addr) => addr.id === selectedAddressId
+  );
+
   const handleAddressSelect = (addressId: string) => {
-    setSelectedAddress(addressId);
-    const address = addresses.find((addr) => addr.id === addressId);
-    if (address) {
-      onSelect(address);
-    }
+    setSelectedAddressId(addressId);
   };
 
   const handleNewAddressSubmit = async (data: any) => {
     // TODO: Implementar adição de novo endereço
     setShowNewAddressForm(false);
+  };
+
+  const handleContinue = () => {
+    if (selectedAddress && selectedShipping) {
+      onSelect(selectedAddress);
+    }
   };
 
   if (showNewAddressForm) {
@@ -63,7 +72,7 @@ export function AddressSelection({ onSelect }: AddressSelectionProps) {
       {addresses.length > 0 ? (
         <div className="space-y-4">
           <RadioGroup
-            value={selectedAddress || undefined}
+            value={selectedAddressId || undefined}
             onValueChange={handleAddressSelect}
             className="space-y-4"
           >
@@ -71,7 +80,7 @@ export function AddressSelection({ onSelect }: AddressSelectionProps) {
               <div
                 key={address.id}
                 className={`relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none ${
-                  selectedAddress === address.id
+                  selectedAddressId === address.id
                     ? "border-orange-500 ring-2 ring-orange-500"
                     : "border-gray-300"
                 }`}
@@ -110,6 +119,20 @@ export function AddressSelection({ onSelect }: AddressSelectionProps) {
               </div>
             ))}
           </RadioGroup>
+
+          {selectedAddress && (
+            <div className="mt-6">
+              <ShippingCalculator
+                originZipCode="01153000" // CEP de origem padrão
+                weight={300} // Peso padrão de 300g
+                length={16} // Dimensões padrão
+                height={12}
+                width={12}
+                allowSelection={true}
+                prefilledZipCode={selectedAddress.zip_code}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <p className="text-center text-gray-500">
@@ -127,18 +150,11 @@ export function AddressSelection({ onSelect }: AddressSelectionProps) {
         Adicionar novo endereço
       </Button>
 
-      {selectedAddress && (
+      {selectedAddress && selectedShipping && (
         <Button
           type="button"
           className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-          onClick={() => {
-            const address = addresses.find(
-              (addr) => addr.id === selectedAddress
-            );
-            if (address) {
-              onSelect(address);
-            }
-          }}
+          onClick={handleContinue}
         >
           Continuar com este endereço
         </Button>

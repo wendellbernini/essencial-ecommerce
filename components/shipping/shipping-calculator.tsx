@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Truck } from "lucide-react";
@@ -26,6 +26,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatPrice } from "@/lib/utils";
+import { useCart } from "@/contexts/cart-context";
+import { ShippingOption } from "@/contexts/cart-context";
 
 // Schema para validação do CEP
 const zipCodeSchema = z.object({
@@ -39,20 +41,14 @@ const zipCodeSchema = z.object({
 
 type ZipCodeFormData = z.infer<typeof zipCodeSchema>;
 
-interface ShippingOption {
-  service: string;
-  code: string;
-  price: number;
-  deadline: number;
-  company: string;
-}
-
 interface ShippingCalculatorProps {
   originZipCode: string;
   weight: number;
   length: number;
   height: number;
   width: number;
+  allowSelection?: boolean;
+  prefilledZipCode?: string;
 }
 
 export function ShippingCalculator({
@@ -61,23 +57,34 @@ export function ShippingCalculator({
   length,
   height,
   width,
+  allowSelection = false,
+  prefilledZipCode,
 }: ShippingCalculatorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const { selectedShipping, setSelectedShipping } = useCart();
 
   const form = useForm<z.infer<typeof zipCodeSchema>>({
     resolver: zodResolver(zipCodeSchema),
     defaultValues: {
-      zipCode: "",
+      zipCode: prefilledZipCode || "",
     },
   });
+
+  useEffect(() => {
+    if (prefilledZipCode) {
+      form.setValue("zipCode", prefilledZipCode);
+      form.handleSubmit(calculateShipping)();
+    }
+  }, [prefilledZipCode]);
 
   async function calculateShipping(values: z.infer<typeof zipCodeSchema>) {
     try {
       setIsLoading(true);
       setShowResults(false);
       setShippingOptions([]);
+      setSelectedShipping(null);
 
       const requestData = {
         originZipCode,
@@ -130,9 +137,15 @@ export function ShippingCalculator({
     return `${numbers.slice(0, 5)}-${numbers.slice(5, 8)}`;
   };
 
+  const handleShippingSelect = (option: ShippingOption) => {
+    setSelectedShipping(option);
+  };
+
   return (
     <div className="space-y-4 border rounded-lg p-4">
-      <h3 className="text-lg font-medium">Calcular Frete</h3>
+      <h3 className="text-lg font-medium">
+        {allowSelection ? "Selecionar Frete" : "Calcular Frete"}
+      </h3>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(calculateShipping)}
@@ -156,10 +169,13 @@ export function ShippingCalculator({
                       }}
                       placeholder="00000-000"
                       maxLength={9}
-                      disabled={isLoading}
+                      disabled={isLoading || !!prefilledZipCode}
                       className="max-w-[200px]"
                     />
-                    <Button type="submit" disabled={isLoading}>
+                    <Button
+                      type="submit"
+                      disabled={isLoading || !!prefilledZipCode}
+                    >
                       {isLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -192,6 +208,7 @@ export function ShippingCalculator({
                 <TableHead>Serviço</TableHead>
                 <TableHead>Prazo</TableHead>
                 <TableHead>Valor</TableHead>
+                {allowSelection && <TableHead></TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -202,6 +219,28 @@ export function ShippingCalculator({
                   </TableCell>
                   <TableCell>{option.deadline} dias úteis</TableCell>
                   <TableCell>{formatPrice(option.price)}</TableCell>
+                  {allowSelection && (
+                    <TableCell>
+                      <Button
+                        variant={
+                          selectedShipping?.code === option.code
+                            ? "default"
+                            : "outline"
+                        }
+                        size="sm"
+                        onClick={() => handleShippingSelect(option)}
+                        className={
+                          selectedShipping?.code === option.code
+                            ? "bg-orange-500 hover:bg-orange-600 text-white"
+                            : ""
+                        }
+                      >
+                        {selectedShipping?.code === option.code
+                          ? "Selecionado"
+                          : "Selecionar"}
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -209,16 +248,18 @@ export function ShippingCalculator({
         </div>
       )}
 
-      <div className="text-sm text-gray-500">
-        <a
-          href="https://buscacepinter.correios.com.br/app/endereco/index.php"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-orange-500 hover:text-orange-600"
-        >
-          Não sei meu CEP
-        </a>
-      </div>
+      {!prefilledZipCode && (
+        <div className="text-sm text-gray-500">
+          <a
+            href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-orange-500 hover:text-orange-600"
+          >
+            Não sei meu CEP
+          </a>
+        </div>
+      )}
     </div>
   );
 }

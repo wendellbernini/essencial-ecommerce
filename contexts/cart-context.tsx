@@ -21,12 +21,21 @@ export interface CartItem {
   image_url: string;
 }
 
+export interface ShippingOption {
+  service: string;
+  code: string;
+  price: number;
+  deadline: number;
+  company: string;
+}
+
 interface CartState {
   items: CartItem[];
   total: number;
   total_items: number;
   isOpen: boolean;
   isLoading: boolean;
+  selectedShipping: ShippingOption | null;
 }
 
 type CartAction =
@@ -36,7 +45,8 @@ type CartAction =
   | { type: "CLEAR_CART" }
   | { type: "LOAD_CART"; payload: CartItem[] }
   | { type: "TOGGLE_CART" }
-  | { type: "SET_LOADING"; payload: boolean };
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_SHIPPING"; payload: ShippingOption | null };
 
 interface CartContextType extends CartState {
   addItem: (item: CartItem) => Promise<void>;
@@ -44,6 +54,7 @@ interface CartContextType extends CartState {
   updateQuantity: (id: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   toggleCart: () => void;
+  setSelectedShipping: (option: ShippingOption | null) => void;
 }
 
 // Contexto
@@ -141,6 +152,13 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         isOpen: !state.isOpen,
       };
 
+    case "SET_SHIPPING": {
+      return {
+        ...state,
+        selectedShipping: action.payload,
+      };
+    }
+
     default:
       return state;
   }
@@ -165,6 +183,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     total: 0,
     total_items: 0,
     isOpen: false,
+    isLoading: false,
+    selectedShipping: null,
   });
 
   const supabase = createClientComponentClient();
@@ -218,6 +238,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "TOGGLE_CART" });
   };
 
+  const setSelectedShipping = (option: ShippingOption | null) => {
+    dispatch({ type: "SET_SHIPPING", payload: option });
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -227,6 +251,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         updateQuantity,
         clearCart,
         toggleCart,
+        setSelectedShipping,
       }}
     >
       {children}
