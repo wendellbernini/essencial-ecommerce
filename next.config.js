@@ -5,6 +5,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "2mb",
     },
+    appDir: true,
   },
   images: {
     remotePatterns: [
@@ -25,13 +26,18 @@ const nextConfig = {
         hostname: "source.unsplash.com",
       },
     ],
+    domains: [
+      "res.cloudinary.com",
+      "lh3.googleusercontent.com",
+      "avatars.githubusercontent.com",
+    ],
   },
   typescript: {
-    // Não falha o build se houver erros de tipo
+    // !! AVISO: Isso deve ser temporário apenas para desenvolvimento
     ignoreBuildErrors: true,
   },
   eslint: {
-    // Não falha o build se houver erros de lint
+    // !! AVISO: Isso deve ser temporário apenas para desenvolvimento
     ignoreDuringBuilds: true,
   },
   swcMinify: true,

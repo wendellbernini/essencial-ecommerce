@@ -34,7 +34,7 @@ const zipCodeSchema = z.object({
     .min(8, "CEP inválido")
     .max(9, "CEP inválido")
     .regex(/^\d{5}-?\d{3}$/, "CEP inválido")
-    .transform((value) => value.replace(/\D/g, "")), // Remove caracteres não numéricos
+    .transform((value) => value.replace(/\D/g, "")),
 });
 
 type ZipCodeFormData = z.infer<typeof zipCodeSchema>;
@@ -44,6 +44,7 @@ interface ShippingOption {
   code: string;
   price: number;
   deadline: number;
+  company: string;
 }
 
 interface ShippingCalculatorProps {
@@ -63,6 +64,7 @@ export function ShippingCalculator({
 }: ShippingCalculatorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [showResults, setShowResults] = useState(false);
 
   const form = useForm<z.infer<typeof zipCodeSchema>>({
     resolver: zodResolver(zipCodeSchema),
@@ -74,33 +76,30 @@ export function ShippingCalculator({
   async function calculateShipping(values: z.infer<typeof zipCodeSchema>) {
     try {
       setIsLoading(true);
+      setShowResults(false);
       setShippingOptions([]);
 
-      console.log("Enviando requisição de cálculo com dados:", {
+      const requestData = {
         originZipCode,
         destinationZipCode: values.zipCode,
         weight,
         length,
         height,
         width,
-      });
+      };
+
+      console.log("Enviando requisição de cálculo com dados:", requestData);
 
       const response = await fetch("/api/shipping/calculate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          originZipCode,
-          destinationZipCode: values.zipCode,
-          weight,
-          length,
-          height,
-          width,
-        }),
+        body: JSON.stringify(requestData),
       });
 
       const data = await response.json();
+      console.log("Resposta recebida:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Erro ao calcular o frete");
@@ -112,6 +111,8 @@ export function ShippingCalculator({
       }
 
       setShippingOptions(data.shippingOptions);
+      setShowResults(true);
+      console.log("Opções de frete definidas:", data.shippingOptions);
     } catch (error: any) {
       console.error("Erro ao calcular frete:", error);
       toast.error(
@@ -159,7 +160,14 @@ export function ShippingCalculator({
                       className="max-w-[200px]"
                     />
                     <Button type="submit" disabled={isLoading}>
-                      {isLoading ? "Calculando..." : "Calcular"}
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Calculando...
+                        </>
+                      ) : (
+                        "Calcular"
+                      )}
                     </Button>
                   </div>
                 </FormControl>
@@ -170,25 +178,35 @@ export function ShippingCalculator({
         </form>
       </Form>
 
-      {shippingOptions.length > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Serviço</TableHead>
-              <TableHead>Prazo</TableHead>
-              <TableHead>Valor</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {shippingOptions.map((option) => (
-              <TableRow key={option.code}>
-                <TableCell>{option.service}</TableCell>
-                <TableCell>{option.deadline} dias úteis</TableCell>
-                <TableCell>{formatPrice(option.price)}</TableCell>
+      {isLoading && (
+        <div className="flex items-center justify-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+        </div>
+      )}
+
+      {showResults && shippingOptions.length > 0 && (
+        <div className="mt-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Serviço</TableHead>
+                <TableHead>Prazo</TableHead>
+                <TableHead>Valor</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {shippingOptions.map((option) => (
+                <TableRow key={option.code}>
+                  <TableCell>
+                    {option.company} - {option.service}
+                  </TableCell>
+                  <TableCell>{option.deadline} dias úteis</TableCell>
+                  <TableCell>{formatPrice(option.price)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       <div className="text-sm text-gray-500">

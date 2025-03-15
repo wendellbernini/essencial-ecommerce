@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MelhorEnvioClient } from "@/lib/melhor-envio/client";
 
 interface ShippingCalculationParams {
   originZipCode: string;
@@ -134,9 +135,8 @@ async function calculateShipping({
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
     const { originZipCode, destinationZipCode, weight, length, height, width } =
-      body;
+      await request.json();
 
     // Validações básicas
     if (!originZipCode || !destinationZipCode) {
@@ -146,23 +146,57 @@ export async function POST(request: Request) {
       );
     }
 
-    const shippingOptions = await calculateShipping({
-      originZipCode,
-      destinationZipCode,
-      weight: weight || 300, // Peso mínimo de 300g
-      length: length || 16, // Dimensões mínimas
-      height: height || 2,
-      width: width || 11,
-    });
+    const client = new MelhorEnvioClient();
 
-    return NextResponse.json({ shippingOptions });
+    // Convertendo gramas para kg se necessário
+    const weightInKg = weight >= 1 ? weight / 1000 : weight;
+
+    const shippingData = {
+      from: {
+        postal_code: originZipCode.replace(/\D/g, ""),
+      },
+      to: {
+        postal_code: destinationZipCode.replace(/\D/g, ""),
+      },
+      products: [
+        {
+          id: "1",
+          width: Number(width) || 11,
+          height: Number(height) || 2,
+          length: Number(length) || 16,
+          weight: weightInKg, // Peso em kg
+          insurance_value: 100, // Valor do seguro em reais
+          quantity: 1,
+        },
+      ],
+    };
+
+    console.log("🟡 Enviando requisição para o Melhor Envio:", shippingData);
+
+    const shippingOptions = await client.calculateShipping(shippingData);
+
+    console.log("🟢 Opções de frete recebidas:", shippingOptions);
+
+    // Formata as opções de frete para o formato esperado pelo frontend
+    const formattedOptions = shippingOptions
+      .filter((option) => !option.error) // Remove opções com erro
+      .map((option) => ({
+        service: option.name,
+        code: option.id.toString(),
+        price: Number(option.price) || 0,
+        deadline: Number(option.delivery_time) || 0,
+        company: option.company.name,
+      }));
+
+    console.log("🟢 Opções formatadas:", formattedOptions);
+
+    return NextResponse.json({ shippingOptions: formattedOptions });
   } catch (error: any) {
-    console.error("Erro completo:", error);
+    console.error("🔴 Erro ao calcular frete:", error);
     return NextResponse.json(
       {
-        error:
-          error.message ||
-          "Erro ao calcular frete. Por favor, tente novamente.",
+        error: "Erro ao calcular frete",
+        details: error.message,
       },
       { status: 500 }
     );

@@ -2082,6 +2082,53 @@ Apenas execute o deploy no GitHub. Os arquivos essenciais, como .gitignore, já 
 
 _**Assistant**_
 
+Vou executar o processo de deploy no GitHub passo a passo:
+
+1. Primeiro, vou verificar o status do Git:
+
+---
+
+```bash
+git status
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   ".specstory/history/2025-03-14_21-25-investiga\303\247\303\243o-prof
+unda-do-projeto.md"
+        modified:   components/category/filters.tsx
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        app/(main)/marca/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$
+```
+
+---
+
+2. Vou adicionar os arquivos modificados e novos:
+
+---
+
+```bash
+git add .
+```
+
+```
+vboxuser@Xubuntu:~/Desktop/projects/essencial-ecommerce$ 
+
+```
+
+---
+
 
 
 ---
