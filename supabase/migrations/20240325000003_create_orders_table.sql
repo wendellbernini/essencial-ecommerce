@@ -1,11 +1,16 @@
--- Criar enum para status do pedido
-create type order_status as enum (
-  'pending', -- Aguardando pagamento
-  'processing', -- Pagamento confirmado, em processamento
-  'shipped', -- Enviado
-  'delivered', -- Entregue
-  'cancelled' -- Cancelado
-);
+-- Criar enum para status do pedido apenas se não existir
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
+        CREATE TYPE order_status AS ENUM (
+            'pending', -- Aguardando pagamento
+            'processing', -- Pagamento confirmado, em processamento
+            'shipped', -- Enviado
+            'delivered', -- Entregue
+            'cancelled' -- Cancelado
+        );
+    END IF;
+END $$;
 
 -- Criar tabela de pedidos
 create table if not exists public.orders (
@@ -16,6 +21,11 @@ create table if not exists public.orders (
     shipping_address jsonb not null,
     stripe_session_id text,
     stripe_payment_intent_id text,
+    invoice_url text, -- URL da nota fiscal
+    invoice_number text, -- Número da nota fiscal
+    invoice_key text, -- Chave da nota fiscal eletrônica
+    invoice_status text, -- Status da nota fiscal (pending, processing, issued)
+    invoice_issued_at timestamp with time zone, -- Data de emissão da nota fiscal
     created_at timestamp with time zone not null default now(),
     updated_at timestamp with time zone not null default now()
 );

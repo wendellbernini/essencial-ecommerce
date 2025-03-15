@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PromoBanner as PromoBannerType } from "@/lib/types";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 interface TimeLeft {
   hours: number;
@@ -37,6 +38,24 @@ interface PromoBannerProps {
 export function PromoBanner({ slides = [] }: PromoBannerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [timeLeft, setTimeLeft] = useState<{ [key: number]: TimeLeft }>({});
+  const [activeSlides, setActiveSlides] = useState(slides);
+  const supabase = createClientComponentClient();
+
+  // Função para atualizar o status do banner no banco de dados
+  const updateBannerStatus = async (bannerId: number, isActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("promo_banners")
+        .update({ is_active: isActive })
+        .eq("id", bannerId);
+
+      if (error) {
+        console.error("Erro ao atualizar status do banner:", error);
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar status do banner:", error);
+    }
+  };
 
   // Função para calcular o tempo restante
   const calculateTimeLeft = useCallback((endDate: string) => {
@@ -60,17 +79,39 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
     // Função para atualizar todos os contadores
     const updateAllCountdowns = () => {
       const newTimeLeft: { [key: number]: TimeLeft } = {};
+      let shouldUpdateSlides = false;
 
-      slides.forEach((banner, index) => {
+      activeSlides.forEach((banner, index) => {
         if (banner.has_countdown && banner.end_date) {
           const timeRemaining = calculateTimeLeft(banner.end_date);
           if (timeRemaining) {
             newTimeLeft[index] = timeRemaining;
+          } else if (banner.is_active) {
+            // Se o tempo acabou e o banner ainda está ativo, marca para atualização
+            shouldUpdateSlides = true;
+            updateBannerStatus(banner.id, false);
           }
         }
       });
 
       setTimeLeft(newTimeLeft);
+
+      // Se algum banner precisa ser desativado, atualiza a lista de slides ativos
+      if (shouldUpdateSlides) {
+        const updatedSlides = activeSlides
+          .map((banner) => {
+            if (banner.has_countdown && banner.end_date) {
+              const timeRemaining = calculateTimeLeft(banner.end_date);
+              if (!timeRemaining) {
+                return { ...banner, is_active: false };
+              }
+            }
+            return banner;
+          })
+          .filter((banner) => banner.is_active);
+
+        setActiveSlides(updatedSlides);
+      }
     };
 
     // Atualiza imediatamente e depois a cada segundo
@@ -78,35 +119,34 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
     const interval = setInterval(updateAllCountdowns, 1000);
 
     return () => clearInterval(interval);
-  }, [slides, calculateTimeLeft]);
+  }, [activeSlides, calculateTimeLeft]);
 
   // Avança para o próximo slide automaticamente
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (activeSlides.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [slides.length]);
+  }, [activeSlides.length]);
 
-  // Se não houver slides, não renderiza nada
-  if (!slides || slides.length === 0) {
+  // Se não houver slides ativos, não renderiza nada
+  if (!activeSlides || activeSlides.length === 0) {
     return null;
   }
 
-  const currentBanner = slides[currentSlide];
-  console.log("Slides totais:", slides.length);
-  console.log("Slide atual:", currentSlide);
-  console.log("Banner atual:", currentBanner);
+  const currentBanner = activeSlides[currentSlide];
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    setCurrentSlide(
+      (prev) => (prev - 1 + activeSlides.length) % activeSlides.length
+    );
   };
 
   const formatPrice = (price: number) => {
@@ -126,7 +166,7 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
       <div className="container mx-auto px-0">
         <div className="relative bg-white rounded-lg overflow-hidden">
           {/* Navegação */}
-          {slides.length > 1 && (
+          {activeSlides.length > 1 && (
             <>
               <Button
                 variant="ghost"
@@ -208,9 +248,9 @@ export function PromoBanner({ slides = [] }: PromoBannerProps) {
           </Link>
 
           {/* Indicadores */}
-          {slides.length > 1 && (
+          {activeSlides.length > 1 && (
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-              {slides.map((_, index) => (
+              {activeSlides.map((_, index) => (
                 <button
                   key={index}
                   className={`w-1 h-1 rounded-full transition-all ${
