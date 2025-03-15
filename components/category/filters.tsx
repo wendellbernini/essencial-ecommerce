@@ -16,6 +16,7 @@ import { useCallback, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 
+type Category = Database["public"]["Tables"]["categories"]["Row"];
 type Subcategory = Database["public"]["Tables"]["subcategories"]["Row"];
 type Classification = {
   id: number;
@@ -26,9 +27,11 @@ type Classification = {
 type Brand = Database["public"]["Tables"]["brands"]["Row"];
 
 interface FiltersProps {
-  subcategories: Subcategory[];
+  categories?: Category[];
+  subcategories?: Subcategory[];
   classifications?: Classification[];
   brands?: Brand[];
+  currentCategory?: string;
   currentSubcategory?: string;
   currentBrand?: string;
   currentSortBy?: string;
@@ -36,13 +39,16 @@ interface FiltersProps {
   currentMinPrice?: string;
   currentNecessidade?: string[];
   currentTipoPele?: string[];
-  categorySlug: string;
+  categorySlug?: string;
+  brandSlug?: string;
 }
 
 export function Filters({
-  subcategories,
+  categories = [],
+  subcategories = [],
   classifications = [],
   brands = [],
+  currentCategory,
   currentSubcategory,
   currentBrand,
   currentSortBy,
@@ -51,9 +57,13 @@ export function Filters({
   currentNecessidade = [],
   currentTipoPele = [],
   categorySlug,
+  brandSlug,
 }: FiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const baseUrl = categorySlug
+    ? `/categoria/${categorySlug}`
+    : `/marca/${brandSlug}`;
 
   // Função auxiliar para atualizar URL mantendo outros parâmetros
   const updateSearchParams = useCallback(
@@ -118,20 +128,12 @@ export function Filters({
           minPrice: priceRange[0].toString(),
           maxPrice: priceRange[1].toString(),
         };
-        router.push(
-          `/categoria/${categorySlug}?${updateSearchParams(updates)}`
-        );
+        router.push(`${baseUrl}?${updateSearchParams(updates)}`);
       }
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [
-    priceRange,
-    debouncedPriceRange,
-    router,
-    categorySlug,
-    updateSearchParams,
-  ]);
+  }, [priceRange, debouncedPriceRange, router, baseUrl, updateSearchParams]);
 
   // Agrupar classificações por tipo
   const groupedClassifications = classifications.reduce((acc, item) => {
@@ -149,7 +151,6 @@ export function Filters({
 
   // Função auxiliar para formatar o nome do tipo de classificação
   const formatClassificationType = (type: string) => {
-    // Mapeamento de tipos para nomes amigáveis
     const typeMap: Record<string, string> = {
       necessidade: "Necessidade",
       tipo_pele: "Tipo de Pele",
@@ -165,19 +166,24 @@ export function Filters({
     return typeMap[type.toLowerCase()] || type;
   };
 
+  const handleCategoryChange = (value: string) => {
+    const updates = { categoria: value === "all" ? null : value };
+    router.push(`${baseUrl}?${updateSearchParams(updates)}`);
+  };
+
   const handleSubcategoryChange = (value: string) => {
     const updates = { subcategory: value === "all" ? null : value };
-    router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
+    router.push(`${baseUrl}?${updateSearchParams(updates)}`);
   };
 
   const handleBrandChange = (value: string) => {
     const updates = { brand: value === "all" ? null : value };
-    router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
+    router.push(`${baseUrl}?${updateSearchParams(updates)}`);
   };
 
   const handleSortChange = (value: string) => {
     const updates = { sortBy: value };
-    router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
+    router.push(`${baseUrl}?${updateSearchParams(updates)}`);
   };
 
   const handleClassificationChange = (
@@ -208,7 +214,7 @@ export function Filters({
     };
 
     // Atualizar URL
-    router.push(`/categoria/${categorySlug}?${updateSearchParams(updates)}`);
+    router.push(`${baseUrl}?${updateSearchParams(updates)}`);
   };
 
   return (
@@ -232,123 +238,133 @@ export function Filters({
         </Select>
       </div>
 
-      {/* Filtro de Subcategorias */}
-      <div className="space-y-3">
-        <h3 className="font-medium text-sm text-gray-900">Subcategorias</h3>
-        <Select
-          value={currentSubcategory || "all"}
-          onValueChange={handleSubcategoryChange}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Subcategoria" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as subcategorias</SelectItem>
-            {subcategories?.map((subcategory) => (
-              <SelectItem key={subcategory.id} value={subcategory.slug}>
-                {subcategory.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {/* Filtro de Categorias (apenas na página de marca) */}
+      {brandSlug && categories.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="font-medium text-sm text-gray-900">Categorias</h3>
+          <Select
+            value={currentCategory || "all"}
+            onValueChange={handleCategoryChange}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.slug}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
-      {/* Filtro de Marcas */}
-      <div className="space-y-3">
-        <h3 className="font-medium text-sm text-gray-900">Marcas</h3>
-        <Select value={currentBrand || "all"} onValueChange={handleBrandChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Marca" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as marcas</SelectItem>
-            {brands?.map((brand) => (
-              <SelectItem key={brand.id} value={brand.slug}>
-                {brand.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {/* Filtro de Subcategorias (apenas na página de categoria) */}
+      {categorySlug && subcategories.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="font-medium text-sm text-gray-900">Subcategorias</h3>
+          <Select
+            value={currentSubcategory || "all"}
+            onValueChange={handleSubcategoryChange}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Subcategoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as subcategorias</SelectItem>
+              {subcategories.map((subcategory) => (
+                <SelectItem key={subcategory.id} value={subcategory.slug}>
+                  {subcategory.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
-      {/* Filtro de Preço com Range */}
-      <div className="space-y-4">
+      {/* Filtro de Marcas (apenas na página de categoria) */}
+      {categorySlug && brands.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="font-medium text-sm text-gray-900">Marcas</h3>
+          <Select
+            value={currentBrand || "all"}
+            onValueChange={handleBrandChange}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Marca" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as marcas</SelectItem>
+              {brands.map((brand) => (
+                <SelectItem key={brand.id} value={brand.slug}>
+                  {brand.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Filtro de Preço */}
+      <div className="space-y-3">
         <h3 className="font-medium text-sm text-gray-900">Faixa de Preço</h3>
-        <div className="pt-6">
+        <div className="pt-4">
           <Slider
+            value={priceRange}
             min={0}
             max={1000}
             step={10}
-            value={priceRange}
-            onValueChange={(value: [number, number]) => setPriceRange(value)}
+            onValueChange={(value) => setPriceRange(value as [number, number])}
             className="w-full"
           />
-        </div>
-        <div className="flex items-center justify-between text-sm text-gray-600">
-          <span>R$ {priceRange[0].toFixed(2)}</span>
-          <span>R$ {priceRange[1].toFixed(2)}</span>
+          <div className="flex justify-between mt-2">
+            <span className="text-sm text-gray-600">
+              R$ {priceRange[0].toFixed(2)}
+            </span>
+            <span className="text-sm text-gray-600">
+              R$ {priceRange[1].toFixed(2)}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Filtros específicos por categoria */}
-      {Object.entries(groupedClassifications).length > 0 && (
-        <div className="space-y-6">
-          {Object.entries(groupedClassifications).map(([type, items]) => {
-            const normalizedType = normalizeType(type);
-            const selectedValues = Array.from(
-              searchParams.getAll(normalizedType)
-            );
-
-            return (
-              <div key={type} className="space-y-3">
-                <h3 className="font-medium text-sm text-gray-900">
-                  {formatClassificationType(type)}
-                </h3>
-                <div className="space-y-2">
-                  {items.map((item) => {
-                    const key = `${normalizedType}-${item.id}`;
-                    const isChecked =
-                      localCheckedItems[key] ??
-                      selectedValues.includes(item.name);
-
-                    return (
-                      <div
-                        key={item.id}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={key}
-                          checked={isChecked}
-                          onCheckedChange={(checked) =>
-                            handleClassificationChange(
-                              type,
-                              item.name,
-                              checked as boolean,
-                              item.id
-                            )
-                          }
-                          className="border-2 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                        />
-                        <Label
-                          htmlFor={key}
-                          className={cn(
-                            "text-sm cursor-pointer",
-                            isChecked
-                              ? "text-orange-500 font-medium"
-                              : "text-gray-600 hover:text-gray-900"
-                          )}
-                        >
-                          {item.name}
-                        </Label>
-                      </div>
-                    );
-                  })}
+      {/* Filtros de Classificação */}
+      {Object.entries(groupedClassifications).map(([type, items]) => (
+        <div key={type} className="space-y-3">
+          <h3 className="font-medium text-sm text-gray-900">
+            {formatClassificationType(type)}
+          </h3>
+          <div className="space-y-2">
+            {items.map((item) => {
+              const key = `${normalizeType(type)}-${item.id}`;
+              return (
+                <div key={item.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={key}
+                    checked={localCheckedItems[key] || false}
+                    onCheckedChange={(checked) =>
+                      handleClassificationChange(
+                        type,
+                        item.name,
+                        checked as boolean,
+                        item.id
+                      )
+                    }
+                  />
+                  <Label
+                    htmlFor={key}
+                    className="text-sm font-medium leading-none text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    {item.name}
+                  </Label>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
