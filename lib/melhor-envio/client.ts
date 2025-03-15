@@ -100,23 +100,28 @@ export class MelhorEnvioClient {
 
   // Método para gerar token de autenticação
   static async generateToken(code: string): Promise<string> {
-    const response = await fetch(
-      "https://sandbox.melhorenvio.com.br/oauth/token",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          grant_type: "authorization_code",
-          client_id: process.env.MELHOR_ENVIO_CLIENT_ID,
-          client_secret: process.env.MELHOR_ENVIO_CLIENT_SECRET,
-          code,
-          redirect_uri:
-            "https://a23a-177-12-49-168.ngrok-free.app/api/shipping/auth/callback",
-        }),
-      }
-    );
+    const baseUrl =
+      process.env.MELHOR_ENVIO_SANDBOX === "true"
+        ? "https://sandbox.melhorenvio.com.br"
+        : "https://www.melhorenvio.com.br";
+
+    const redirectUri = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}/api/shipping/auth/callback`
+      : "http://localhost:3000/api/shipping/auth/callback";
+
+    const response = await fetch(`${baseUrl}/oauth/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        grant_type: "authorization_code",
+        client_id: process.env.MELHOR_ENVIO_CLIENT_ID,
+        client_secret: process.env.MELHOR_ENVIO_CLIENT_SECRET,
+        code,
+        redirect_uri: redirectUri,
+      }),
+    });
 
     if (!response.ok) {
       const error = await response.json();
