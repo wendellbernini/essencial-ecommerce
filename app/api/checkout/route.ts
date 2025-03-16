@@ -89,6 +89,13 @@ export async function POST(request: Request) {
       shipping: JSON.stringify(selectedShipping),
     });
 
+    // Buscar dados do usuário
+    const { data: userData } = await supabase
+      .from("users")
+      .select("email, full_name, phone")
+      .eq("id", user.id)
+      .single();
+
     // Criar a sessão de checkout
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -96,13 +103,20 @@ export async function POST(request: Request) {
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout?canceled=true`,
-      shipping_address_collection: {
-        allowed_countries: ["BR"],
-      },
+      customer_email: userData?.email || user.email,
       metadata: {
         user_id: user.id,
         address: JSON.stringify(selectedAddress),
         shipping: JSON.stringify(selectedShipping),
+        shipping_address: `${selectedAddress.street}, ${
+          selectedAddress.number
+        }${
+          selectedAddress.complement ? ` - ${selectedAddress.complement}` : ""
+        } - ${selectedAddress.neighborhood} - ${selectedAddress.city}/${
+          selectedAddress.state
+        } - CEP: ${selectedAddress.zip_code}`,
+        recipient: selectedAddress.recipient,
+        phone: selectedAddress.phone || "",
       },
     });
 
